@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="th" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบตารางคิวงานนายก - อบต.ชำปาแพว</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sarabun: ['Sarabun', 'sans-serif'] },
+          colors: {
+            gov: { 50:'#eff6ff', 100:'#dbeafe', 200:'#bfdbfe', 300:'#93c5fd', 400:'#60a5fa', 500:'#3b82f6', 600:'#2563eb', 700:'#1d4ed8', 800:'#1e3a5f', 900:'#0f2440' },
+            accent: { warn:'#f59e0b', success:'#10b981', pending:'#6366f1' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { font-family: 'Sarabun', sans-serif; }
+    .task-card { transition: all 0.2s ease; }
+    .task-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    .stat-card { transition: all 0.3s ease; }
+    .stat-card:hover { transform: translateY(-3px); }
+    .fade-in { animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .tab-active { border-bottom: 3px solid #2563eb; color: #1d4ed8; font-weight: 700; }
+    .tab-inactive { border-bottom: 3px solid transparent; color: #64748b; }
+    .status-badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 9999px; font-weight: 600; }
+    .modal-overlay { background: rgba(15,36,64,0.6); backdrop-filter: blur(4px); }
+  </style>
+ </head>
+ <body class="h-full bg-gray-50">
+  <div id="app" class="h-full w-full flex flex-col overflow-auto bg-gradient-to-br from-gov-50 via-white to-blue-50">
+   
+   <header class="bg-gradient-to-r from-gov-800 to-gov-900 text-white px-4 py-3 flex items-center justify-between shadow-lg sticky top-0 z-40">
+    <div class="flex items-center gap-3">
+     <div class="w-10 h-10 rounded-full bg-amber-400 flex items-center justify-center shadow-md text-gov-900 font-bold">อบต.</div>
+     <div>
+      <h1 class="text-lg font-bold leading-tight">ชำปาแพว</h1>
+      <p class="text-xs text-blue-200 font-light">SAO Chief Schedule</p>
+     </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="refreshData()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"> <i data-lucide="rotate-cw" class="w-5 h-5"></i> </button> 
+      <button onclick="showAdminLogin()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"> <i data-lucide="user-cog" class="w-5 h-5"></i> </button>
+    </div>
+   </header>
+
+   <div id="adminBar" class="hidden bg-emerald-500 text-white text-center text-xs py-1.5 font-semibold">
+    🔓 โหมดผู้ดูแลระบบ — สามารถแก้ไขข้อมูลได้ <button onclick="logoutAdmin()" class="ml-3 underline">ออกจากระบบ</button>
+   </div>
+
+   <div class="bg-white border-b border-gray-200 px-4 py-3 shadow-sm">
+    <div class="flex items-center justify-between gap-3">
+     <div class="flex items-center gap-3 flex-1">
+      <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden"><i id="mayorIconDisplay" data-lucide="building-2" class="w-5 h-5 text-gov-600"></i></div>
+      <div class="min-w-0 flex-1">
+       <h3 class="text-sm font-bold text-gray-800">นายกณัฐรดา</h3>
+       <p class="text-xs text-gray-500">สถานะ: <span id="mayorStatusLabel" class="font-semibold">-</span></p>
+      </div>
+     </div>
+     <div id="mayorStatusBadge" class="px-3 py-1.5 rounded-full text-xs font-semibold border flex items-center gap-1">
+      <span id="mayorStatusText">-</span>
+     </div>
+    </div>
+    <div id="mayorControlPanel" class="hidden grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-gray-200">
+     <button onclick="updateMayorStatus('in_office')" class="p-2 text-xs rounded-lg border bg-gray-50">🟢 เข้า อบต.</button> 
+     <button onclick="updateMayorStatus('fieldwork')" class="p-2 text-xs rounded-lg border bg-gray-50">🟡 ลงพื้นที่</button> 
+     <button onclick="updateMayorStatus('out_of_office')" class="p-2 text-xs rounded-lg border bg-gray-50">🔴 ไม่อยู่</button>
+    </div>
+   </div>
+
+   <nav class="bg-white flex border-b sticky top-[60px] z-30 shadow-sm">
+      <button onclick="switchTab('dashboard')" id="tabDashboard" class="flex-1 py-3 text-sm text-center tab-active">แดชบอร์ด</button> 
+      <button onclick="switchTab('calendar')" id="tabCalendar" class="flex-1 py-3 text-sm text-center tab-inactive">ปฏิทิน</button> 
+      <button onclick="switchTab('tasks')" id="tabTasks" class="flex-1 py-3 text-sm text-center tab-inactive">งานทั้งหมด</button> 
+      <button onclick="switchTab('contacts')" id="tabContacts" class="flex-1 py-3 text-sm text-center tab-inactive">สมุดเบอร์</button>
+   </nav>
+
+   <main class="flex-1 p-4 pb-24">
+    <section id="sectionDashboard" class="fade-in">
+     <div class="grid grid-cols-2 gap-3 mb-5 text-center">
+      <div class="stat-card bg-white rounded-2xl p-4 shadow-md border border-blue-100">
+        <p class="text-xs text-gray-400">ทั้งหมด</p>
+        <p id="statTotal" class="text-3xl font-extrabold text-gov-800">0</p>
+      </div>
+      <div class="stat-card bg-white rounded-2xl p-4 shadow-md border border-indigo-100">
+        <p class="text-xs text-gray-400">รอดำเนินการ</p>
+        <p id="statPending" class="text-3xl font-extrabold text-accent-pending">0</p>
+      </div>
+     </div>
+     <h2 class="text-base font-bold text-gov-800 mb-3">📅 งานวันนี้</h2>
+     <div id="todayList" class="space-y-3"></div>
+    </section>
+
+    <section id="sectionCalendar" class="hidden fade-in">
+      <div class="bg-white rounded-2xl shadow-md p-4 mb-4">
+        <div class="flex items-center justify-between mb-4">
+          <button onclick="changeMonth(-1)" class="p-2"> <i data-lucide="chevron-left"></i> </button>
+          <h3 id="calMonthYear" class="text-lg font-bold text-gov-800"></h3>
+          <button onclick="changeMonth(1)" class="p-2"> <i data-lucide="chevron-right"></i> </button>
+        </div>
+        <div id="calGrid" class="grid grid-cols-7 gap-1 text-center"></div>
+      </div>
+      <div id="calDayTasks" class="space-y-3"></div>
+    </section>
+
+    <section id="sectionTasks" class="hidden fade-in">
+      <input id="searchInput" type="text" placeholder="ค้นหางาน..." oninput="renderAllTasks()" class="w-full p-3 rounded-xl border mb-4">
+      <div id="allTasksList" class="space-y-3"></div>
+    </section>
+
+    <section id="sectionContacts" class="hidden fade-in">
+      <div id="contactsList" class="space-y-3"></div>
+    </section>
+   </main>
+
+   <button id="fabAdd" onclick="openAddForm()" class="hidden fixed bottom-6 right-6 w-16 h-16 bg-gov-600 text-white rounded-full shadow-xl items-center justify-center z-30">
+      <i data-lucide="plus" class="w-8 h-8"></i>
+   </button>
+
+   <div id="adminModal" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
+     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+      <h3 class="text-xl font-bold text-center mb-4">เข้าสู่ระบบผู้ดูแล</h3>
+      <input id="adminPass" type="password" placeholder="รหัสผ่าน" class="w-full px-4 py-3 rounded-xl border mb-4">
+      <div class="flex gap-3">
+        <button onclick="closeAdminLogin()" class="flex-1 py-3 text-gray-500">ยกเลิก</button>
+        <button onclick="attemptLogin()" class="flex-1 py-3 bg-gov-600 text-white rounded-xl">ตกลง</button>
+      </div>
+     </div>
+   </div>
+
+   <div id="taskModal" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4 overflow-auto">
+      <div class="bg-white rounded-2xl w-full max-w-lg p-6">
+        <h3 id="formTitle" class="text-lg font-bold mb-4">เพิ่มงาน</h3>
+        <form id="taskForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+          <input type="hidden" id="editingId">
+          <input id="fTitle" type="text" required placeholder="ชื่องาน" class="w-full p-2 border rounded">
+          <input id="fDate" type="date" required class="w-full p-2 border rounded">
+          <select id="fStatus" class="w-full p-2 border rounded">
+            <option value="รอดำเนินการ">รอดำเนินการ</option>
+            <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
+            <option value="เสร็จสิ้น">เสร็จสิ้น</option>
+          </select>
+          <div class="flex gap-2">
+            <button type="button" onclick="closeTaskForm()" class="flex-1 p-2 bg-gray-200 rounded">ยกเลิก</button>
+            <button type="submit" class="flex-1 p-2 bg-gov-600 text-white rounded">บันทึก</button>
+          </div>
+        </form>
+      </div>
+   </div>
+
+   <div id="toast" class="hidden fixed bottom-4 left-4 right-4 bg-gray-800 text-white p-3 rounded-lg text-center z-50"></div>
+  </div>
+
+  <script>
+    // --- Data Management (LocalStorage) ---
+    let allTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    let mayorStatus = localStorage.getItem('mayorStatus') || 'in_office';
+    let isAdmin = false;
+    let calYear = new Date().getFullYear();
+    let calMonth = new Date().getMonth();
+
+    function saveData() {
+      localStorage.setItem('tasks', JSON.stringify(allTasks));
+      localStorage.setItem('mayorStatus', mayorStatus);
+      updateDashboard();
+      renderToday();
+      renderAllTasks();
+      renderCalendar();
+    }
+
+    // --- Core Logic ---
+    function updateDashboard() {
+      document.getElementById('statTotal').textContent = allTasks.length;
+      document.getElementById('statPending').textContent = allTasks.filter(t => t.status === 'รอดำเนินการ').length;
+    }
+
+    function updateMayorStatus(status) {
+      mayorStatus = status;
+      document.getElementById('mayorStatusLabel').textContent = status;
+      document.getElementById('mayorStatusText').textContent = status;
+      saveData();
+      showToast("อัปเดตสถานะนายกแล้ว");
+    }
+
+    function switchTab(tab) {
+      ['dashboard','calendar','tasks','contacts'].forEach(t => {
+        document.getElementById('section' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('hidden', t !== tab);
+        document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).className = (t === tab) ? 'flex-1 py-3 text-sm text-center tab-active' : 'flex-1 py-3 text-sm text-center tab-inactive';
+      });
+      if (tab === 'calendar') renderCalendar();
+    }
+
+    // --- Admin ---
+    function showAdminLogin() { document.getElementById('adminModal').classList.remove('hidden'); }
+    function closeAdminLogin() { document.getElementById('adminModal').classList.add('hidden'); }
+    function attemptLogin() {
+      if (document.getElementById('adminPass').value === '1234') { // รหัสผ่านเริ่มต้น
+        isAdmin = true;
+        document.getElementById('adminBar').classList.remove('hidden');
+        document.getElementById('mayorControlPanel').classList.remove('hidden');
+        document.getElementById('fabAdd').classList.remove('hidden');
+        document.getElementById('fabAdd').classList.add('flex');
+        closeAdminLogin();
+        showToast("ยินดีต้อนรับ Admin");
+      } else {
+        alert("รหัสผ่านไม่ถูกต้อง");
+      }
+    }
+    function logoutAdmin() {
+        isAdmin = false;
+        location.reload();
+    }
+
+    // --- Tasks ---
+    function openAddForm() {
+      document.getElementById('editingId').value = '';
+      document.getElementById('taskForm').reset();
+      document.getElementById('taskModal').classList.remove('hidden');
+    }
+    function closeTaskForm() { document.getElementById('taskModal').classList.add('hidden'); }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const newTask = {
+        id: document.getElementById('editingId').value || Date.now().toString(),
+        title: document.getElementById('fTitle').value,
+        date: document.getElementById('fDate').value,
+        status: document.getElementById('fStatus').value
+      };
+      
+      const idx = allTasks.findIndex(t => t.id === newTask.id);
+      if (idx > -1) allTasks[idx] = newTask;
+      else allTasks.push(newTask);
+      
+      saveData();
+      closeTaskForm();
+      showToast("บันทึกสำเร็จ");
+    }
+
+    function renderToday() {
+        const list = document.getElementById('todayList');
+        const today = new Date().toISOString().split('T')[0];
+        const todayTasks = allTasks.filter(t => t.date === today);
+        list.innerHTML = todayTasks.length ? todayTasks.map(t => `<div class="p-4 bg-white rounded-xl shadow-sm border border-l-4 border-l-blue-500">${t.title}</div>`).join('') : '<p class="text-center text-gray-400 py-4">ไม่มีงานวันนี้</p>';
+    }
+
+    function renderAllTasks() {
+        const list = document.getElementById('allTasksList');
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        list.innerHTML = allTasks.filter(t => t.title.toLowerCase().includes(search)).map(t => `
+            <div class="p-4 bg-white rounded-xl shadow-sm flex justify-between items-center">
+                <div>
+                    <p class="font-bold">${t.title}</p>
+                    <p class="text-xs text-gray-400">${t.date} | ${t.status}</p>
+                </div>
+                ${isAdmin ? `<button onclick="deleteTask('${t.id}')" class="text-red-500"><i data-lucide="trash-2"></i></button>` : ''}
+            </div>
+        `).join('');
+        lucide.createIcons();
+    }
+
+    function deleteTask(id) {
+        if(confirm('ลบงานนี้ใช่หรือไม่?')) {
+            allTasks = allTasks.filter(t => t.id !== id);
+            saveData();
+        }
+    }
+
+    // --- Calendar ---
+    function changeMonth(dir) { calMonth += dir; renderCalendar(); }
+    function renderCalendar() {
+        const monthNames = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+        document.getElementById('calMonthYear').textContent = `${monthNames[new Date(calYear, calMonth).getMonth()]} ${new Date(calYear, calMonth).getFullYear() + 543}`;
+        // ปฏิทินแบบง่าย (Logic ย่อเพื่อให้โค้ดไม่ยาวเกินไป)
+        const grid = document.getElementById('calGrid');
+        grid.innerHTML = "<div>อา</div><div>จ</div><div>อ</div><div>พ</div><div>พฤ</div><div>ศ</div><div>ส</div>";
+        const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+        for (let i = 1; i <= daysInMonth; i++) {
+            grid.innerHTML += `<div class="p-2 border rounded hover:bg-blue-50 cursor-pointer">${i}</div>`;
+        }
+    }
+
+    function showToast(m) {
+        const t = document.getElementById('toast');
+        t.textContent = m; t.classList.remove('hidden');
+        setTimeout(() => t.classList.add('hidden'), 2000);
+    }
+
+    function refreshData() { location.reload(); }
+
+    // Init
+    window.onload = () => {
+        updateDashboard();
+        renderToday();
+        renderAllTasks();
+        lucide.createIcons();
+    };
+  </script>
+ </body>
+</html>
