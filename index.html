@@ -1,155 +1,194 @@
-<!doctype html>
-<html lang="th" class="h-full">
+<!DOCTYPE html>
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAO Chief Schedule</title>
-    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>CHUMPAKPAEW - SAO Chief Schedule</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        body { font-family: 'Sarabun', sans-serif; }
-        .tab-active { border-bottom: 3px solid #1d4ed8; color: #1d4ed8; font-weight: bold; }
-        .modal-bg { background: rgba(15,36,64,0.6); backdrop-filter: blur(4px); }
+        :root {
+            --primary-blue: #1a2b48;
+            --accent-blue: #3b82f6;
+            --bg-light: #f8fafc;
+            --text-dark: #334155;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Kanit', sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-dark); }
+
+        /* Header Section */
+        header {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .profile-info { display: flex; align-items: center; gap: 10px; }
+        .logo-circle { width: 40px; height: 40px; background: white; border-radius: 50%; overflow: hidden; }
+
+        /* Status Bar */
+        .status-card {
+            background: white;
+            margin: 10px;
+            padding: 15px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .status-dot { width: 15px; height: 15px; background: #4ade80; border-radius: 50%; border: 2px solid #fff; outline: 2px solid #4ade80; }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+        }
+        .tab-item {
+            flex: 1;
+            padding: 15px 5px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #64748b;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .tab-item.active {
+            color: var(--accent-blue);
+            border-bottom: 3px solid var(--accent-blue);
+        }
+        .tab-item i { display: block; font-size: 1.2rem; margin-bottom: 5px; }
+
+        /* Content Area */
+        .content-section { padding: 15px; display: none; }
+        .content-section.active { display: block; }
+
+        /* Dashboard Cards */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+        .stat-card .num { font-size: 2rem; font-weight: 500; margin-top: 10px; color: var(--accent-blue); }
+        .tag { font-size: 0.7rem; position: absolute; top: 15px; right: 15px; padding: 2px 8px; border-radius: 10px; background: #eff6ff; }
+
+        /* Contact Card */
+        .contact-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 15px;
+            border-left: 5px solid #8b5cf6;
+        }
+
+        /* Bottom Floating Social */
+        .social-float {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .social-btn { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; }
     </style>
 </head>
-<body class="h-full bg-slate-50">
-    <div id="app" class="flex flex-col h-full max-w-md mx-auto bg-white shadow-2xl relative">
-        <header class="bg-blue-900 text-white p-4 flex justify-between items-center shrink-0">
-            <div><h1 class="font-bold">CHUMPAPEAW</h1><p class="text-[10px] opacity-70">SAO Chief Schedule</p></div>
-            <div class="flex gap-2">
-                <button onclick="location.reload()" class="p-2 bg-white/10 rounded-full"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>
-                <button onclick="toggleAdmin()" id="adminIcon" class="p-2 bg-white/10 rounded-full"><i data-lucide="user-cog" class="w-4 h-4"></i></button>
-            </div>
-        </header>
+<body>
 
-        <div class="p-4 border-b bg-white flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600"><i data-lucide="user"></i></div>
-                <div><h3 class="text-sm font-bold">นายกณัฐรดา</h3><p id="mStatusText" class="text-xs text-gray-500">-</p></div>
+    <header>
+        <div class="profile-info">
+            <div class="logo-circle"><img src="https://via.placeholder.com/40" alt="logo"></div>
+            <div>
+                <div style="font-weight: 500; font-size: 0.9rem;">CHUMPAKPAEW</div>
+                <div style="font-size: 0.7rem; opacity: 0.8;">SAO Chief Schedule</div>
             </div>
-            <div id="mBadge" class="px-3 py-1 rounded-full text-[10px] font-bold border">-</div>
         </div>
-
-        <div id="adminTools" class="hidden p-3 bg-emerald-50 border-b grid grid-cols-3 gap-2">
-            <button onclick="setMStatus('เข้า อบต.')" class="p-2 text-[10px] bg-white border rounded">🟢 เข้า อบต.</button>
-            <button onclick="setMStatus('ลงพื้นที่')" class="p-2 text-[10px] bg-white border rounded">🟡 ลงพื้นที่</button>
-            <button onclick="setMStatus('ติดภารกิจ')" class="p-2 text-[10px] bg-white border rounded">🔴 ไม่อยู่</button>
+        <div style="display: flex; gap: 15px;">
+            <i class="fa-solid fa-rotate-right"></i>
+            <i class="fa-solid fa-user-gear"></i>
         </div>
+    </header>
 
-        <nav class="flex border-b shrink-0 text-gray-500">
-            <button onclick="showTab('dash')" id="t-dash" class="flex-1 py-3 text-xs tab-active">แดชบอร์ด</button>
-            <button onclick="showTab('tasks')" id="t-tasks" class="flex-1 py-3 text-xs">งาน</button>
-            <button onclick="showTab('cal')" id="t-cal" class="flex-1 py-3 text-xs">ปฏิทิน</button>
-        </nav>
-
-        <main class="flex-1 overflow-y-auto p-4 pb-20">
-            <section id="s-dash">
-                <div class="grid grid-cols-2 gap-3 mb-6">
-                    <div class="bg-blue-50 p-4 rounded-xl text-center"><p class="text-xs text-blue-600">ทั้งหมด</p><b id="c-all" class="text-2xl">0</b></div>
-                    <div class="bg-amber-50 p-4 rounded-xl text-center"><p class="text-xs text-amber-600">รอดำเนินการ</p><b id="c-pend" class="text-2xl">0</b></div>
-                </div>
-                <h2 class="text-sm font-bold mb-3">📌 งานวันนี้</h2>
-                <div id="todayList" class="space-y-3 text-gray-400 text-center py-4 text-xs">ไม่มีงาน</div>
-            </section>
-
-            <section id="s-tasks" class="hidden">
-                <input oninput="renderTasks(this.value)" type="text" placeholder="ค้นหางาน..." class="w-full p-3 border rounded-xl mb-4 text-sm">
-                <div id="taskList" class="space-y-3"></div>
-            </section>
-
-            <section id="s-cal" class="hidden">
-                <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-center text-[10px]"></div>
-            </section>
-        </main>
-
-        <button id="fab" onclick="openForm()" class="hidden fixed bottom-6 right-6 w-14 h-14 bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center">
-            <i data-lucide="plus"></i>
-        </button>
-
-        <div id="modal" class="hidden fixed inset-0 z-50 modal-bg flex items-center justify-center p-4">
-            <div class="bg-white rounded-2xl w-full p-6 shadow-xl">
-                <h3 class="font-bold mb-4">จัดการข้อมูล</h3>
-                <form onsubmit="saveTask(event)" class="space-y-3">
-                    <input id="fId" type="hidden">
-                    <input id="fTitle" placeholder="ชื่องาน" required class="w-full p-2 border rounded text-sm">
-                    <input id="fDate" type="date" required class="w-full p-2 border rounded text-sm">
-                    <div class="flex gap-2">
-                        <button type="button" onclick="closeModal()" class="flex-1 p-2 text-sm">ยกเลิก</button>
-                        <button type="submit" class="flex-1 p-2 bg-blue-700 text-white rounded text-sm">บันทึก</button>
-                    </div>
-                </form>
+    <div class="status-card">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-building-user" style="color: var(--accent-blue); font-size: 1.5rem;"></i>
+            <div>
+                <div style="font-weight: 500;">นายกณัฐรดา</div>
+                <div style="font-size: 0.8rem; color: #64748b;">สถานะ: เข้า อบต. (อยู่ห้อง)</div>
             </div>
+        </div>
+        <div class="status-dot"></div>
+    </div>
+
+    <nav class="nav-tabs">
+        <div class="tab-item active" onclick="showTab('dashboard')"><i class="fa-solid fa-grip"></i>แดชบอร์ด</div>
+        <div class="tab-item" onclick="showTab('calendar')"><i class="fa-solid fa-calendar-days"></i>ปฏิทิน</div>
+        <div class="tab-item" onclick="showTab('tasks')"><i class="fa-solid fa-list-check"></i>งานทั้งหมด</div>
+        <div class="tab-item" onclick="showTab('contacts')"><i class="fa-solid fa-phone"></i>สมุดเบอร์</div>
+    </nav>
+
+    <div id="dashboard" class="content-section active">
+        <div class="grid-container">
+            <div class="stat-card"><span class="tag">ทั้งหมด</span><i class="fa-regular fa-clipboard"></i><div class="num">0</div></div>
+            <div class="stat-card"><span class="tag">รอดำเนินการ</span><i class="fa-regular fa-clock"></i><div class="num">0</div></div>
+            <div class="stat-card"><span class="tag" style="background:#fef3c7">กำลังดำเนินการ</span><i class="fa-regular fa-sun"></i><div class="num">0</div></div>
+            <div class="stat-card"><span class="tag" style="background:#dcfce7">เสร็จสิ้น</span><i class="fa-regular fa-circle-check"></i><div class="num">0</div></div>
+        </div>
+        <p style="text-align: center; margin-top: 50px; color: #94a3b8;">ไม่มีงานวันนี้</p>
+    </div>
+
+    <div id="contacts" class="content-section">
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <input type="text" placeholder="ค้นหาชื่อ, เบอร์..." style="flex:1; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0;">
+            <button style="background: var(--accent-blue); color: white; border: none; padding: 10px 15px; border-radius: 10px;"><i class="fa-solid fa-plus"></i></button>
+        </div>
+        <div class="contact-card">
+            <div style="display: flex; justify-content: space-between;">
+                <strong>คุณสัญญา</strong>
+                <div><i class="fa-solid fa-pen" style="margin-right:10px; color:#64748b"></i> <i class="fa-solid fa-trash" style="color:#f87171"></i></div>
+            </div>
+            <div style="font-size: 0.85rem; color: #64748b;">ชื่อเล่น: แบมแบม</div>
+            <span style="background: #f3e8ff; color: #8b5cf6; font-size: 0.7rem; padding: 2px 8px; border-radius: 5px;">พนักงานจ้างเหมา</span>
+            <div style="margin-top: 10px; color: var(--accent-blue);"><i class="fa-solid fa-phone"></i> 0838270002</div>
         </div>
     </div>
 
+    <div class="social-float">
+        <a href="#" class="social-btn" style="background: #3b5998;"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="#" class="social-btn" style="background: #25d366;"><i class="fa-brands fa-line"></i></a>
+        <a href="#" class="social-btn" style="background: #ea4335;"><i class="fa-solid fa-phone"></i></a>
+    </div>
+
     <script>
-        let tasks = JSON.parse(localStorage.getItem('ntrd_tasks')) || [];
-        let isAdmin = false;
-
-        const ui = (id) => document.getElementById(id);
-
-        function save() {
-            localStorage.setItem('ntrd_tasks', JSON.stringify(tasks));
-            render();
-        }
-
-        function render(search = "") {
-            const today = new Date().toISOString().split('T')[0];
-            const filtered = tasks.filter(t => t.title.toLowerCase().includes(search.toLowerCase()));
+        function showTab(tabId) {
+            // ซ่อนทุก section
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            // เอาเส้นใต้เมนูออก
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
             
-            ui('c-all').textContent = tasks.length;
-            ui('c-pend').textContent = tasks.filter(t => t.status !== 'เสร็จสิ้น').length;
-
-            const card = (t) => `
-                <div class="p-3 bg-white border rounded-xl shadow-sm flex justify-between items-center">
-                    <div><p class="text-sm font-semibold">${t.title}</p><p class="text-[10px] text-gray-400">${t.date}</p></div>
-                    ${isAdmin ? `<button onclick="delTask('${t.id}')" class="text-red-400 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>` : ''}
-                </div>`;
-
-            ui('todayList').innerHTML = tasks.filter(t => t.date === today).map(card).join('') || "ไม่มีงานวันนี้";
-            ui('taskList').innerHTML = filtered.map(card).join('');
-            lucide.createIcons();
+            // แสดง section ที่เลือก
+            document.getElementById(tabId).classList.add('active');
+            // เพิ่มเส้นใต้เมนูที่คลิก
+            event.currentTarget.classList.add('active');
         }
-
-        function showTab(t) {
-            ['dash', 'tasks', 'cal'].forEach(s => {
-                ui('s-'+s).classList.toggle('hidden', s !== t);
-                ui('t-'+s).className = `flex-1 py-3 text-xs ${s===t ? 'tab-active' : ''}`;
-            });
-        }
-
-        function toggleAdmin() {
-            let p = prompt("รหัสผ่าน:");
-            if(p === "ntrd") {
-                isAdmin = true;
-                ui('adminTools').classList.toggle('hidden');
-                ui('fab').classList.remove('hidden');
-                render();
-            }
-        }
-
-        function openForm() { ui('modal').classList.remove('hidden'); ui('fId').value=''; }
-        function closeModal() { ui('modal').classList.add('hidden'); }
-
-        function saveTask(e) {
-            e.preventDefault();
-            tasks.push({ id: Date.now(), title: ui('fTitle').value, date: ui('fDate').value, status: 'รอดำเนินการ' });
-            save(); closeModal();
-        }
-
-        function delTask(id) { if(confirm('ลบ?')) { tasks = tasks.filter(t => t.id != id); save(); } }
-
-        function setMStatus(s) {
-            localStorage.setItem('mStatus', s);
-            ui('mStatusText').textContent = s;
-            ui('mBadge').textContent = s;
-            ui('mBadge').className = `px-3 py-1 rounded-full text-[10px] font-bold border ${s === 'เข้า อบต.' ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'}`;
-        }
-
-        ui('mStatusText').textContent = localStorage.getItem('mStatus') || "เข้า อบต.";
-        setMStatus(ui('mStatusText').textContent);
-        render();
     </script>
 </body>
 </html>
