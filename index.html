@@ -14,7 +14,7 @@
 
     <style>
         html { font-size: 18px !important; }
-        body { font-family: 'Prompt', sans-serif; background-color: #f8fafc; color: #1e293b; overflow-x: hidden; }
+        body { font-family: 'Prompt', sans-serif; background-color: #f0f4f8; color: #1e293b; overflow-x: hidden; }
         .bg-main { background-color: #152D4D; }
         .font-sarabun { font-family: 'Sarabun', sans-serif; font-size: 18px; }
 
@@ -34,43 +34,40 @@
         .animate-slow-bounce { animation: slow-bounce 2s ease-in-out infinite; }
         
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .glass-modal { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.3); }
-        .today-card { border: 2px solid #ef4444 !important; background-color: #fffafa; }
+        .today-card { border: 2px solid #ef4444 !important; background-color: #fffafa; box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.2); }
 
         /* Tap/Hover Effect */
         .tap-effect { transition: all 0.2s ease; cursor: pointer; }
-        .tap-effect:active { transform: scale(0.96); opacity: 0.8; }
+        .tap-effect:active { transform: scale(0.96); opacity: 0.9; }
 
-        /* Glass Big Number Design */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        /* Modern Colored Big Number Cards */
+        .color-card {
             position: relative;
             overflow: hidden;
+            box-shadow: inset 0 -4px 0 rgba(0,0,0,0.1), 0 8px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
         }
-        .glass-card::before {
+        .color-card::after {
             content: "";
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
-            opacity: 0.3;
-            pointer-events: none;
+            top: -30px;
+            right: -30px;
+            width: 100px;
+            height: 100px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 50%;
         }
+        .color-card:hover { transform: translateY(-3px); box-shadow: inset 0 -4px 0 rgba(0,0,0,0.1), 0 12px 25px rgba(0,0,0,0.1); }
 
-        /* Fixed Buttons */
-        .fixed-btn { position: fixed; bottom: 100px; right: 25px; z-index: 100; box-shadow: 0 10px 25px rgba(21, 45, 77, 0.3); }
+        /* Fixed FAB Dashboard */
+        #fabAdd { position: fixed; bottom: 100px; right: 25px; z-index: 100; box-shadow: 0 10px 25px rgba(21, 45, 77, 0.3); }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col hover:no-underline">
 
-    <div id="app" class="w-full max-w-5xl mx-auto min-h-screen bg-[#fcfdfe] relative flex flex-col shadow-2xl">
+    <div id="app" class="w-full max-w-5xl mx-auto min-h-screen bg-white relative flex flex-col shadow-2xl border-x border-gray-100">
         
-        <header class="bg-main px-5 py-4 flex justify-between items-center text-white sticky top-0 z-50 shadow-xl">
+        <header class="bg-main px-5 py-4 flex justify-between items-center text-white sticky top-0 z-50 shadow-xl border-b border-[#1a3a63]">
             <div class="flex items-center gap-3">
                 <img src="https://drive.google.com/thumbnail?id=1pgip9WQ97-gztB2sYoGyTWRt7tlVtmnY&sz=w200" class="w-11 h-11 object-contain">
                 <div class="flex flex-col">
@@ -80,26 +77,26 @@
                     <span class="text-[11px] font-light opacity-80 leading-tight">องค์การบริหารส่วนตำบลชำผักแพว</span>
                 </div>
             </div>
-            <button onclick="handleAdminToggle()" class="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center tap-effect relative">
+            <button onclick="handleAdminToggle()" class="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center tap-effect relative hover:bg-white/20">
                 <i id="adminIcon" class="fa-solid fa-user-shield text-lg"></i>
                 <div id="adminBadge" class="hidden absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-green-400 rounded-full border-2 border-[#152D4D]"></div>
             </button>
         </header>
 
-        <nav class="flex bg-white border-b py-1 sticky top-[84px] z-40 shadow-sm overflow-x-auto no-scrollbar">
+        <nav class="flex bg-white border-b py-1 sticky top-[84px] z-40 shadow-md overflow-x-auto no-scrollbar">
             <button onclick="changePage('dashboard')" id="nav-dashboard" class="flex-1 py-3 flex flex-col items-center text-[#152D4D] border-b-2 border-[#152D4D] min-w-[80px] tap-effect"><i class="fa-solid fa-chart-line text-xl mb-1"></i><span class="text-[10px] font-bold">แดชบอร์ด</span></button>
             <button onclick="changePage('calendar')" id="nav-calendar" class="flex-1 py-3 flex flex-col items-center text-gray-400 min-w-[80px] font-bold tap-effect"><i class="fa-solid fa-calendar-alt text-xl mb-1"></i><span class="text-[10px]">ปฏิทิน</span></button>
             <button onclick="changePage('tasks')" id="nav-tasks" class="flex-1 py-3 flex flex-col items-center text-gray-400 min-w-[80px] font-bold tap-effect"><i class="fa-solid fa-clipboard-list text-xl mb-1"></i><span class="text-[10px]">คิวงาน</span></button>
             <button onclick="changePage('contacts')" id="nav-contacts" class="flex-1 py-3 flex flex-col items-center text-gray-400 min-w-[80px] font-bold tap-effect"><i class="fa-solid fa-address-book text-xl mb-1"></i><span class="text-[10px]">เบอร์โทร</span></button>
         </nav>
 
-        <main id="mainContent" class="flex-1 p-5 space-y-6">
+        <main id="mainContent" class="flex-1 p-5 space-y-6 bg-[#f8fafc]">
             
             <div id="page-dashboard" class="space-y-6">
-                <div class="bg-gradient-to-br from-white to-gray-50 p-5 rounded-3xl border border-gray-100 flex items-center justify-between shadow-sm tap-effect">
+                <div class="bg-white p-5 rounded-3xl border border-gray-100 flex items-center justify-between shadow-lg tap-effect">
                     <div class="flex items-center gap-4">
                         <div class="relative">
-                            <img src="https://drive.google.com/thumbnail?id=1ET2DmRqMeDl1f13eL9EZpxr_FNvtZpwM&sz=w200" class="w-16 h-16 rounded-2xl object-cover shadow-md border-2 border-white">
+                            <img src="https://drive.google.com/thumbnail?id=1ET2DmRqMeDl1f13eL9EZpxr_FNvtZpwM&sz=w200" class="w-16 h-16 rounded-2xl object-cover shadow-md border-2 border-white overflow-hidden">
                             <div id="statusDot" class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-4 border-white bg-green-500 shadow-sm"></div>
                         </div>
                         <div>
@@ -107,48 +104,52 @@
                             <p id="statusText" class="text-xs text-gray-500 font-medium">อยู่อบต./ห้องทำงาน</p>
                         </div>
                     </div>
-                    <button id="admin-status-btn" onclick="openModal('statusModal')" class="hidden w-9 h-9 rounded-xl bg-white shadow-sm border border-gray-100 text-gray-400 tap-effect"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                    <button id="admin-status-btn" onclick="openModal('statusModal')" class="hidden w-9 h-9 rounded-xl bg-gray-50 shadow-inner border border-gray-100 text-gray-400 tap-effect hover:bg-gray-100"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="glass-card p-5 rounded-3xl border-l-4 border-l-indigo-600 tap-effect">
-                        <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">ทั้งหมด</p>
-                        <h3 id="stat-total" class="text-3xl font-black mt-1 text-indigo-900">0</h3>
+                    <div class="color-card bg-gradient-to-br from-indigo-500 to-indigo-600 p-5 rounded-3xl text-white tap-effect">
+                        <p class="text-[10px] font-bold opacity-80 uppercase tracking-widest">ทั้งหมด</p>
+                        <h3 id="stat-total" class="text-4xl font-black mt-1 leading-none">0</h3>
+                        <i class="fa-solid fa-layer-group absolute bottom-4 right-4 text-white/10 text-4xl"></i>
                     </div>
-                    <div class="glass-card p-5 rounded-3xl border-l-4 border-l-amber-500 tap-effect">
-                        <p class="text-[10px] font-bold text-amber-500 uppercase tracking-widest">รอดำเนินการ</p>
-                        <h3 id="stat-pending" class="text-3xl font-black mt-1 text-amber-900">0</h3>
+                    <div class="color-card bg-gradient-to-br from-amber-400 to-amber-500 p-5 rounded-3xl text-white tap-effect">
+                        <p class="text-[10px] font-bold opacity-80 uppercase tracking-widest">รอดำเนินการ</p>
+                        <h3 id="stat-pending" class="text-4xl font-black mt-1 leading-none">0</h3>
+                        <i class="fa-solid fa-hourglass-start absolute bottom-4 right-4 text-white/10 text-4xl"></i>
                     </div>
-                    <div class="glass-card p-5 rounded-3xl border-l-4 border-l-emerald-500 tap-effect">
-                        <p class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">กำลังทำ</p>
-                        <h3 id="stat-active" class="text-3xl font-black mt-1 text-emerald-900">0</h3>
+                    <div class="color-card bg-gradient-to-br from-emerald-500 to-emerald-600 p-5 rounded-3xl text-white tap-effect">
+                        <p class="text-[10px] font-bold opacity-80 uppercase tracking-widest">กำลังทำ</p>
+                        <h3 id="stat-active" class="text-4xl font-black mt-1 leading-none">0</h3>
+                        <i class="fa-solid fa-spinner absolute bottom-4 right-4 text-white/10 text-4xl fa-spin-fast"></i>
                     </div>
-                    <div class="glass-card p-5 rounded-3xl border-l-4 border-l-red-500 tap-effect">
-                        <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest">เสร็จสิ้น</p>
-                        <h3 id="stat-done" class="text-3xl font-black mt-1 text-red-900">0</h3>
+                    <div class="color-card bg-gradient-to-br from-red-500 to-red-600 p-5 rounded-3xl text-white tap-effect">
+                        <p class="text-[10px] font-bold opacity-80 uppercase tracking-widest">เสร็จสิ้น</p>
+                        <h3 id="stat-done" class="text-4xl font-black mt-1 leading-none">0</h3>
+                        <i class="fa-solid fa-check-double absolute bottom-4 right-4 text-white/10 text-4xl"></i>
                     </div>
                 </div>
 
-                <div class="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
+                <div class="bg-white p-5 rounded-3xl border border-gray-100 shadow-lg">
                     <div class="flex justify-between items-center mb-3 text-sm font-bold text-[#152D4D]">
                         <h3>ความคืบหน้าภารกิจโดยรวม</h3>
-                        <span id="overallProgressValue">0%</span>
+                        <span id="overallProgressValue" class="text-blue-600 font-black">0%</span>
                     </div>
                     <div class="w-full bg-gray-100 rounded-full h-4 overflow-hidden p-0.5 shadow-inner">
-                        <div id="overallProgressBar" class="progress-fill h-full rounded-full bg-gradient-to-r from-blue-400 to-blue-600"></div>
+                        <div id="overallProgressBar" class="progress-fill h-full rounded-full bg-gradient-to-r from-blue-400 to-blue-600 shadow-md shadow-blue-200"></div>
                     </div>
                 </div>
 
-                <h3 class="font-black text-[#152D4D] border-l-4 border-main pl-3 uppercase text-sm tracking-widest">คิวงานสำคัญวันนี้</h3>
+                <h3 class="font-black text-[#152D4D] border-l-4 border-main pl-3 uppercase text-sm tracking-widest">คิวงานวันนี้</h3>
                 <div id="dashboardTaskList" class="space-y-4 font-sarabun"></div>
             </div>
 
             <div id="page-calendar" class="hidden space-y-4">
-                <div class="bg-white p-5 rounded-3xl border shadow-xl">
+                <div class="bg-white p-5 rounded-3xl border border-gray-100 shadow-xl">
                     <div class="flex justify-between items-center mb-6">
-                        <button onclick="prevMonth()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center tap-effect"><i class="fa-solid fa-chevron-left"></i></button>
-                        <h3 id="currentMonthYear" class="font-black text-[#152D4D] text-lg"></h3>
-                        <button onclick="nextMonth()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center tap-effect"><i class="fa-solid fa-chevron-right"></i></button>
+                        <button onclick="prevMonth()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center tap-effect border hover:bg-gray-100"><i class="fa-solid fa-chevron-left text-gray-500"></i></button>
+                        <h3 id="currentMonthYear" class="font-black text-[#152D4D] text-lg tracking-tight"></h3>
+                        <button onclick="nextMonth()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center tap-effect border hover:bg-gray-100"><i class="fa-solid fa-chevron-right text-gray-500"></i></button>
                     </div>
                     <div class="grid grid-cols-7 text-center text-xs font-black text-gray-300 mb-4 uppercase tracking-widest border-b pb-3">
                         <div class="text-red-400">อา</div><div>จ</div><div>อ</div><div>พ</div><div>พฤ</div><div>ศ</div><div class="text-blue-400">ส</div>
@@ -158,17 +159,17 @@
                 <div id="selectedDateTasks" class="space-y-4 pt-2 font-sarabun"></div>
             </div>
 
-            <div id="page-tasks" class="hidden space-y-4">
-                <h3 class="font-black text-[#152D4D] border-l-4 border-blue-500 pl-3 uppercase text-sm tracking-widest">รายการคิวงานทั้งหมด</h3>
-                <div id="fullTaskList" class="grid grid-cols-1 md:grid-cols-2 gap-4 font-sarabun"></div>
+            <div id="page-tasks" class="hidden space-y-4 font-sarabun">
+                <h3 class="font-black text-[#152D4D] border-l-4 border-blue-500 pl-3 font-prompt uppercase text-sm tracking-widest">งานทั้งหมดในระบบ</h3>
+                <div id="fullTaskList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
             <div id="page-contacts" class="hidden space-y-5">
                 <div class="relative group">
-                    <input type="text" id="contactSearch" onkeyup="renderContacts(this.value)" placeholder="ค้นหาชื่อ หรือตำแหน่ง..." class="w-full p-4 pl-12 bg-white rounded-2xl border border-gray-100 shadow-sm outline-none">
+                    <input type="text" id="contactSearch" onkeyup="renderContacts(this.value)" placeholder="ค้นหาชื่อ หรือตำแหน่ง..." class="w-full p-4 pl-12 bg-white rounded-2xl border border-gray-100 shadow-md outline-none focus:border-blue-200">
                     <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
                 </div>
-                <button id="admin-add-contact" onclick="openContactModal()" class="hidden w-full py-4 bg-indigo-50 text-indigo-700 rounded-2xl font-black border-2 border-dashed border-indigo-200 tap-effect">
+                <button id="admin-add-contact" onclick="openContactModal()" class="hidden w-full py-4 bg-indigo-50 text-indigo-700 rounded-2xl font-black border-2 border-dashed border-indigo-200 tap-effect hover:bg-indigo-100 hover:border-indigo-300">
                     <i class="fa-solid fa-user-plus mr-2"></i> เพิ่มรายชื่อติดต่อใหม่
                 </button>
                 <div id="contactGroups" class="space-y-6"></div>
@@ -176,25 +177,25 @@
 
         </main>
 
-        <footer class="bg-white/80 backdrop-blur-md border-t flex justify-around p-4 pb-8 z-40">
-            <a href="https://www.chumpakpaew.go.th" class="flex flex-col items-center text-gray-400 tap-effect"><i class="fa-solid fa-globe text-2xl mb-1"></i><span class="text-[10px] font-bold">เว็บไซต์</span></a>
-            <a href="https://www.facebook.com/xbt.cha.phak.ph.w" class="flex flex-col items-center text-gray-400 tap-effect"><i class="fa-brands fa-facebook text-2xl mb-1"></i><span class="text-[10px] font-bold">เฟสบุ๊ก</span></a>
-            <a href="https://lin.ee/dCB8MH3" class="flex flex-col items-center text-gray-400 tap-effect"><i class="fa-brands fa-line text-2xl mb-1"></i><span class="text-[10px] font-bold">ไลน์</span></a>
-            <a href="tel:036-714-081" class="flex flex-col items-center text-gray-400 tap-effect"><i class="fa-solid fa-phone text-2xl mb-1"></i><span class="text-[10px] font-bold">โทรศัพท์</span></a>
+        <footer class="bg-white border-t flex justify-around p-4 pb-8 z-40 shadow-inner">
+            <a href="https://www.chumpakpaew.go.th" class="flex flex-col items-center text-gray-400 tap-effect hover:text-main"><i class="fa-solid fa-globe text-2xl mb-1"></i><span class="text-[10px] font-bold">เว็บไซต์</span></a>
+            <a href="https://www.facebook.com/xbt.cha.phak.ph.w" class="flex flex-col items-center text-gray-400 tap-effect hover:text-blue-600"><i class="fa-brands fa-facebook text-2xl mb-1"></i><span class="text-[10px] font-bold">เฟสบุ๊ก</span></a>
+            <a href="https://lin.ee/dCB8MH3" class="flex flex-col items-center text-gray-400 tap-effect hover:text-green-500"><i class="fa-brands fa-line text-2xl mb-1"></i><span class="text-[10px] font-bold">ไลน์</span></a>
+            <a href="tel:036-714-081" class="flex flex-col items-center text-gray-400 tap-effect hover:text-red-500"><i class="fa-solid fa-phone text-2xl mb-1"></i><span class="text-[10px] font-bold">โทรศัพท์</span></a>
         </footer>
 
-        <button id="fabAdd" onclick="openTaskModal()" class="hidden w-16 h-16 bg-main text-white rounded-3xl flex items-center justify-center text-3xl border-4 border-white transform tap-effect">
+        <button id="fabAdd" onclick="openTaskModal()" class="hidden fixed-btn w-16 h-16 bg-main text-white rounded-3xl flex items-center justify-center text-3xl border-4 border-white transform tap-effect hover:bg-[#1c3a61]">
             <i class="fa-solid fa-plus"></i>
         </button>
     </div>
 
     <div id="loginModal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
         <div class="bg-white w-full max-w-sm rounded-[3rem] p-10 shadow-2xl text-center border-t-8 border-main">
-            <h2 class="text-xl font-black text-main mb-6 leading-tight">ระบุรหัสผ่านแอดมิน</h2>
-            <input type="password" id="adminPassword" placeholder="รหัสผ่าน" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center font-black mb-8 outline-none tracking-widest">
+            <h2 class="text-xl font-black text-main mb-6">ระบุรหัสผ่านแอดมิน</h2>
+            <input type="password" id="adminPassword" placeholder="รหัสผ่าน" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center font-black mb-8 outline-none tracking-widest focus:border-blue-300">
             <div class="flex gap-3">
-                <button onclick="closeModal('loginModal')" class="flex-1 py-3 rounded-2xl bg-gray-100 text-gray-400 font-bold tap-effect">ยกเลิก</button>
-                <button onclick="verifyAdminLogin()" class="flex-1 py-3 rounded-2xl bg-main text-white font-bold tap-effect">ยืนยัน</button>
+                <button onclick="closeModal('loginModal')" class="flex-1 py-3 rounded-2xl bg-gray-100 text-gray-400 font-bold tap-effect hover:bg-gray-200">ยกเลิก</button>
+                <button onclick="verifyAdminLogin()" class="flex-1 py-3 rounded-2xl bg-main text-white font-bold tap-effect hover:bg-[#1c3a61]">ยืนยัน</button>
             </div>
         </div>
     </div>
@@ -204,53 +205,60 @@
             <h2 id="taskModalTitle" class="text-2xl font-bold mb-6 text-main">บันทึกคิวงาน</h2>
             <form id="taskForm" class="space-y-4">
                 <input type="hidden" id="taskEditId">
-                <input type="text" id="t-title" placeholder="ชื่องาน" required class="w-full p-4 bg-gray-50 rounded-2xl border-none">
+                <div><label class="font-bold text-gray-700 text-sm">ชื่องาน *</label><input type="text" id="t-title" required class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 focus:border-blue-200 outline-none"></div>
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="date" id="t-startDate" required class="p-4 bg-gray-50 rounded-2xl border-none">
-                    <input type="time" id="t-startTime" class="p-4 bg-gray-50 rounded-2xl border-none">
+                    <div><label class="font-bold text-gray-700 text-sm">วันที่เริ่ม *</label><input type="date" id="t-startDate" required class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none"></div>
+                    <div><label class="font-bold text-gray-700 text-sm">เวลาเริ่ม</label><input type="time" id="t-startTime" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none"></div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="date" id="t-endDate" class="p-4 bg-gray-50 rounded-2xl border-none">
-                    <input type="time" id="t-endTime" class="p-4 bg-gray-50 rounded-2xl border-none">
+                    <div><label class="font-bold text-gray-700 text-sm">วันที่สิ้นสุด</label><input type="date" id="t-endDate" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none"></div>
+                    <div><label class="font-bold text-gray-700 text-sm">เวลาสิ้นสุด</label><input type="time" id="t-endTime" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none"></div>
                 </div>
-                <select id="t-status" class="w-full p-4 bg-gray-50 rounded-2xl border-none">
-                    <option>รอดำเนินการ</option><option>กำลังดำเนินการ</option><option>เสร็จสิ้น</option>
-                </select>
-                <input type="text" id="t-loc" placeholder="สถานที่" class="w-full p-4 bg-gray-50 rounded-2xl border-none">
-                <input type="text" id="t-dress" placeholder="การแต่งกาย" class="w-full p-4 bg-gray-50 rounded-2xl border-none">
-                <select id="t-owner" class="w-full p-4 bg-gray-50 rounded-2xl border-none">
-                    <option>นายก</option><option>รองมานิต</option><option>รองบุญโฮม</option><option>เลขามาลี</option><option>ปลัด</option><option>กองช่าง</option>
-                </select>
-                <input type="url" id="t-link" placeholder="ลิงก์ Drive" class="w-full p-4 bg-gray-50 rounded-2xl border-none">
+                <div><label class="font-bold text-gray-700 text-sm">สถานะ</label>
+                    <select id="t-status" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none font-sarabun">
+                        <option>รอดำเนินการ</option><option>กำลังดำเนินการ</option><option>เสร็จสิ้น</option>
+                    </select>
+                </div>
+                <input type="text" id="t-loc" placeholder="สถานที่" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none">
+                <input type="text" id="t-dress" placeholder="การแต่งกาย" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none">
+                <div><label class="font-bold text-gray-700 text-sm">ผู้รับผิดชอบ</label>
+                    <select id="t-owner" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none font-sarabun">
+                        <option>นายก</option><option>รองมานิต</option><option>รองบุญโฮม</option><option>เลขามาลี</option><option>ปลัด</option><option>กองช่าง</option>
+                    </select>
+                </div>
+                <input type="url" id="t-link" placeholder="ลิงก์ Drive (https://...)" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none">
+                
                 <div class="pt-6 flex gap-3 font-prompt">
-                    <button type="button" id="btnDeleteTask" onclick="deleteTask()" class="px-5 bg-red-50 text-red-500 rounded-2xl tap-effect"><i class="fa-solid fa-trash"></i></button>
-                    <button type="button" onclick="closeModal('taskModal')" class="flex-1 py-4 bg-gray-100 text-gray-500 rounded-2xl font-bold tap-effect">ยกเลิก</button>
-                    <button type="submit" class="flex-1 py-4 bg-main text-white rounded-2xl font-bold tap-effect shadow-lg">บันทึก</button>
+                    <button type="button" id="btnDeleteTask" onclick="deleteTask()" class="px-5 bg-red-50 text-red-500 rounded-2xl tap-effect hover:bg-red-100 border border-red-100"><i class="fa-solid fa-trash"></i></button>
+                    <button type="button" onclick="closeModal('taskModal')" class="flex-1 py-4 bg-gray-100 text-gray-500 rounded-3xl font-bold tap-effect hover:bg-gray-200">ยกเลิก</button>
+                    <button type="submit" class="flex-1 py-4 bg-main text-white rounded-3xl font-bold shadow-lg tap-effect hover:bg-[#1c3a61]">บันทึกข้อมูล</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="contactModal" class="hidden fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl font-sarabun">
-            <h2 id="contactModalTitle" class="text-xl font-bold mb-6 text-main">เบอร์โทรศัพท์</h2>
+    <div id="contactModal" class="hidden fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl font-sarabun border-t-8 border-indigo-500 overflow-y-auto no-scrollbar max-h-[90vh]">
+            <h2 id="contactModalTitle" class="text-xl font-bold mb-6 text-indigo-900 font-prompt">เบอร์โทรศัพท์</h2>
             <form id="contactForm" class="space-y-4">
                 <input type="hidden" id="contactEditId">
-                <input type="text" id="c-name" placeholder="ชื่อ นามสกุล" required class="w-full p-4 bg-gray-50 rounded-2xl border-none">
-                <input type="text" id="c-role" placeholder="ตำแหน่ง" required class="w-full p-4 bg-gray-50 rounded-2xl border-none">
-                <input type="tel" id="c-tel" placeholder="เบอร์โทรศัพท์" required class="w-full p-4 bg-gray-50 rounded-2xl border-none">
-                <select id="c-group" class="w-full p-4 bg-gray-50 rounded-2xl border-none font-sarabun">
-                    <option value="1">1. ผู้บริหาร</option><option value="2">2. ข้าราชการ</option><option value="3">3. สมาชิก อบต.</option><option value="4">4. กำนัน/ผู้ใหญ่บ้าน</option>
-                </select>
+                <input type="text" id="c-name" placeholder="ชื่อ นามสกุล" required class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none focus:border-indigo-200">
+                <input type="text" id="c-role" placeholder="ตำแหน่ง" required class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none focus:border-indigo-200">
+                <input type="tel" id="c-tel" placeholder="เบอร์โทรศัพท์" required class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none focus:border-indigo-200">
+                <div><label class="font-bold text-gray-700 text-sm font-prompt">กลุ่มผู้ติดต่อ</label>
+                    <select id="c-group" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none font-sarabun">
+                        <option value="1">1. ผู้บริหาร</option><option value="2">2. ข้าราชการ</option><option value="3">3. สมาชิก อบต.</option><option value="4">4. กำนัน/ผู้ใหญ่บ้าน</option>
+                    </select>
+                </div>
                 <div class="flex gap-3 pt-4 font-prompt">
-                    <button type="submit" class="flex-1 py-4 bg-main text-white rounded-2xl font-black tap-effect shadow-lg">บันทึก</button>
-                    <button type="button" onclick="closeModal('contactModal')" class="px-6 bg-gray-100 font-bold rounded-2xl text-gray-400 tap-effect">ยกเลิก</button>
+                    <button type="submit" class="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-black tap-effect shadow-lg hover:bg-indigo-700">บันทึก</button>
+                    <button type="button" onclick="closeModal('contactModal')" class="px-6 bg-gray-100 font-bold rounded-2xl text-gray-400 tap-effect hover:bg-gray-200">ยกเลิก</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="statusModal" class="hidden fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm"><div class="bg-white w-full max-w-xs rounded-[2.5rem] p-8 text-center"><h3 class="font-black mb-6 text-[#152D4D]">สถานะนายก</h3><div class="grid gap-3"><button onclick="updateMayorStatus('อยู่อบต./ห้องทำงาน', 'bg-green-500')" class="p-4 bg-green-50 text-green-700 rounded-2xl font-black tap-effect">🟢 อยู่อบต.</button><button onclick="updateMayorStatus('ลงพื้นที่/ติดภารกิจ', 'bg-yellow-500')" class="p-4 bg-yellow-50 text-yellow-700 rounded-2xl font-black tap-effect">🟡 ลงพื้นที่</button><button onclick="updateMayorStatus('ไม่อยู่อบต.', 'bg-red-500')" class="p-4 bg-red-50 text-red-700 rounded-2xl font-black tap-effect">🔴 ไม่อยู่อบต.</button></div><button onclick="closeModal('statusModal')" class="mt-4 text-gray-300 font-bold tap-effect">ปิด</button></div></div>
+    <div id="statusModal" class="hidden fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm"><div class="bg-white w-full max-w-xs rounded-[2.5rem] p-8 text-center border-t-8 border-emerald-500 shadow-2xl"><h3 class="font-black mb-6 text-[#152D4D]">สถานะนายก</h3><div class="grid gap-3"><button onclick="updateMayorStatus('อยู่อบต./ห้องทำงาน', 'bg-green-500')" class="p-4 bg-green-50 text-green-700 rounded-2xl font-black tap-effect hover:bg-green-100">🟢 อยู่อบต.</button><button onclick="updateMayorStatus('ลงพื้นที่/ติดภารกิจ', 'bg-yellow-500')" class="p-4 bg-yellow-50 text-yellow-700 rounded-2xl font-black tap-effect hover:bg-yellow-100">🟡 ลงพื้นที่</button><button onclick="updateMayorStatus('ไม่อยู่อบต.', 'bg-red-500')" class="p-4 bg-red-50 text-red-700 rounded-2xl font-black tap-effect hover:bg-red-100">🔴 ไม่อยู่อบต.</button></div><button onclick="closeModal('statusModal')" class="mt-4 text-gray-300 font-bold tap-effect hover:text-gray-400 text-sm">ปิด</button></div></div>
 
     <script>
         const holidays2026 = { "01-01": "วันขึ้นปีใหม่", "03-03": "วันมาฆบูชา", "04-06": "วันจักรี", "04-13": "วันสงกรานต์", "04-14": "วันสงกรานต์", "04-15": "วันสงกรานต์", "05-01": "วันแรงงานแห่งชาติ", "05-04": "วันฉัตรมงคล", "05-11": "วันพืชมงคลฯ", "05-31": "วันวิสาขบูชา", "06-01": "ชดเชยวันวิสาขบูชา", "06-03": "วันเฉลิมฯ พระราชินี", "07-28": "วันเฉลิมฯ ร.10", "07-29": "วันอาสาฬหบูชา", "07-30": "วันเข้าพรรษา", "08-12": "วันแม่แห่งชาติ", "10-13": "วันนวมินทรมหาราช", "10-23": "วันปิยมหาราช", "10-26": "วันออกพรรษา", "12-05": "วันพ่อแห่งชาติ", "12-07": "ชดเชยวันพ่อแห่งชาติ", "12-10": "วันรัฐธรรมนูญ", "12-31": "วันสิ้นปี" };
@@ -271,7 +279,7 @@
                 updateAdminVisibility();
                 renderAll();
             } else { 
-                document.getElementById('adminPassword').value = ''; 
+                document.getElementById('adminPassword').value = ''; // ล้างรหัสเดิมก่อนเปิด
                 openModal('loginModal'); 
             }
         }
@@ -280,7 +288,7 @@
             const pwdInput = document.getElementById('adminPassword');
             if(pwdInput.value.toLowerCase() === 'ntrd') {
                 isAdmin = true; 
-                pwdInput.value = ''; 
+                pwdInput.value = ''; // ล้างรหัสทันทีหลังยืนยันสำเร็จ
                 closeModal('loginModal');
                 document.getElementById('adminIcon').className = 'fa-solid fa-user-check text-green-300 text-lg';
                 document.getElementById('adminBadge').classList.remove('hidden');
@@ -346,7 +354,7 @@
             let doneTasks = tasks.filter(t => t.status === 'เสร็จสิ้น').length;
             let avg = tasks.length > 0 ? Math.round((doneTasks / tasks.length) * 100) : 0;
             bar.style.width = avg + '%'; valText.innerText = avg + '%';
-            bar.className = avg === 100 ? 'progress-fill h-full rounded-full bg-emerald-500 shadow-lg' : 'progress-fill h-full rounded-full bg-gradient-to-r from-blue-400 to-blue-600';
+            bar.className = avg === 100 ? 'progress-fill h-full rounded-full bg-emerald-500 shadow-lg shadow-emerald-100' : 'progress-fill h-full rounded-full bg-gradient-to-r from-blue-400 to-blue-600';
         }
 
         function getThaiFullDate(dateString) {
@@ -368,15 +376,15 @@
                     <span class="text-[18px] font-bold text-main bg-blue-50 px-3 py-1 rounded-xl">${t.startTime || 'ไม่ระบุเวลา'}</span>
                     <span class="text-[12px] font-bold px-4 py-2 rounded-full border ${statusStyles} uppercase">${t.status}</span>
                 </div>
-                <h4 class="font-bold text-[22px] text-gray-800 mb-3 leading-tight">${t.title}</h4>
+                <h4 class="font-bold text-[22px] text-gray-800 mb-3 leading-tight font-sarabun">${t.title}</h4>
                 <div class="space-y-1 text-[18px] text-gray-500 font-sarabun">
                     <div class="text-main font-bold mb-2"><i class="fa-solid fa-calendar-day mr-2"></i>${getThaiFullDate(t.startDate)}</div>
-                    <div><span class="font-bold text-gray-700">สถานที่:</span> ${t.loc || '-'}</div>
-                    <div><span class="font-bold text-gray-700">การแต่งกาย:</span> ${t.dress || '-'}</div>
-                    <div><span class="font-bold text-gray-700">ผู้รับผิดชอบ:</span> ${t.owner}</div>
+                    <div><span class="font-bold text-gray-700 font-prompt text-sm">สถานที่:</span> ${t.loc || '-'}</div>
+                    <div><span class="font-bold text-gray-700 font-prompt text-sm">การแต่งกาย:</span> ${t.dress || '-'}</div>
+                    <div><span class="font-bold text-gray-700 font-prompt text-sm">ผู้รับผิดชอบ:</span> ${t.owner}</div>
                 </div>
-                ${t.link ? `<a href="${t.link}" target="_blank" class="block w-full text-center py-3 mt-4 bg-blue-50 text-blue-700 rounded-2xl font-bold border border-blue-100 tap-effect"><i class="fa-brands fa-google-drive mr-2"></i> เอกสารอ้างอิง</a>` : ''}
-                ${isAdmin ? `<button onclick="editTask('${t.id}')" class="absolute top-5 right-5 w-10 h-10 bg-gray-50 text-gray-300 rounded-2xl flex items-center justify-center border hover:text-main transition-colors"><i class="fa-solid fa-pen-nib text-sm"></i></button>` : ''}
+                ${t.link ? `<a href="${t.link}" target="_blank" class="block w-full text-center py-3 mt-4 bg-blue-50 text-blue-700 rounded-2xl font-bold border border-blue-100 tap-effect hover:bg-blue-100 font-prompt text-sm"><i class="fa-brands fa-google-drive mr-2"></i> เอกสารอ้างอิง</a>` : ''}
+                ${isAdmin ? `<button onclick="editTask('${t.id}')" class="absolute top-5 right-5 w-10 h-10 bg-gray-50 text-gray-300 rounded-2xl flex items-center justify-center border hover:text-main tap-effect hover:bg-white"><i class="fa-solid fa-pen-nib text-sm"></i></button>` : ''}
             </div>`;
         }
 
@@ -386,8 +394,8 @@
         }
 
         function renderFullTasks() {
-            const list = document.getElementById('fullTaskList');
-            if(list) list.innerHTML = tasks.sort((a,b) => new Date(b.startDate) - new Date(a.startDate)).map(t => generateTaskCardHTML(t)).join('');
+            const container = document.getElementById('fullTaskList');
+            if(container) container.innerHTML = tasks.sort((a,b) => new Date(b.startDate) - new Date(a.startDate)).map(t => generateTaskCardHTML(t)).join('');
         }
 
         function renderCalendar() {
@@ -415,7 +423,7 @@
             const dObj = new Date(d);
             const dateKey = `${(dObj.getMonth()+1).toString().padStart(2,'0')}-${dObj.getDate().toString().padStart(2,'0')}`;
             let holidayInfo = (dObj.getFullYear() === 2026 && holidays2026[dateKey]) ? `<div class="bg-red-50 text-red-600 p-4 rounded-3xl mb-4 font-black text-sm flex items-center gap-3 font-sarabun font-bold"><i class="fa-solid fa-bullhorn"></i> วันสำคัญ: ${holidays2026[dateKey]}</div>` : "";
-            container.innerHTML = `<h4 class="text-sm font-black text-gray-400 mb-4 border-b pb-4">${getThaiFullDate(d)}</h4>${holidayInfo}`;
+            container.innerHTML = `<h4 class="text-sm font-black text-gray-400 mb-4 border-b pb-4 font-prompt">${getThaiFullDate(d)}</h4>${holidayInfo}`;
             container.innerHTML += dayTasks.map(t => generateTaskCardHTML(t)).join('') || '<p class="text-xs text-gray-300 py-6 text-center italic font-sarabun">ไม่มีภารกิจในวันนี้</p>';
         }
 
@@ -427,9 +435,9 @@
             Object.keys(groups).forEach(g => {
                 const members = filtered.filter(c => c.group === g);
                 if(members.length > 0) {
-                    let html = `<div class="space-y-3 font-sarabun"><h4 class="text-xs font-black text-gray-400 uppercase font-prompt pl-2 border-l-4 border-gray-200 ml-1 mb-4">${groups[g]}</h4>`;
+                    let html = `<div class="space-y-3 font-sarabun"><h4 class="text-xs font-black text-gray-400 uppercase font-prompt pl-2 border-l-4 border-gray-200 ml-1 mb-4 tracking-wider">${groups[g]}</h4>`;
                     members.forEach(m => {
-                        html += `<div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex items-center justify-between tap-effect"><div onclick="window.location='tel:${m.tel}'" class="flex-1 cursor-pointer"><p class="font-bold text-gray-800 text-lg leading-tight mb-1 font-prompt">${m.name}</p><p class="text-sm text-gray-400 font-bold mb-2 font-sarabun">${m.role}</p><p class="text-xl font-black text-main tracking-widest font-sarabun">${m.tel}</p></div><div class="flex flex-col gap-3"><a href="tel:${m.tel}" class="w-14 h-14 bg-green-50 text-green-700 rounded-3xl flex items-center justify-center shadow-lg hover:bg-green-100 transition tap-effect"><i class="fa-solid fa-phone text-2xl"></i></a>${isAdmin ? `<div class="flex gap-2 justify-center"><button onclick="editContact('${m.id}')" class="text-gray-300 tap-effect"><i class="fa-solid fa-pen text-sm"></i></button><button onclick="deleteContact('${m.id}')" class="text-red-200 tap-effect"><i class="fa-solid fa-trash text-sm"></i></button></div>` : ''}</div></div>`;
+                        html += `<div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex items-center justify-between tap-effect hover:shadow-md"><div onclick="window.location='tel:${m.tel}'" class="flex-1 cursor-pointer"><p class="font-bold text-gray-800 text-lg leading-tight mb-1 font-prompt">${m.name}</p><p class="text-sm text-gray-400 font-medium mb-2 font-sarabun">${m.role}</p><p class="text-xl font-black text-main tracking-widest font-sarabun">${m.tel}</p></div><div class="flex flex-col gap-3"><a href="tel:${m.tel}" class="w-14 h-14 bg-green-50 text-green-700 rounded-3xl flex items-center justify-center shadow-lg tap-effect hover:bg-green-100"><i class="fa-solid fa-phone text-2xl"></i></a>${isAdmin ? `<div class="flex gap-2 justify-center"><button onclick="editContact('${m.id}')" class="text-gray-300 tap-effect hover:text-main"><i class="fa-solid fa-pen text-sm"></i></button><button onclick="deleteContact('${m.id}')" class="text-red-200 tap-effect hover:text-red-500"><i class="fa-solid fa-trash text-sm"></i></button></div>` : ''}</div></div>`;
                     });
                     container.innerHTML += html + `</div>`;
                 }
