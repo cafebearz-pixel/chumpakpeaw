@@ -89,7 +89,7 @@
                         <span class="font-black text-xl tracking-widest wave-text uppercase">
                             <span>C</span><span>H</span><span>U</span><span>M</span><span>P</span><span>A</span><span>K</span><span>P</span><span>A</span><span>E</span><span>W</span>
                         </span>
-                        <span class="text-[11px] font-light opacity-80 leading-tight font-prompt">องค์การบริหารส่วนตำบลชำผักแพว</span>
+                        <span class="text-sm font-normal opacity-90 leading-tight font-prompt mt-0.5">องค์การบริหารส่วนตำบลชำผักแพว</span>
                     </div>
                 </div>
                 <button onclick="handleAdminToggle()" class="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center tap-effect border border-white/20">
@@ -232,7 +232,7 @@
     <div id="loginModal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md font-prompt">
         <div class="bg-white w-full max-w-sm rounded-[3rem] p-10 shadow-2xl text-center">
             <div class="w-16 h-16 bg-main rounded-full flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-lock text-white text-2xl"></i></div>
-            <h2 class="text-xl font-black text-main mb-6 uppercase">รหัสผ่านแอดมิน</h2>
+            <h2 class="text-xl font-black text-main mb-6 uppercase tracking-widest">Admin</h2>
             <input type="password" id="adminPassword" placeholder="••••" class="w-full p-4 bg-gray-50 rounded-2xl text-center font-black mb-8 outline-none text-2xl tracking-[0.5em] border focus:border-main focus:ring-1">
             <div class="flex gap-3">
                 <button onclick="closeModal('loginModal')" class="flex-1 py-3 rounded-2xl text-gray-400 font-bold bg-gray-100 tap-effect">ยกเลิก</button>
@@ -275,7 +275,7 @@
         function updateAdminUI() {
             document.getElementById('fabAdd').classList.toggle('hidden', !window.isAdmin || window.currentPage !== 'dashboard');
             document.getElementById('admin-add-contact').classList.toggle('hidden', !window.isAdmin || window.currentPage !== 'contacts');
-            document.getElementById('adminIcon').className = window.isAdmin ? 'fa-solid fa-user-check text-green-400 text-xl' : 'fa-solid fa-user-shield text-lg text-white';
+            document.getElementById('adminIcon').className = window.isAdmin ? 'fa-solid fa-user-check text-green-400 text-lg' : 'fa-solid fa-user-shield text-lg text-white';
         }
 
         function getDiffDays(dateString) {
@@ -287,7 +287,7 @@
         function taskCardHTML(t, animate = false) {
             const diff = getDiffDays(t.startDate);
             let countdown = diff === 0 ? `<div class="absolute -top-3 -right-2 bg-red-600 text-white text-[11px] font-black px-3 py-1.5 rounded-full animate-countdown shadow-lg">วันนี้!</div>` : 
-                           (diff > 0 && diff <= 10) ? `<div class="absolute -top-3 -right-2 bg-orange-500 text-white text-[11px] font-black px-3 py-1.5 rounded-full animate-countdown shadow-lg">อีก ${diff} วัน</div>` : '';
+                           (diff > 0 && diff <= 10) ? `<div class="absolute -top-3 -right-2 bg-orange-500 text-white text-[11px] font-black px-3 py-1.5 rounded-full animate-countdown shadow-lg">อีก ${diff} วันจะถึงงาน</div>` : '';
             
             return `<div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 relative tap-effect ${animate?'animate-upcoming':''} font-prompt hover:shadow-md transition-all">
                 ${countdown}
@@ -301,7 +301,7 @@
                     ${t.coord?`<p><i class="fa-solid fa-handshake mr-2 text-main w-4"></i>ประสานงาน: ${t.coord}</p>`:''}
                 </div>
                 ${t.link ? `<a href="${t.link}" target="_blank" class="block mt-5 text-center py-2.5 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold border border-blue-100 hover:bg-blue-100 transition-all"><i class="fa-brands fa-google-drive mr-2"></i>เปิดไฟล์เอกสารแนบ</a>` : ''}
-                ${window.isAdmin ? `<button onclick="editTask('${t.id}')" class="absolute bottom-6 right-6 w-10 h-10 bg-gray-50 text-gray-400 rounded-xl flex items-center justify-center border hover:text-main hover:bg-white"><i class="fa-solid fa-pen"></i></button>` : ''}
+                ${window.isAdmin ? `<button onclick="editTask('${t.id}')" class="absolute bottom-6 right-6 w-10 h-10 bg-gray-50 text-gray-400 rounded-xl flex items-center justify-center border hover:text-main hover:bg-white transition-all"><i class="fa-solid fa-pen"></i></button>` : ''}
             </div>`;
         }
 
