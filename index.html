@@ -38,7 +38,7 @@
         @keyframes pulse-orange { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(0.95); } }
         .animate-countdown { animation: pulse-orange 1.5s infinite; }
 
-        /* การ์ดเด้งขึ้นลงสำหรับงานด่วน */
+        /* การ์ดเด้งขึ้นลงสำหรับงานวันนี้ */
         @keyframes bounce-subtle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         .animate-today-card { 
             animation: bounce-subtle 2.5s infinite; 
@@ -77,7 +77,7 @@
             <nav class="flex bg-white border-b overflow-x-auto no-scrollbar font-prompt">
                 <button onclick="changePage('dashboard')" id="nav-dashboard" class="flex-1 py-4 text-main border-b-4 border-main font-bold text-sm min-w-[100px] tap-effect"><i class="fa-solid fa-chart-line mr-2"></i>แดชบอร์ด</button>
                 <button onclick="changePage('calendar')" id="nav-calendar" class="flex-1 py-4 text-gray-400 font-bold text-sm min-w-[100px] tap-effect"><i class="fa-solid fa-calendar-alt mr-2"></i>ปฏิทิน</button>
-                <button onclick="changePage('tasks')" id="nav-tasks" class="flex-1 py-4 text-gray-400 font-bold text-sm min-w-[100px] tap-effect"><i class="fa-solid fa-list-check mr-2"></i>คิวงาน</button>
+                <button onclick="changePage('tasks')" id="nav-tasks" class="flex-1 py-4 text-gray-400 font-bold text-sm min-w-[100px] tap-effect"><i class="fa-solid fa-list-check mr-2"></i>คิวทั้งหมด</button>
                 <button onclick="changePage('contacts')" id="nav-contacts" class="flex-1 py-4 text-gray-400 font-bold text-sm min-w-[100px] tap-effect"><i class="fa-solid fa-address-book mr-2"></i>เบอร์โทร</button>
             </nav>
         </div>
@@ -142,14 +142,14 @@
             </div>
 
             <div id="page-tasks" class="hidden space-y-6">
-                <h2 class="font-black text-main text-lg border-l-4 border-blue-500 pl-3 uppercase">คิวงานทั้งหมดในระบบ</h2>
-                <div id="fullTaskList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                <h2 class="font-black text-main text-lg border-l-4 border-blue-500 pl-3 uppercase mb-4">สถานะคิวทั้งหมด</h2>
+                <div id="fullTaskList" class="w-full"></div>
             </div>
 
             <div id="page-contacts" class="hidden space-y-6">
                 <div class="max-w-3xl mx-auto space-y-6">
                     <div class="relative">
-                        <input type="text" id="contactSearch" onkeyup="renderContacts(this.value)" placeholder="ค้นหารายชื่อ หรือ ตำแหน่ง..." class="w-full p-4 pl-12 bg-white rounded-2xl shadow-md border-none outline-none focus:ring-2 focus:ring-main font-prompt">
+                        <input type="text" id="contactSearch" onkeyup="renderContacts(this.value)" placeholder="ค้นหารายชื่อ ชื่อเล่น หรือ ตำแหน่ง..." class="w-full p-4 pl-12 bg-white rounded-2xl shadow-md border-none outline-none focus:ring-2 focus:ring-main font-prompt">
                         <i class="fa-solid fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-300"></i>
                     </div>
                     <button id="admin-add-contact" onclick="openContactModal()" class="hidden w-full py-4 bg-indigo-50 text-indigo-700 rounded-2xl font-black border-2 border-dashed border-indigo-200 tap-effect">
@@ -189,7 +189,23 @@
                 <input type="text" id="t-loc" placeholder="สถานที่" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100">
                 <input type="text" id="t-dress" placeholder="การแต่งกาย" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100">
                 <input type="text" id="t-coord" placeholder="ผู้ประสานงาน" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                <select id="t-owner" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100"><option>นายก</option><option>ปลัด</option><option>รองนายก</option><option>กองช่าง</option></select>
+                <select id="t-owner" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                    <option>นายก อบต.</option>
+                    <option>รองนายก อบต.</option>
+                    <option>เลขานุการนายก</option>
+                    <option>ปลัด อบต.</option>
+                    <option>รองปลัด อบต.</option>
+                    <option>สำนักปลัด</option>
+                    <option>กองช่าง</option>
+                    <option>กองคลัง</option>
+                    <option>กองการศึกษาฯ</option>
+                    <option>กองสวัสดิการสังคม</option>
+                    <option>กองสาธารณสุขและสิ่งแวดล้อม</option>
+                    <option>ประธานสภาฯ</option>
+                    <option>รองประธานสภาฯ</option>
+                    <option>สมาชิกสภาฯ</option>
+                    <option>อื่นๆ</option>
+                </select>
                 <input type="url" id="t-link" placeholder="ลิงก์แนบไฟล์ Google Drive (ถ้ามี)" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 text-sm">
                 
                 <div class="pt-4 flex gap-3">
@@ -246,7 +262,6 @@
     </div>
 
     <script>
-        // ข้อมูลเบื้องต้น
         const holidays2026 = { "01-01": "วันขึ้นปีใหม่", "03-03": "วันมาฆบูชา", "04-06": "วันจักรี", "04-13": "วันสงกรานต์", "04-14": "วันสงกรานต์", "04-15": "วันสงกรานต์", "05-01": "วันแรงงานแห่งชาติ", "05-04": "วันฉัตรมงคล", "05-11": "วันพืชมงคลฯ", "05-31": "วันวิสาขบูชา", "06-01": "ชดเชยวันวิสาขบูชา", "06-03": "วันเฉลิมฯ พระราชินี", "07-28": "วันเฉลิมฯ ร.10", "07-29": "วันอาสาฬหบูชา", "07-30": "วันเข้าพรรษา", "08-12": "วันแม่แห่งชาติ", "10-13": "วันนวมินทรมหาราช", "10-23": "วันปิยมหาราช", "10-26": "วันออกพรรษา", "12-05": "วันพ่อแห่งชาติ", "12-07": "ชดเชยวันพ่อแห่งชาติ", "12-10": "วันรัฐธรรมนูญ", "12-31": "วันสิ้นปี" };
 
         window.tasks = []; 
@@ -256,7 +271,6 @@
         window.currentPage = 'dashboard';
         let currentViewDate = new Date();
 
-        // ตั้งค่า Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAg_kQRN64eIdhRDtIdsR24JSUiwHdT7tM",
             authDomain: "flutter-ai-playground-ca0f3.firebaseapp.com",
@@ -288,7 +302,6 @@
             renderAll();
         });
 
-        // ควบคุมหน้าจอ
         function handleAdminToggle() {
             if (window.isAdmin) { window.isAdmin = false; updateAdminUI(); renderAll(); } 
             else { document.getElementById('adminPassword').value = ''; openModal('loginModal'); }
@@ -334,7 +347,6 @@
             return Math.ceil((target - today) / 86400000);
         }
 
-        // แปลงวันที่แบบไทย
         function formatThaiDate(dateStr) {
             if(!dateStr) return '';
             const days = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
@@ -444,21 +456,38 @@
                 }
             }
 
+            // ✅ ฟังก์ชันใหม่: แบ่งหมวดหมู่คิวทั้งหมด
             if (window.currentPage === 'tasks') {
                 const fullList = document.getElementById('fullTaskList');
-                let allTasks = window.tasks.slice();
-                allTasks.sort(function(a,b){
-                    if(a.startDate > b.startDate) return -1;
-                    if(a.startDate < b.startDate) return 1;
-                    return 0;
-                });
                 
-                let html = '';
-                if(allTasks.length > 0) {
-                    for(let i=0; i<allTasks.length; i++) html += taskCardHTML(allTasks[i], allTasks[i].startDate === todayStr);
-                } else {
-                    html = '<p class="text-center text-gray-300 py-10 w-full col-span-full font-prompt">ไม่มีข้อมูลคิวงาน</p>';
+                // คัดกรองงานแต่ละประเภทและจัดเรียงวันที่
+                const activeTasks = window.tasks.filter(function(t){return t.status === 'กำลังดำเนินการ';}).sort(function(a,b){return a.startDate < b.startDate ? -1 : 1;});
+                const pendingTasks = window.tasks.filter(function(t){return t.status === 'รอดำเนินการ';}).sort(function(a,b){return a.startDate < b.startDate ? -1 : 1;});
+                const doneTasks = window.tasks.filter(function(t){return t.status === 'เสร็จสิ้น';}).sort(function(a,b){return a.startDate > b.startDate ? -1 : 1;}); // เสร็จสิ้นจัดเรียงจากใหม่ไปเก่า
+
+                // ฟังก์ชันสำหรับสร้างหมวดหมู่แบบกางออกได้ (Accordion)
+                function buildTaskGroup(title, icon, colorClass, badgeClass, tasksArr, isOpen) {
+                    let html = '<details class="bg-white rounded-[2rem] shadow-sm border border-gray-100 mb-5 group" ' + (isOpen ? 'open' : '') + '>';
+                    html += '<summary class="font-black text-main text-lg p-5 cursor-pointer list-none flex justify-between items-center tap-effect outline-none [&::-webkit-details-marker]:hidden">';
+                    html += '<div class="flex items-center gap-3"><i class="' + icon + ' ' + colorClass + '"></i> ' + title + ' <span class="' + badgeClass + ' text-xs px-3 py-1 rounded-full">' + tasksArr.length + '</span></div>';
+                    html += '<i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180 text-gray-400"></i>';
+                    html += '</summary>';
+                    html += '<div class="p-5 pt-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 border-t border-gray-50 mt-2 pt-5">';
+                    if(tasksArr.length > 0) {
+                        for(let i=0; i<tasksArr.length; i++) html += taskCardHTML(tasksArr[i], tasksArr[i].startDate === todayStr);
+                    } else {
+                        html += '<p class="text-center text-gray-300 py-6 w-full col-span-full font-prompt">ไม่มีคิวงานในสถานะนี้</p>';
+                    }
+                    html += '</div></details>';
+                    return html;
                 }
+
+                let html = '';
+                // สร้าง 3 หมวดหมู่ (ให้ 'กำลังทำ' กับ 'รอทำ' กางออก ส่วน 'เสร็จสิ้น' พับไว้)
+                html += buildTaskGroup('กำลังดำเนินการ', 'fa-solid fa-spinner', 'text-emerald-500', 'bg-emerald-50 text-emerald-600', activeTasks, true);
+                html += buildTaskGroup('รอดำเนินการ', 'fa-solid fa-clock-rotate-left', 'text-amber-500', 'bg-amber-50 text-amber-600', pendingTasks, true);
+                html += buildTaskGroup('เสร็จสิ้น', 'fa-solid fa-check-double', 'text-red-500', 'bg-red-50 text-red-600', doneTasks, false);
+
                 fullList.innerHTML = html;
             }
             
@@ -501,7 +530,8 @@
                 let list = [];
                 for(let j=0; j<window.contacts.length; j++){
                     let c = window.contacts[j];
-                    if(c.group === g && (c.name.indexOf(query) > -1 || c.role.indexOf(query) > -1)) {
+                    // ✅ อนุญาตให้ค้นหาจาก "ชื่อเล่น" ได้แล้ว
+                    if(c.group === g && (c.name.indexOf(query) > -1 || c.role.indexOf(query) > -1 || (c.nickname && c.nickname.indexOf(query) > -1))) {
                         list.push(c);
                     }
                 }
