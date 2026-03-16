@@ -73,27 +73,13 @@
         @keyframes pulse-orange { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(0.95); } }
         .animate-countdown { animation: pulse-orange 1.5s infinite; }
 
-        /* การ์ดเด้งขึ้นลงสำหรับ "งานวันนี้" */
+        /* การ์ดเด้งขึ้นลงสำหรับงานด่วน */
         @keyframes bounce-subtle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        .animate-today-card { 
-            animation: bounce-subtle 2.5s infinite; 
-            border: 2px solid #ef4444 !important; /* เปลี่ยนขอบเป็นสีแดงให้ดูเป็นงานด่วน */
-            box-shadow: 0 15px 30px rgba(239, 68, 68, 0.15) !important; 
-        }
+        .animate-upcoming { animation: bounce-subtle 2.5s infinite; border: 2px solid #3b82f6 !important; box-shadow: 0 15px 30px rgba(59, 130, 246, 0.2); }
 
         .glass-stat-card {
             background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 8px 32px rgba(0,0,0,0.05);
             position: relative; overflow: hidden;
         }
-        .glass-stat-card .bg-icon { position: absolute; bottom: -20px; right: -15px; font-size: 90px; opacity: 0.08; transform: rotate(-15deg); }
-    </style>
-</head>
-<body class="min-h-screen">
-
-    <div id="app" class="max-w-6xl mx-auto bg-white min-h-screen shadow-2xl flex flex-col relative">
-        
-        <div class="sticky top-0 z-50 flex flex-col w-full shadow-md">
-            <header class="bg-main px-5 py-4 flex justify-between items-center text-white">
-                <div class="flex items-center gap-3">
-                    <img src="
+        .glass-stat-card .bg-icon { position: absolute; bottom: -20px; right: -15px
