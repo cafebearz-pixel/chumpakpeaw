@@ -222,7 +222,7 @@
                 <div class="pt-4 flex gap-3">
                     <button type="button" id="btnDeleteTask" onclick="deleteTask()" class="hidden px-5 bg-red-50 text-red-500 rounded-2xl tap-effect"><i class="fa-solid fa-trash"></i></button>
                     <button type="button" onclick="closeModal('taskModal')" class="flex-1 py-4 bg-gray-100 text-gray-500 rounded-2xl font-bold tap-effect">ยกเลิก</button>
-                    <button type="submit" class="flex-1 py-4 bg-main text-white rounded-2xl font-bold shadow-lg tap-effect">บันทึกคิวงาน</button>
+                    <button type="submit" id="btnSaveTask" class="flex-1 py-4 bg-main text-white rounded-2xl font-bold shadow-lg tap-effect">บันทึกคิวงาน</button>
                 </div>
             </form>
         </div>
@@ -317,7 +317,7 @@
             return Math.ceil((target - today) / 86400000);
         }
 
-        // เพิ่มฟังก์ชันแปลงวันที่เป็นแบบไทย
+        // --- ฟังก์ชันแปลงวันที่แบบไทย ---
         function formatThaiDate(dateStr) {
             if(!dateStr) return '';
             const days = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
@@ -349,7 +349,6 @@
         }
 
         window.renderAll = () => {
-            // อัปเดตตัวเลขหน้าแรก
             document.getElementById('stat-total').innerText = window.tasks.length;
             document.getElementById('stat-pending').innerText = window.tasks.filter(t=>t.status==='รอดำเนินการ').length;
             document.getElementById('stat-active').innerText = window.tasks.filter(t=>t.status==='กำลังดำเนินการ').length;
@@ -357,7 +356,6 @@
 
             const todayStr = new Date().toISOString().split('T')[0];
 
-            // 1. หน้า Dashboard
             if (window.currentPage === 'dashboard') {
                 const dashContainer = document.getElementById('dashboardTaskList');
                 const todayTasks = window.tasks.filter(t => t.startDate === todayStr);
@@ -385,7 +383,6 @@
                 dashContainer.innerHTML = html;
             }
 
-            // 2. หน้า Calendar
             if (window.currentPage === 'calendar') {
                 const grid = document.getElementById('daysGrid'); grid.innerHTML = '';
                 const y = currentViewDate.getFullYear(), m = currentViewDate.getMonth();
@@ -405,20 +402,21 @@
                 }
             }
 
-            // 3. หน้า Tasks (งานทั้งหมด)
             if (window.currentPage === 'tasks') {
                 const fullList = document.getElementById('fullTaskList');
                 fullList.innerHTML = window.tasks.sort((a,b)=>b.startDate.localeCompare(a.startDate)).map(t => taskCardHTML(t)).join('') || '<p class="text-center text-gray-300 py-10 w-full col-span-full font-prompt">ไม่มีข้อมูลคิวงาน</p>';
             }
             
-            // 4. หน้า Contacts
             if (window.currentPage === 'contacts') renderContacts();
         };
 
         function showDayTasks(date, h) {
             const container = document.getElementById('selectedDateTasks');
             const dayTasks = window.tasks.filter(t => t.startDate === date);
+            
+            // ประยุกต์ใช้วันที่ภาษาไทยบนหัวข้อเมื่อจิ้มปฏิทิน
             const thaiDate = formatThaiDate(date);
+            
             let head = `<div class="col-span-full p-4 bg-white rounded-[2rem] border border-gray-100 shadow-sm font-prompt text-center"><p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">วันที่เลือก</p><p class="font-black text-main text-xl">${thaiDate}</p>${h?`<div class="mt-3 inline-block bg-red-50 text-red-500 font-bold text-sm px-4 py-2 rounded-xl"><i class="fa-solid fa-flag mr-2"></i>วันหยุดราชการ: ${h}</div>`:''}</div>`;
             container.innerHTML = head + (dayTasks.length ? dayTasks.map(t => taskCardHTML(t)).join('') : '<div class="col-span-full bg-white rounded-[2rem] p-8 border border-dashed border-gray-200 text-center"><p class="text-gray-400 font-prompt">ไม่มีคิวงานในวันนี้</p></div>');
         }
@@ -456,9 +454,45 @@
         function prevMonth() { currentViewDate.setMonth(currentViewDate.getMonth()-1); renderAll(); }
         function nextMonth() { currentViewDate.setMonth(currentViewDate.getMonth()+1); renderAll(); }
         
-        function openTaskModal() { document.getElementById('taskForm').reset(); document.getElementById('taskEditId').value = ''; document.getElementById('btnDeleteTask').classList.add('hidden'); openModal('taskModal'); }
-        function editTask(id) { const t = window.tasks.find(x => x.id == id); if(!t) return; document.getElementById('taskEditId').value = t.id; ['title','startDate','startTime','endDate','endTime','status','loc','dress','coord','owner','link'].forEach(k => { if(document.getElementById(`t-${k}`)) document.getElementById(`t-${k}`).value = t[k]||''; }); document.getElementById('btnDeleteTask').classList.remove('hidden'); openModal('taskModal'); }
-        document.getElementById('taskForm').onsubmit = (e) => { e.preventDefault(); const id = document.getElementById('taskEditId').value || Date.now().toString(); const data = { id }; ['title','startDate','startTime','endDate','endTime','status','loc','dress','coord','owner','link'].forEach(k => data[k] = document.getElementById(`t-${k}`).value); const idx = window.tasks.findIndex(x => x.id === id); if(idx > -1) window.tasks[idx] = data; else window.tasks.push(data); window.saveToCloud(window.tasks, window.contacts, window.mayorStatus); closeModal('taskModal'); };
+        function openTaskModal() { document.getElementById('taskForm').reset(); document.getElementById('taskEditId').value = ''; openModal('taskModal'); }
+        function editTask(id) { const t = window.tasks.find(x => x.id == id); if(!t) return; document.getElementById('taskEditId').value = t.id; ['title','startDate','startTime','endDate','endTime','status','loc','dress','coord','owner','link'].forEach(k => { if(document.getElementById(`t-${k}`)) document.getElementById(`t-${k}`).value = t[k]||''; }); openModal('taskModal'); }
+        
+        document.getElementById('taskForm').onsubmit = (e) => { 
+            e.preventDefault(); 
+            const btn = document.getElementById('btnSaveTask');
+            const originalText = btn.innerText;
+            btn.innerText = 'กำลังบันทึก...';
+            btn.disabled = true;
+
+            const id = document.getElementById('taskEditId').value || Date.now().toString(); 
+            const data = { id }; 
+            ['title','startDate','startTime','endDate','endTime','status','loc','dress','coord','owner','link'].forEach(k => data[k] = document.getElementById(`t-${k}`).value); 
+            
+            const idx = window.tasks.findIndex(x => x.id === id); 
+            if(idx > -1) window.tasks[idx] = data; else window.tasks.push(data); 
+            
+            // 1. บันทึกลง Firebase
+            window.saveToCloud(window.tasks, window.contacts, window.mayorStatus); 
+
+            // 2. ส่งข้อมูลไปเก็บที่ Google Sheets (Backup)
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbx2WLgayblJSdhnA_Ad0Bjeng0tjn4aw7UzngKCctWOHJJYDCruvw1hpsSr4t-bNe8ogQ/exec';
+            
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify(data)
+            }).then(() => {
+                btn.innerText = originalText;
+                btn.disabled = false;
+                closeModal('taskModal'); 
+            }).catch(error => {
+                console.error('Sheets Backup Error:', error.message);
+                btn.innerText = originalText;
+                btn.disabled = false;
+                closeModal('taskModal'); 
+            });
+        };
+
         function deleteTask() { if(confirm('ยืนยันการลบคิวงานนี้ถาวร?')) { window.tasks = window.tasks.filter(t => t.id !== document.getElementById('taskEditId').value); window.saveToCloud(window.tasks, window.contacts, window.mayorStatus); closeModal('taskModal'); } }
 
         function openContactModal() { document.getElementById('contactForm').reset(); document.getElementById('contactEditId').value = ''; openModal('contactModal'); }
