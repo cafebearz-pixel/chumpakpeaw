@@ -270,7 +270,7 @@
     </div>
 
     <script>
-        const holidays2026 = { "01-01": "วันขึ้นปีใหม่", "03-03": "วันมาฆบูชา", "04-06": "วันจักรี", "04-13": "วันสงกรานต์", "04-14": "วันสงกรานต์", "04-15": "วันสงกรานต์", "05-01": "วันแรงงานแห่งชาติ", "05-04": "วันฉัตรมonkol", "05-11": "วันพืชมงคลฯ", "05-31": "วันวิสาขบูชา", "06-01": "ชดเชยวันวิสาขบูชา", "06-03": "วันเฉลิมฯ พระราชินี", "07-28": "วันเฉลิมฯ ร.10", "07-29": "วันอาสาฬหบูชา", "07-30": "วันเข้าพรรษา", "08-12": "วันแม่แห่งชาติ", "10-13": "วันนวมินทรมหาราช", "10-23": "วันปิยมหาราช", "10-26": "วันออกพรรษา", "12-05": "วันพ่อแห่งชาติ", "12-07": "ชดเชยวันพ่อแห่งชาติ", "12-10": "วันรัฐธรรมนูญ", "12-31": "วันสิ้นปี" };
+        const holidays2026 = { "01-01": "วันขึ้นปีใหม่", "03-03": "วันมาฆบูชา", "04-06": "วันจักรี", "04-13": "วันสงกรานต์", "04-14": "วันสงกรานต์", "04-15": "วันสงกรานต์", "05-01": "วันแรงงานแห่งชาติ", "05-04": "วันฉัตรมงคล", "05-11": "วันพืชมงคลฯ", "05-31": "วันวิสาขบูชา", "06-01": "ชดเชยวันวิสาขบูชา", "06-03": "วันเฉลิมฯ พระราชินี", "07-28": "วันเฉลิมฯ ร.10", "07-29": "วันอาสาฬหบูชา", "07-30": "วันเข้าพรรษา", "08-12": "วันแม่แห่งชาติ", "10-13": "วันนวมินทรมหาราช", "10-23": "วันปิยมหาราช", "10-26": "วันออกพรรษา", "12-05": "วันพ่อแห่งชาติ", "12-07": "ชดเชยวันพ่อแห่งชาติ", "12-10": "วันรัฐธรรมนูญ", "12-31": "วันสิ้นปี" };
 
         window.tasks = []; 
         window.contacts = []; 
@@ -349,10 +349,48 @@
             }
         }
 
-        function getDiffDays(dateString) {
+        function getDiffDays(startStr, endStr) {
             const today = new Date(); today.setHours(0,0,0,0);
-            const target = new Date(dateString); target.setHours(0,0,0,0);
-            return Math.ceil((target - today) / 86400000);
+            const start = new Date(startStr); start.setHours(0,0,0,0);
+            let end = start;
+            if(endStr) { end = new Date(endStr); end.setHours(0,0,0,0); }
+            
+            if(today >= start && today <= end) return 0; // ถือว่าเป็น "วันนี้" ตลอดช่วงวันเชื่อม
+            return Math.ceil((start - today) / 86400000);
+        }
+
+        // ✅ ฟังก์ชันจัดรูปแบบวันที่แบบช่วง (วันเชื่อม)
+        function formatDateRangeThai(startStr, endStr) {
+            if(!startStr) return '';
+            const days = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+            const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+            
+            const d1 = new Date(startStr);
+            if(isNaN(d1.getTime())) return startStr;
+
+            if(!endStr || startStr === endStr) {
+                return days[d1.getDay()] + " " + d1.getDate() + " " + months[d1.getMonth()] + " " + (d1.getFullYear() + 543);
+            }
+
+            const d2 = new Date(endStr);
+            if(isNaN(d2.getTime())) return startStr + ' ถึง ' + endStr;
+
+            const y1 = d1.getFullYear() + 543;
+            const y2 = d2.getFullYear() + 543;
+            const m1 = months[d1.getMonth()];
+            const m2 = months[d2.getMonth()];
+            const day1 = d1.getDate();
+            const day2 = d2.getDate();
+
+            if (y1 === y2) {
+                if (m1 === m2) {
+                    return day1 + "-" + day2 + " " + m1 + " " + y1;
+                } else {
+                    return day1 + " " + m1 + " - " + day2 + " " + m2 + " " + y1;
+                }
+            } else {
+                return day1 + " " + m1 + " " + y1 + " - " + day2 + " " + m2 + " " + y2;
+            }
         }
 
         function formatThaiDate(dateStr) {
@@ -365,7 +403,7 @@
         }
 
         function taskCardHTML(t, isTodayTask) {
-            const diff = getDiffDays(t.startDate);
+            const diff = getDiffDays(t.startDate, t.endDate);
             let countdown = '';
             if(diff === 0) countdown = '<div class="absolute -top-3 -right-2 bg-red-600 text-white text-[11px] font-black px-3 py-1.5 rounded-full animate-countdown shadow-lg">วันนี้!</div>';
             else if(diff > 0 && diff <= 10) countdown = '<div class="absolute -top-3 -right-2 bg-orange-500 text-white text-[11px] font-black px-3 py-1.5 rounded-full animate-countdown shadow-lg">อีก ' + diff + ' วันจะถึงงาน</div>';
@@ -375,7 +413,8 @@
             html += '<div class="flex justify-between items-center mb-4"><span class="bg-blue-50 text-main px-3 py-1.5 rounded-xl text-sm font-bold"><i class="fa-regular fa-clock mr-1"></i>' + (t.startTime||'ไม่ระบุเวลา') + '</span><span class="text-[10px] border px-2 py-1 rounded-lg uppercase text-gray-400 font-bold">' + t.status + '</span></div>';
             html += '<h4 class="font-bold text-xl leading-tight mb-4 text-gray-800">' + t.title + '</h4>';
             html += '<div class="text-sm text-gray-500 space-y-2">';
-            html += '<p><i class="fa-solid fa-calendar-day mr-2 text-main w-4"></i><span class="font-medium">' + formatThaiDate(t.startDate) + '</span> ' + (t.endDate ? ' ถึง <span class="font-medium">' + formatThaiDate(t.endDate) + '</span>' : '') + '</p>';
+            // ✅ เปลี่ยนมาใช้ฟังก์ชันวันเชื่อมตรงนี้
+            html += '<p><i class="fa-solid fa-calendar-day mr-2 text-main w-4"></i><span class="font-medium">' + formatDateRangeThai(t.startDate, t.endDate) + '</span></p>';
             html += '<p><i class="fa-solid fa-location-dot mr-2 text-main w-4"></i>' + (t.loc||'-') + '</p>';
             html += '<p><i class="fa-solid fa-shirt mr-2 text-main w-4"></i>การแต่งกาย: ' + (t.dress||'-') + '</p>';
             html += '<p><i class="fa-solid fa-user mr-2 text-main w-4"></i>รับผิดชอบ: <span class="text-main font-medium">' + t.owner + '</span></p>';
@@ -401,9 +440,16 @@
 
             if (window.currentPage === 'dashboard') {
                 const dashContainer = document.getElementById('dashboardTaskList');
-                const todayTasks = window.tasks.filter(function(t){return t.startDate === todayStr;});
                 
-                const upcomingTasksAll = window.tasks.filter(function(t){return t.startDate > todayStr;});
+                // ✅ แก้ไขให้เช็คงานที่คร่อม "วันนี้" (วันเชื่อม) ให้ขึ้นโชว์ด้วย
+                const todayTasks = window.tasks.filter(function(t){
+                    if(!t.endDate || t.endDate === "") return t.startDate === todayStr;
+                    return todayStr >= t.startDate && todayStr <= t.endDate;
+                });
+                
+                const upcomingTasksAll = window.tasks.filter(function(t){
+                    return t.startDate > todayStr;
+                });
                 upcomingTasksAll.sort(function(a,b){
                     if(a.startDate < b.startDate) return -1;
                     if(a.startDate > b.startDate) return 1;
@@ -452,7 +498,13 @@
                     
                     let hasTask = false;
                     for(let k=0; k<window.tasks.length; k++){
-                        if(window.tasks[k].startDate === fullDate) { hasTask = true; break; }
+                        let t = window.tasks[k];
+                        // ✅ จุดแจ้งเตือนในปฏิทิน ต้องแสดงทุกวันที่คาบเกี่ยวกัน
+                        if(!t.endDate || t.endDate === "") {
+                            if(t.startDate === fullDate) { hasTask = true; break; }
+                        } else {
+                            if(fullDate >= t.startDate && fullDate <= t.endDate) { hasTask = true; break; }
+                        }
                     }
                     
                     const h = holidays2026[dateKey];
@@ -479,7 +531,14 @@
                     html += '</summary>';
                     html += '<div class="p-5 pt-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 border-t border-gray-50 mt-2 pt-5">';
                     if(tasksArr.length > 0) {
-                        for(let i=0; i<tasksArr.length; i++) html += taskCardHTML(tasksArr[i], tasksArr[i].startDate === todayStr);
+                        for(let i=0; i<tasksArr.length; i++) {
+                            // ✅ ประเมินค่าว่างานนี้เป็นของวันนี้หรือไม่ เพื่อให้มันเด้ง
+                            let isToday = false;
+                            if(!tasksArr[i].endDate || tasksArr[i].endDate === "") isToday = (tasksArr[i].startDate === todayStr);
+                            else isToday = (todayStr >= tasksArr[i].startDate && todayStr <= tasksArr[i].endDate);
+                            
+                            html += taskCardHTML(tasksArr[i], isToday);
+                        }
                     } else {
                         html += '<p class="text-center text-gray-300 py-6 w-full col-span-full font-prompt">ไม่มีคิวงานในสถานะนี้</p>';
                     }
@@ -500,7 +559,13 @@
 
         function showDayTasks(date, h) {
             const container = document.getElementById('selectedDateTasks');
-            const dayTasks = window.tasks.filter(function(t){return t.startDate === date;});
+            
+            // ✅ ดึงงานเฉพาะวันที่กด (รวมงานวันเชื่อมด้วย)
+            const dayTasks = window.tasks.filter(function(t){
+                if(!t.endDate || t.endDate === "") return t.startDate === date;
+                return date >= t.startDate && date <= t.endDate;
+            });
+            
             const thaiDate = formatThaiDate(date);
             
             const d = new Date();
@@ -515,7 +580,13 @@
             
             let bodyHTML = '';
             if(dayTasks.length > 0) {
-                for(let i=0; i<dayTasks.length; i++) bodyHTML += taskCardHTML(dayTasks[i], dayTasks[i].startDate === todayStr);
+                for(let i=0; i<dayTasks.length; i++) {
+                    let isToday = false;
+                    if(!dayTasks[i].endDate || dayTasks[i].endDate === "") isToday = (dayTasks[i].startDate === todayStr);
+                    else isToday = (todayStr >= dayTasks[i].startDate && todayStr <= dayTasks[i].endDate);
+                    
+                    bodyHTML += taskCardHTML(dayTasks[i], isToday);
+                }
             } else {
                 bodyHTML = '<div class="col-span-full bg-white rounded-[2rem] p-8 border border-dashed border-gray-200 text-center"><p class="text-gray-400 font-prompt">ไม่มีคิวงานในวันนี้</p></div>';
             }
@@ -566,7 +637,6 @@
             }
         }
 
-        // Utils & Form Actions
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         function prevMonth() { currentViewDate.setMonth(currentViewDate.getMonth()-1); renderAll(); }
