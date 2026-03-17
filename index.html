@@ -273,58 +273,38 @@
     <script>
         const holidays2026 = { "01-01": "วันขึ้นปีใหม่", "03-03": "วันมาฆบูชา", "04-06": "วันจักรี", "04-13": "วันสงกรานต์", "04-14": "วันสงกรานต์", "04-15": "วันสงกรานต์", "05-01": "วันแรงงานแห่งชาติ", "05-04": "วันฉัตรมงคล", "05-11": "วันพืชมงคลฯ", "05-31": "วันวิสาขบูชา", "06-01": "ชดเชยวันวิสาขบูชา", "06-03": "วันเฉลิมฯ พระราชินี", "07-28": "วันเฉลิมฯ ร.10", "07-29": "วันอาสาฬหบูชา", "07-30": "วันเข้าพรรษา", "08-12": "วันแม่แห่งชาติ", "10-13": "วันนวมินทรมหาราช", "10-23": "วันปิยมหาราช", "10-26": "วันออกพรรษา", "12-05": "วันพ่อแห่งชาติ", "12-07": "ชดเชยวันพ่อแห่งชาติ", "12-10": "วันรัฐธรรมนูญ", "12-31": "วันสิ้นปี" };
 
-        window.tasks = []; 
-        window.contacts = []; 
-        window.mayorStatus = { text: 'อยู่อบต./ห้องทำงาน', color: 'bg-green-500' };
-        window.isAdmin = false; 
-        window.currentPage = 'dashboard';
+        window.tasks = []; window.contacts = []; window.mayorStatus = { text: 'อยู่อบต./ห้องทำงาน', color: 'bg-green-500' };
+        window.isAdmin = false; window.currentPage = 'dashboard';
         let currentViewDate = new Date();
 
         const firebaseConfig = {
-            apiKey: "AIzaSyAg_kQRN64eIdhRDtIdsR24JSUiwHdT7tM",
-            authDomain: "flutter-ai-playground-ca0f3.firebaseapp.com",
-            projectId: "flutter-ai-playground-ca0f3",
-            storageBucket: "flutter-ai-playground-ca0f3.firebasestorage.app",
-            messagingSenderId: "679308094535",
-            appId: "1:679308094535:web:81bd85c714926a10909562",
+            apiKey: "AIzaSyAg_kQRN64eIdhRDtIdsR24JSUiwHdT7tM", authDomain: "flutter-ai-playground-ca0f3.firebaseapp.com",
+            projectId: "flutter-ai-playground-ca0f3", storageBucket: "flutter-ai-playground-ca0f3.firebasestorage.app",
+            messagingSenderId: "679308094535", appId: "1:679308094535:web:81bd85c714926a10909562",
             databaseURL: "https://flutter-ai-playground-ca0f3-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        firebase.initializeApp(firebaseConfig); const db = firebase.database();
 
         window.saveToCloud = function(tasks, contacts, mStatus) {
-            const status = mStatus || window.mayorStatus;
-            db.ref('data/').set({ tasks: tasks, contacts: contacts, mayorStatus: status });
+            db.ref('data/').set({ tasks: tasks, contacts: contacts, mayorStatus: mStatus || window.mayorStatus });
         };
 
         db.ref('data/').on('value', function(snapshot) {
             const data = snapshot.val() || {};
-            window.tasks = data.tasks || [];
-            window.contacts = data.contacts || [];
+            window.tasks = data.tasks || []; window.contacts = data.contacts || [];
             window.mayorStatus = data.mayorStatus || {text: 'อยู่อบต./ห้องทำงาน', color: 'bg-green-500'};
             
-            const stText = document.getElementById('statusText');
-            const stDot = document.getElementById('statusDot');
+            const stText = document.getElementById('statusText'); const stDot = document.getElementById('statusDot');
             if(stText) stText.innerText = window.mayorStatus.text;
             if(stDot) stDot.className = "absolute -bottom-1 -right-1 w-5 h-5 md:w-6 md:h-6 rounded-full border-4 border-white " + window.mayorStatus.color + " shadow-sm transition-colors duration-300";
-
             renderAll();
         });
 
-        function handleAdminToggle() {
-            if (window.isAdmin) { window.isAdmin = false; updateAdminUI(); renderAll(); } 
-            else { document.getElementById('adminPassword').value = ''; openModal('loginModal'); }
-        }
-
-        function verifyAdminLogin() {
-            if(document.getElementById('adminPassword').value === 'ntrd') {
-                window.isAdmin = true; closeModal('loginModal'); updateAdminUI(); renderAll();
-            } else { alert('รหัสผ่านแอดมินไม่ถูกต้อง!'); }
-        }
+        function handleAdminToggle() { if(window.isAdmin) { window.isAdmin=false; updateAdminUI(); renderAll(); } else { document.getElementById('adminPassword').value=''; openModal('loginModal'); } }
+        function verifyAdminLogin() { if(document.getElementById('adminPassword').value==='ntrd') { window.isAdmin=true; closeModal('loginModal'); updateAdminUI(); renderAll(); } else { alert('รหัสผ่านแอดมินไม่ถูกต้อง!'); } }
 
         function changePage(p) {
-            window.currentPage = p;
-            const pages = ['dashboard','calendar','tasks','contacts'];
+            window.currentPage = p; const pages = ['dashboard','calendar','tasks','contacts'];
             for(let i=0; i<pages.length; i++) {
                 document.getElementById('page-'+pages[i]).classList.add('hidden');
                 document.getElementById('nav-'+pages[i]).className = 'flex-1 py-4 text-gray-400 font-bold text-sm min-w-[100px] tap-effect font-prompt';
@@ -335,90 +315,84 @@
         }
 
         function updateAdminUI() {
-            if(document.getElementById('fabAdd')) {
-                if(window.isAdmin && window.currentPage === 'dashboard') { document.getElementById('fabAdd').classList.remove('hidden'); } else { document.getElementById('fabAdd').classList.add('hidden'); }
-            }
-            if(document.getElementById('admin-add-contact')) {
-                if(window.isAdmin && window.currentPage === 'contacts') { document.getElementById('admin-add-contact').classList.remove('hidden'); } else { document.getElementById('admin-add-contact').classList.add('hidden'); }
-            }
-            if(document.getElementById('admin-status-btn')) {
-                if(window.isAdmin && window.currentPage === 'dashboard') { document.getElementById('admin-status-btn').classList.remove('hidden'); } else { document.getElementById('admin-status-btn').classList.add('hidden'); }
-            }
-            const icon = document.getElementById('adminIcon');
-            if(icon) {
-                icon.className = window.isAdmin ? 'fa-solid fa-user-check text-green-400 text-lg' : 'fa-solid fa-user-shield text-lg text-white';
-            }
+            if(document.getElementById('fabAdd')) document.getElementById('fabAdd').classList.toggle('hidden', !(window.isAdmin && window.currentPage === 'dashboard'));
+            if(document.getElementById('admin-add-contact')) document.getElementById('admin-add-contact').classList.toggle('hidden', !(window.isAdmin && window.currentPage === 'contacts'));
+            if(document.getElementById('admin-status-btn')) document.getElementById('admin-status-btn').classList.toggle('hidden', !(window.isAdmin && window.currentPage === 'dashboard'));
+            if(document.getElementById('adminIcon')) document.getElementById('adminIcon').className = window.isAdmin ? 'fa-solid fa-user-check text-green-400 text-lg' : 'fa-solid fa-user-shield text-lg text-white';
         }
 
-        // ✅ ฟังก์ชันใหม่ 100%: แปลงวันที่เป็น "ตัวเลขล้วน" (ไม่มีทางเพี้ยนใน iPhone)
-        // เช่น "2026-03-30" จะกลายเป็น 20260330 
-        function getDateNum(dStr) {
-            if(!dStr) return 99999999; // ถ้าไม่มีวันที่ ให้ไปอยู่ท้ายสุด
-            return parseInt(dStr.replace(/-/g, ''), 10);
+        // ==========================================
+        // 🔴 โซน Rewrite Engine วันที่แบบใหม่หมดจด 🔴
+        // ==========================================
+
+        // 1. แปลงวันที่เป็น String ตัวเลข YYYYMMDD เพื่อใช้เทียบและเรียงลำดับเท่านั้น (ไม่ใช้ Date() เลย)
+        function getSortStr(dStr) {
+            if(!dStr) return "99999999";
+            var p = dStr.split('-');
+            if(p.length !== 3) return "99999999";
+            var y = p[0];
+            var m = p[1].length === 1 ? '0' + p[1] : p[1];
+            var d = p[2].length === 1 ? '0' + p[2] : p[2];
+            return y + m + d;
+        }
+
+        // 2. ดึงวันที่ปัจจุบันแบบ String ตัวเลข YYYYMMDD
+        function getTodaySortStr() {
+            var d = new Date();
+            var y = d.getFullYear();
+            var m = d.getMonth() + 1; m = m < 10 ? '0'+m : m;
+            var day = d.getDate(); day = day < 10 ? '0'+day : day;
+            return "" + y + m + day;
+        }
+
+        // 3. แปลงค่าเป็น Date Object เพื่อหาจำนวนวันที่ห่างกัน (บังคับเซ็ตเวลา 12:00 น. กัน Timezone คลาดเคลื่อน)
+        function parseSafeDate(dStr) {
+            var p = dStr.split('-');
+            return new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10), 12, 0, 0);
         }
 
         function getDiffDays(startStr, endStr) {
             if(!startStr) return 0;
-            const today = new Date(); 
-            today.setHours(0,0,0,0);
+            var todaySort = getTodaySortStr();
+            var sSort = getSortStr(startStr);
+            var eSort = (endStr && endStr.trim() !== "") ? getSortStr(endStr) : sSort;
             
-            var p1 = startStr.split('-');
-            const start = new Date(parseInt(p1[0]), parseInt(p1[1])-1, parseInt(p1[2]));
+            if (todaySort >= sSort && todaySort <= eSort) return 0; // วันนี้ชัวร์ๆ 
             
-            let end = start;
-            if(endStr) {
-                var p2 = endStr.split('-');
-                end = new Date(parseInt(p2[0]), parseInt(p2[1])-1, parseInt(p2[2]));
-            }
-            
-            if(today.getTime() >= start.getTime() && today.getTime() <= end.getTime()) return 0;
-            return Math.ceil((start.getTime() - today.getTime()) / 86400000);
+            var dNow = new Date();
+            var dToday = new Date(dNow.getFullYear(), dNow.getMonth(), dNow.getDate(), 12, 0, 0);
+            var dStart = parseSafeDate(startStr);
+            return Math.ceil((dStart.getTime() - dToday.getTime()) / 86400000);
         }
 
         function formatDateRangeThai(startStr, endStr) {
-            if(!startStr) return '';
+            if(!startStr) return '-';
             const days = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
             const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
             
-            var p1 = startStr.split('-');
-            if(p1.length !== 3) return startStr;
-            const d1 = new Date(parseInt(p1[0]), parseInt(p1[1]) - 1, parseInt(p1[2]));
-
-            if(!endStr || startStr === endStr) {
-                return days[d1.getDay()] + " " + d1.getDate() + " " + months[d1.getMonth()] + " " + (d1.getFullYear() + 543);
-            }
-
-            var p2 = endStr.split('-');
-            if(p2.length !== 3) return startStr + ' ถึง ' + endStr;
-            const d2 = new Date(parseInt(p2[0]), parseInt(p2[1]) - 1, parseInt(p2[2]));
-
-            const y1 = d1.getFullYear() + 543;
-            const y2 = d2.getFullYear() + 543;
-            const m1 = months[d1.getMonth()];
-            const m2 = months[d2.getMonth()];
-            const day1 = d1.getDate();
-            const day2 = d2.getDate();
+            const d1 = parseSafeDate(startStr);
+            if(!endStr || startStr.trim() === endStr.trim()) return days[d1.getDay()] + " " + d1.getDate() + " " + months[d1.getMonth()] + " " + (d1.getFullYear() + 543);
+            
+            const d2 = parseSafeDate(endStr);
+            const y1 = d1.getFullYear() + 543; const y2 = d2.getFullYear() + 543;
+            const m1 = months[d1.getMonth()]; const m2 = months[d2.getMonth()];
+            const day1 = d1.getDate(); const day2 = d2.getDate();
 
             if (y1 === y2) {
-                if (m1 === m2) {
-                    return day1 + "-" + day2 + " " + m1 + " " + y1;
-                } else {
-                    return day1 + " " + m1 + " - " + day2 + " " + m2 + " " + y1;
-                }
-            } else {
-                return day1 + " " + m1 + " " + y1 + " - " + day2 + " " + m2 + " " + y2;
-            }
+                if (m1 === m2) return day1 + "-" + day2 + " " + m1 + " " + y1;
+                else return day1 + " " + m1 + " - " + day2 + " " + m2 + " " + y1;
+            } else return day1 + " " + m1 + " " + y1 + " - " + day2 + " " + m2 + " " + y2;
         }
 
         function formatThaiDate(dateStr) {
             if(!dateStr) return '';
             const days = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
             const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
-            var p = dateStr.split('-');
-            if(p.length !== 3) return dateStr;
-            const d = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
+            const d = parseSafeDate(dateStr);
             return days[d.getDay()] + " " + d.getDate() + " " + months[d.getMonth()] + " " + (d.getFullYear() + 543);
         }
+
+        // ==========================================
 
         function taskCardHTML(t, isTodayTask) {
             const diff = getDiffDays(t.startDate, t.endDate);
@@ -449,31 +423,25 @@
             document.getElementById('stat-active').innerText = window.tasks.filter(function(t){return t.status==='กำลังดำเนินการ';}).length;
             document.getElementById('stat-done').innerText = window.tasks.filter(function(t){return t.status==='เสร็จสิ้น';}).length;
 
-            const d = new Date();
-            const yyyy = d.getFullYear();
-            let mm = d.getMonth() + 1; if(mm<10) mm='0'+mm;
-            let dd = d.getDate(); if(dd<10) dd='0'+dd;
-            const todayStr = yyyy + '-' + mm + '-' + dd;
-            const todayNum = getDateNum(todayStr); // ค่าตัวเลขของวันนี้
+            const todaySortStr = getTodaySortStr();
 
             if (window.currentPage === 'dashboard') {
                 const dashContainer = document.getElementById('dashboardTaskList');
                 
                 const todayTasks = window.tasks.filter(function(t){
-                    const sNum = getDateNum(t.startDate);
-                    const eNum = t.endDate ? getDateNum(t.endDate) : sNum;
-                    return todayNum >= sNum && todayNum <= eNum;
+                    const s = getSortStr(t.startDate);
+                    const e = (t.endDate && t.endDate.trim() !== '') ? getSortStr(t.endDate) : s;
+                    return todaySortStr >= s && todaySortStr <= e;
                 });
                 
                 const upcomingTasksAll = window.tasks.filter(function(t){
-                    return getDateNum(t.startDate) > todayNum;
+                    return getSortStr(t.startDate) > todaySortStr; // เอาเฉพาะคิวที่ยังไม่ถึง
                 });
                 
-                // ✅ เรียงลำดับจากน้อยไปมาก (เอาตัวเลขลบกันตรงๆ ไม่มีทางพลาด)
+                // จัดเรียงคิวถัดไปด้วย localeCompare (ใช้ String YYYYMMDD เทียบกัน แม่นยำที่สุด)
                 upcomingTasksAll.sort(function(a,b){
-                    return getDateNum(a.startDate) - getDateNum(b.startDate);
+                    return getSortStr(a.startDate).localeCompare(getSortStr(b.startDate));
                 });
-                
                 const upcomingTasks = upcomingTasksAll.slice(0, 10);
 
                 let html = '';
@@ -510,22 +478,22 @@
                 
                 for(let i=0; i<first; i++) grid.innerHTML += '<div></div>';
                 for(let d=1; d<=total; d++) {
-                    let sm = m + 1; if(sm<10) sm='0'+sm;
-                    let sd = d; if(sd<10) sd='0'+sd;
+                    let sm = m + 1; sm = sm < 10 ? '0'+sm : sm;
+                    let sd = d; sd = sd < 10 ? '0'+sd : sd;
                     const dateKey = sm + '-' + sd;
-                    const fullDate = y + '-' + dateKey;
-                    const fullDateNum = getDateNum(fullDate);
+                    const fullDateStr = y + '-' + dateKey;
+                    const fullDateSortStr = getSortStr(fullDateStr);
                     
                     let hasTask = false;
                     for(let k=0; k<window.tasks.length; k++){
                         let t = window.tasks[k];
-                        const sNum = getDateNum(t.startDate);
-                        const eNum = t.endDate ? getDateNum(t.endDate) : sNum;
-                        if(fullDateNum >= sNum && fullDateNum <= eNum) { hasTask = true; break; }
+                        let sStr = getSortStr(t.startDate);
+                        let eStr = (t.endDate && t.endDate.trim()!=="") ? getSortStr(t.endDate) : sStr;
+                        if(fullDateSortStr >= sStr && fullDateSortStr <= eStr) { hasTask = true; break; }
                     }
                     
                     const h = holidays2026[dateKey];
-                    let btnHTML = '<button onclick="showDayTasks(\'' + fullDate + '\',\'' + (h||'') + '\')" class="h-12 flex flex-col items-center justify-center rounded-2xl hover:bg-blue-50 relative tap-effect border border-transparent hover:border-blue-100 transition-all">';
+                    let btnHTML = '<button onclick="showDayTasks(\'' + fullDateStr + '\',\'' + (h||'') + '\')" class="h-12 flex flex-col items-center justify-center rounded-2xl hover:bg-blue-50 relative tap-effect border border-transparent hover:border-blue-100 transition-all">';
                     btnHTML += '<span class="' + (h?'text-red-500 font-bold':'text-gray-700 font-medium') + ' text-sm">' + d + '</span>';
                     if(hasTask) btnHTML += '<div class="w-1.5 h-1.5 bg-main rounded-full mt-1"></div>';
                     btnHTML += '</button>';
@@ -536,16 +504,15 @@
             if (window.currentPage === 'tasks') {
                 const fullList = document.getElementById('fullTaskList');
                 
-                // ✅ จับตัวเลขลบกันเพียวๆ ไม่มีบั๊กแน่นอน
+                // ✅ จัดเรียงคิวทุกประเภทด้วยสูตร String Compare ล้วนๆ
                 const activeTasks = window.tasks.filter(function(t){return t.status === 'กำลังดำเนินการ';}).sort(function(a,b){
-                    return getDateNum(a.startDate) - getDateNum(b.startDate);
+                    return getSortStr(a.startDate).localeCompare(getSortStr(b.startDate)); // น้อยไปมาก
                 });
                 const pendingTasks = window.tasks.filter(function(t){return t.status === 'รอดำเนินการ';}).sort(function(a,b){
-                    return getDateNum(a.startDate) - getDateNum(b.startDate);
+                    return getSortStr(a.startDate).localeCompare(getSortStr(b.startDate)); // น้อยไปมาก
                 });
                 const doneTasks = window.tasks.filter(function(t){return t.status === 'เสร็จสิ้น';}).sort(function(a,b){
-                    // งานที่เสร็จแล้ว เรียงจากใหม่ไปเก่า (มากไปน้อย)
-                    return getDateNum(b.startDate) - getDateNum(a.startDate);
+                    return getSortStr(b.startDate).localeCompare(getSortStr(a.startDate)); // งานเสร็จเอาอันใหม่สุดขึ้น (มากไปน้อย)
                 }); 
 
                 function buildTaskGroup(title, icon, colorClass, badgeClass, tasksArr, isOpen) {
@@ -557,10 +524,9 @@
                     html += '<div class="p-5 pt-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 border-t border-gray-50 mt-2 pt-5">';
                     if(tasksArr.length > 0) {
                         for(let i=0; i<tasksArr.length; i++) {
-                            const sNum = getDateNum(tasksArr[i].startDate);
-                            const eNum = tasksArr[i].endDate ? getDateNum(tasksArr[i].endDate) : sNum;
-                            let isToday = (todayNum >= sNum && todayNum <= eNum);
-                            
+                            const sStr = getSortStr(tasksArr[i].startDate);
+                            const eStr = (tasksArr[i].endDate && tasksArr[i].endDate.trim() !== "") ? getSortStr(tasksArr[i].endDate) : sStr;
+                            let isToday = (todaySortStr >= sStr && todaySortStr <= eStr);
                             html += taskCardHTML(tasksArr[i], isToday);
                         }
                     } else {
@@ -581,24 +547,22 @@
             if (window.currentPage === 'contacts') renderContacts();
         }
 
-        function showDayTasks(date, h) {
+        function showDayTasks(dateStr, h) {
             const container = document.getElementById('selectedDateTasks');
-            const dateNum = getDateNum(date);
+            const targetSortStr = getSortStr(dateStr);
             
             const dayTasks = window.tasks.filter(function(t){
-                const sNum = getDateNum(t.startDate);
-                const eNum = t.endDate ? getDateNum(t.endDate) : sNum;
-                return dateNum >= sNum && dateNum <= eNum;
+                const sStr = getSortStr(t.startDate);
+                const eStr = (t.endDate && t.endDate.trim() !== "") ? getSortStr(t.endDate) : sStr;
+                return targetSortStr >= sStr && targetSortStr <= eStr;
             });
             
-            const thaiDate = formatThaiDate(date);
+            const dTarget = parseSafeDate(dateStr);
+            const days = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+            const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+            const thaiDate = days[dTarget.getDay()] + " " + dTarget.getDate() + " " + months[dTarget.getMonth()] + " " + (dTarget.getFullYear() + 543);
             
-            const d = new Date();
-            const yyyy = d.getFullYear();
-            let mm = d.getMonth() + 1; if(mm<10) mm='0'+mm;
-            let dd = d.getDate(); if(dd<10) dd='0'+dd;
-            const todayStr = yyyy + '-' + mm + '-' + dd;
-            const todayNum = getDateNum(todayStr);
+            const todaySortStr = getTodaySortStr();
             
             let head = '<div class="col-span-full p-4 bg-white rounded-[2rem] border border-gray-100 shadow-sm font-prompt text-center"><p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">วันที่เลือก</p><p class="font-black text-main text-xl">' + thaiDate + '</p>';
             if(h) head += '<div class="mt-3 inline-block bg-red-50 text-red-500 font-bold text-sm px-4 py-2 rounded-xl"><i class="fa-solid fa-flag mr-2"></i>วันหยุดราชการ: ' + h + '</div>';
@@ -607,10 +571,9 @@
             let bodyHTML = '';
             if(dayTasks.length > 0) {
                 for(let i=0; i<dayTasks.length; i++) {
-                    const sNum = getDateNum(dayTasks[i].startDate);
-                    const eNum = dayTasks[i].endDate ? getDateNum(dayTasks[i].endDate) : sNum;
-                    let isToday = (todayNum >= sNum && todayNum <= eNum);
-                    
+                    const sStr = getSortStr(dayTasks[i].startDate);
+                    const eStr = (dayTasks[i].endDate && dayTasks[i].endDate.trim() !== "") ? getSortStr(dayTasks[i].endDate) : sStr;
+                    let isToday = (todaySortStr >= sStr && todaySortStr <= eStr);
                     bodyHTML += taskCardHTML(dayTasks[i], isToday);
                 }
             } else {
