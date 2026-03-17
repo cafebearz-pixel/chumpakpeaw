@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบคิวงาน อบต. ชำผักแพว Online</title>
+
+    <meta name="apple-mobile-web-app-title" content="CPP Q">
+    <meta name="application-name" content="CPP Q">
+    <link rel="apple-touch-icon" href="https://drive.google.com/thumbnail?id=1KkCDCvXZThPoNsj7a8ST51V1Im91PioL&sz=w500">
+    <link rel="icon" href="https://drive.google.com/thumbnail?id=1KkCDCvXZThPoNsj7a8ST51V1Im91PioL&sz=w500">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -407,7 +415,7 @@
                 html += '<div class="mb-10"><h2 class="font-black text-main text-lg border-l-4 border-main pl-3 mb-4 uppercase tracking-widest">คิวงานวันนี้</h2>';
                 html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
                 if(todayTasks.length > 0) {
-                    for(let i=0; i<todayTasks.length; i++) html += taskCardHTML(todayTasks[i], true);
+                    for(let i=0; i<todayTasks.length; i++) html += taskCardHTML(todayTasks[i], true); 
                 } else {
                     html += '<div class="col-span-full bg-white rounded-[2rem] p-8 border border-dashed border-gray-200 text-center shadow-sm"><p class="text-gray-400 font-prompt"><i class="fa-regular fa-calendar-xmark text-3xl mb-3 block opacity-50"></i>ไม่มีคิวงานในวันนี้</p></div>';
                 }
@@ -416,7 +424,7 @@
                 html += '<div><h2 class="font-black text-blue-500 text-lg border-l-4 border-blue-500 pl-3 mb-4 uppercase tracking-widest">คิวงานวันถัดไป (10 คิวล่าสุด)</h2>';
                 html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
                 if(upcomingTasks.length > 0) {
-                    for(let i=0; i<upcomingTasks.length; i++) html += taskCardHTML(upcomingTasks[i], false);
+                    for(let i=0; i<upcomingTasks.length; i++) html += taskCardHTML(upcomingTasks[i], false); 
                 } else {
                     html += '<div class="col-span-full bg-white rounded-[2rem] p-8 border border-dashed border-gray-200 text-center shadow-sm"><p class="text-gray-400 font-prompt">ไม่มีคิวงานถัดไป</p></div>';
                 }
@@ -456,16 +464,13 @@
                 }
             }
 
-            // ✅ ฟังก์ชันใหม่: แบ่งหมวดหมู่คิวทั้งหมด
             if (window.currentPage === 'tasks') {
                 const fullList = document.getElementById('fullTaskList');
                 
-                // คัดกรองงานแต่ละประเภทและจัดเรียงวันที่
                 const activeTasks = window.tasks.filter(function(t){return t.status === 'กำลังดำเนินการ';}).sort(function(a,b){return a.startDate < b.startDate ? -1 : 1;});
                 const pendingTasks = window.tasks.filter(function(t){return t.status === 'รอดำเนินการ';}).sort(function(a,b){return a.startDate < b.startDate ? -1 : 1;});
-                const doneTasks = window.tasks.filter(function(t){return t.status === 'เสร็จสิ้น';}).sort(function(a,b){return a.startDate > b.startDate ? -1 : 1;}); // เสร็จสิ้นจัดเรียงจากใหม่ไปเก่า
+                const doneTasks = window.tasks.filter(function(t){return t.status === 'เสร็จสิ้น';}).sort(function(a,b){return a.startDate > b.startDate ? -1 : 1;}); 
 
-                // ฟังก์ชันสำหรับสร้างหมวดหมู่แบบกางออกได้ (Accordion)
                 function buildTaskGroup(title, icon, colorClass, badgeClass, tasksArr, isOpen) {
                     let html = '<details class="bg-white rounded-[2rem] shadow-sm border border-gray-100 mb-5 group" ' + (isOpen ? 'open' : '') + '>';
                     html += '<summary class="font-black text-main text-lg p-5 cursor-pointer list-none flex justify-between items-center tap-effect outline-none [&::-webkit-details-marker]:hidden">';
@@ -483,7 +488,6 @@
                 }
 
                 let html = '';
-                // สร้าง 3 หมวดหมู่ (ให้ 'กำลังทำ' กับ 'รอทำ' กางออก ส่วน 'เสร็จสิ้น' พับไว้)
                 html += buildTaskGroup('กำลังดำเนินการ', 'fa-solid fa-spinner', 'text-emerald-500', 'bg-emerald-50 text-emerald-600', activeTasks, true);
                 html += buildTaskGroup('รอดำเนินการ', 'fa-solid fa-clock-rotate-left', 'text-amber-500', 'bg-amber-50 text-amber-600', pendingTasks, true);
                 html += buildTaskGroup('เสร็จสิ้น', 'fa-solid fa-check-double', 'text-red-500', 'bg-red-50 text-red-600', doneTasks, false);
@@ -530,7 +534,6 @@
                 let list = [];
                 for(let j=0; j<window.contacts.length; j++){
                     let c = window.contacts[j];
-                    // ✅ อนุญาตให้ค้นหาจาก "ชื่อเล่น" ได้แล้ว
                     if(c.group === g && (c.name.indexOf(query) > -1 || c.role.indexOf(query) > -1 || (c.nickname && c.nickname.indexOf(query) > -1))) {
                         list.push(c);
                     }
@@ -563,7 +566,6 @@
             }
         }
 
-        // Utils & Form Actions
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         function prevMonth() { currentViewDate.setMonth(currentViewDate.getMonth()-1); renderAll(); }
