@@ -67,14 +67,15 @@
     <div id="app" class="max-w-6xl mx-auto bg-white min-h-screen shadow-2xl flex flex-col relative">
         
         <div class="sticky top-0 z-50 flex flex-col w-full shadow-md">
+            
             <header class="bg-main px-4 py-3 md:px-5 md:py-4 flex justify-between items-center text-white overflow-hidden">
                 <div class="flex items-center gap-2 md:gap-3 min-w-0">
                     <img src="https://drive.google.com/thumbnail?id=1pgip9WQ97-gztB2sYoGyTWRt7tlVtmnY&sz=w200" class="w-10 h-10 md:w-12 md:h-12 object-contain shrink-0">
                     <div class="flex flex-col min-w-0">
-                        <span class="font-black text-[16px] min-[375px]:text-[18px] sm:text-2xl tracking-tight sm:tracking-widest wave-text uppercase leading-none whitespace-nowrap">
+                        <span class="font-black text-[18px] min-[375px]:text-[20px] sm:text-2xl tracking-wide sm:tracking-widest wave-text uppercase leading-none whitespace-nowrap">
                             <span>C</span><span>H</span><span>U</span><span>M</span><span>P</span><span>A</span><span>K</span><span>P</span><span>A</span><span>E</span><span>W</span>
                         </span>
-                        <span class="text-[9px] min-[375px]:text-[10px] sm:text-sm font-medium opacity-90 leading-tight font-prompt mt-1 whitespace-nowrap">องค์การบริหารส่วนตำบลชำผักแพว</span>
+                        <span class="text-[10px] min-[375px]:text-[12px] sm:text-sm font-medium opacity-90 leading-tight font-prompt mt-1 whitespace-nowrap">องค์การบริหารส่วนตำบลชำผักแพว</span>
                     </div>
                 </div>
                 <button onclick="handleAdminToggle()" class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/10 flex items-center justify-center tap-effect border border-white/20 shrink-0 ml-2">
@@ -349,15 +350,28 @@
             }
         }
 
-        // ✅ แก้บั๊ก Safari: ป้องกัน Invalid Date โดยการแปลค่าเป็นเครื่องหมาย / ก่อนคำนวณ
+        // ✅ ฟังก์ชันถอดรหัสวันที่แบบปลอดภัย 100% แก้บั๊ก iPhone Safari อ่านวันที่ไม่ออก
+        function getSafeTime(dStr) {
+            if(!dStr) return 0;
+            var p = dStr.split('-');
+            if(p.length === 3) {
+                // บังคับแปลงเป็นตัวเลข ปี, เดือน, วัน (เดือนใน JS เริ่มจาก 0 เลยต้องลบ 1)
+                return new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2])).getTime();
+            }
+            return 0;
+        }
+
         function getDiffDays(startStr, endStr) {
-            const today = new Date(); today.setHours(0,0,0,0);
-            const start = new Date(startStr.replace(/-/g, '/')); start.setHours(0,0,0,0);
-            let end = start;
-            if(endStr) { end = new Date(endStr.replace(/-/g, '/')); end.setHours(0,0,0,0); }
+            const today = new Date(); 
+            today.setHours(0,0,0,0);
             
-            if(today >= start && today <= end) return 0;
-            return Math.ceil((start - today) / 86400000);
+            const start = new Date(getSafeTime(startStr));
+            let end = start;
+            if(endStr) end = new Date(getSafeTime(endStr));
+            
+            // ถ้าระยะเวลาปัจจุบัน อยู่ตรงกลางระหว่างวันเริ่ม-วันจบ พอดี ถือว่าเป็น "วันนี้ (0)"
+            if(today.getTime() >= start.getTime() && today.getTime() <= end.getTime()) return 0;
+            return Math.ceil((start.getTime() - today.getTime()) / 86400000);
         }
 
         function formatDateRangeThai(startStr, endStr) {
@@ -365,15 +379,17 @@
             const days = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
             const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
             
-            const d1 = new Date(startStr.replace(/-/g, '/'));
-            if(isNaN(d1.getTime())) return startStr;
+            var p1 = startStr.split('-');
+            if(p1.length !== 3) return startStr;
+            const d1 = new Date(parseInt(p1[0]), parseInt(p1[1]) - 1, parseInt(p1[2]));
 
             if(!endStr || startStr === endStr) {
                 return days[d1.getDay()] + " " + d1.getDate() + " " + months[d1.getMonth()] + " " + (d1.getFullYear() + 543);
             }
 
-            const d2 = new Date(endStr.replace(/-/g, '/'));
-            if(isNaN(d2.getTime())) return startStr + ' ถึง ' + endStr;
+            var p2 = endStr.split('-');
+            if(p2.length !== 3) return startStr + ' ถึง ' + endStr;
+            const d2 = new Date(parseInt(p2[0]), parseInt(p2[1]) - 1, parseInt(p2[2]));
 
             const y1 = d1.getFullYear() + 543;
             const y2 = d2.getFullYear() + 543;
@@ -397,8 +413,9 @@
             if(!dateStr) return '';
             const days = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
             const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
-            const d = new Date(dateStr.replace(/-/g, '/'));
-            if(isNaN(d.getTime())) return dateStr;
+            var p = dateStr.split('-');
+            if(p.length !== 3) return dateStr;
+            const d = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
             return days[d.getDay()] + " " + d.getDate() + " " + months[d.getMonth()] + " " + (d.getFullYear() + 543);
         }
 
@@ -436,25 +453,27 @@
             let mm = d.getMonth() + 1; if(mm<10) mm='0'+mm;
             let dd = d.getDate(); if(dd<10) dd='0'+dd;
             const todayStr = yyyy + '-' + mm + '-' + dd;
+            const todayTime = getSafeTime(todayStr); // แปลงวันนี้เป็นตัวเลข
 
             if (window.currentPage === 'dashboard') {
                 const dashContainer = document.getElementById('dashboardTaskList');
                 
                 const todayTasks = window.tasks.filter(function(t){
-                    if(!t.endDate || t.endDate === "") return t.startDate === todayStr;
-                    return todayStr >= t.startDate && todayStr <= t.endDate;
+                    const sTime = getSafeTime(t.startDate);
+                    const eTime = t.endDate ? getSafeTime(t.endDate) : sTime;
+                    // ตรวจสอบว่าวันนี้อยู่ในช่วงวันเริ่ม-วันจบหรือไม่
+                    return todayTime >= sTime && todayTime <= eTime;
                 });
                 
                 const upcomingTasksAll = window.tasks.filter(function(t){
-                    return t.startDate > todayStr;
+                    return getSafeTime(t.startDate) > todayTime;
                 });
                 
-                // ✅ บังคับเรียงวันที่แบบตัวอักษร ไอโฟนจะได้ไม่งง! (น้อยไปมาก)
+                // ✅ บังคับเรียงวันที่แบบตัวเลขล้วน (แก้บั๊ก 100%)
                 upcomingTasksAll.sort(function(a,b){
-                    if(a.startDate < b.startDate) return -1;
-                    if(a.startDate > b.startDate) return 1;
-                    return 0;
+                    return getSafeTime(a.startDate) - getSafeTime(b.startDate);
                 });
+                
                 const upcomingTasks = upcomingTasksAll.slice(0, 10);
 
                 let html = '';
@@ -495,15 +514,15 @@
                     let sd = d; if(sd<10) sd='0'+sd;
                     const dateKey = sm + '-' + sd;
                     const fullDate = y + '-' + dateKey;
+                    const fullDateTime = getSafeTime(fullDate);
                     
                     let hasTask = false;
                     for(let k=0; k<window.tasks.length; k++){
                         let t = window.tasks[k];
-                        if(!t.endDate || t.endDate === "") {
-                            if(t.startDate === fullDate) { hasTask = true; break; }
-                        } else {
-                            if(fullDate >= t.startDate && fullDate <= t.endDate) { hasTask = true; break; }
-                        }
+                        const sTime = getSafeTime(t.startDate);
+                        const eTime = t.endDate ? getSafeTime(t.endDate) : sTime;
+                        // แจ้งเตือนจุดในปฏิทิน ครอบคลุมตั้งแต่วันเริ่มจนถึงวันจบ
+                        if(fullDateTime >= sTime && fullDateTime <= eTime) { hasTask = true; break; }
                     }
                     
                     const h = holidays2026[dateKey];
@@ -518,22 +537,16 @@
             if (window.currentPage === 'tasks') {
                 const fullList = document.getElementById('fullTaskList');
                 
-                // ✅ แก้ไขเรียงวันที่ให้รองรับ iPhone (ใช้ string < > แทน)
+                // ✅ บังคับเรียงวันที่แบบตัวเลขล้วน (แก้บั๊ก Safari 100%)
                 const activeTasks = window.tasks.filter(function(t){return t.status === 'กำลังดำเนินการ';}).sort(function(a,b){
-                    if(a.startDate < b.startDate) return -1;
-                    if(a.startDate > b.startDate) return 1;
-                    return 0;
+                    return getSafeTime(a.startDate) - getSafeTime(b.startDate);
                 });
                 const pendingTasks = window.tasks.filter(function(t){return t.status === 'รอดำเนินการ';}).sort(function(a,b){
-                    if(a.startDate < b.startDate) return -1;
-                    if(a.startDate > b.startDate) return 1;
-                    return 0;
+                    return getSafeTime(a.startDate) - getSafeTime(b.startDate);
                 });
                 const doneTasks = window.tasks.filter(function(t){return t.status === 'เสร็จสิ้น';}).sort(function(a,b){
-                    // งานที่เสร็จแล้ว เอาอันใหม่ไว้บนสุด
-                    if(a.startDate > b.startDate) return -1;
-                    if(a.startDate < b.startDate) return 1;
-                    return 0;
+                    // งานที่เสร็จแล้ว เอาอันใหม่ไว้บนสุด (มากไปน้อย)
+                    return getSafeTime(b.startDate) - getSafeTime(a.startDate);
                 }); 
 
                 function buildTaskGroup(title, icon, colorClass, badgeClass, tasksArr, isOpen) {
@@ -545,9 +558,9 @@
                     html += '<div class="p-5 pt-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 border-t border-gray-50 mt-2 pt-5">';
                     if(tasksArr.length > 0) {
                         for(let i=0; i<tasksArr.length; i++) {
-                            let isToday = false;
-                            if(!tasksArr[i].endDate || tasksArr[i].endDate === "") isToday = (tasksArr[i].startDate === todayStr);
-                            else isToday = (todayStr >= tasksArr[i].startDate && todayStr <= tasksArr[i].endDate);
+                            const sTime = getSafeTime(tasksArr[i].startDate);
+                            const eTime = tasksArr[i].endDate ? getSafeTime(tasksArr[i].endDate) : sTime;
+                            let isToday = (todayTime >= sTime && todayTime <= eTime);
                             
                             html += taskCardHTML(tasksArr[i], isToday);
                         }
@@ -571,10 +584,12 @@
 
         function showDayTasks(date, h) {
             const container = document.getElementById('selectedDateTasks');
+            const dateTime = getSafeTime(date);
             
             const dayTasks = window.tasks.filter(function(t){
-                if(!t.endDate || t.endDate === "") return t.startDate === date;
-                return date >= t.startDate && date <= t.endDate;
+                const sTime = getSafeTime(t.startDate);
+                const eTime = t.endDate ? getSafeTime(t.endDate) : sTime;
+                return dateTime >= sTime && dateTime <= eTime;
             });
             
             const thaiDate = formatThaiDate(date);
@@ -584,6 +599,7 @@
             let mm = d.getMonth() + 1; if(mm<10) mm='0'+mm;
             let dd = d.getDate(); if(dd<10) dd='0'+dd;
             const todayStr = yyyy + '-' + mm + '-' + dd;
+            const todayTime = getSafeTime(todayStr);
             
             let head = '<div class="col-span-full p-4 bg-white rounded-[2rem] border border-gray-100 shadow-sm font-prompt text-center"><p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">วันที่เลือก</p><p class="font-black text-main text-xl">' + thaiDate + '</p>';
             if(h) head += '<div class="mt-3 inline-block bg-red-50 text-red-500 font-bold text-sm px-4 py-2 rounded-xl"><i class="fa-solid fa-flag mr-2"></i>วันหยุดราชการ: ' + h + '</div>';
@@ -592,9 +608,9 @@
             let bodyHTML = '';
             if(dayTasks.length > 0) {
                 for(let i=0; i<dayTasks.length; i++) {
-                    let isToday = false;
-                    if(!dayTasks[i].endDate || dayTasks[i].endDate === "") isToday = (dayTasks[i].startDate === todayStr);
-                    else isToday = (todayStr >= dayTasks[i].startDate && todayStr <= dayTasks[i].endDate);
+                    const sTime = getSafeTime(dayTasks[i].startDate);
+                    const eTime = dayTasks[i].endDate ? getSafeTime(dayTasks[i].endDate) : sTime;
+                    let isToday = (todayTime >= sTime && todayTime <= eTime);
                     
                     bodyHTML += taskCardHTML(dayTasks[i], isToday);
                 }
