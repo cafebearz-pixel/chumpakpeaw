@@ -71,10 +71,10 @@
                 <div class="flex items-center gap-3">
                     <img src="https://drive.google.com/thumbnail?id=1pgip9WQ97-gztB2sYoGyTWRt7tlVtmnY&sz=w200" class="w-12 h-12 object-contain">
                     <div class="flex flex-col">
-                        <span class="font-black text-2xl tracking-widest wave-text uppercase leading-none">
+                        <span class="font-black text-xl sm:text-2xl tracking-wide sm:tracking-widest wave-text uppercase leading-none">
                             <span>C</span><span>H</span><span>U</span><span>M</span><span>P</span><span>A</span><span>K</span><span>P</span><span>A</span><span>E</span><span>W</span>
                         </span>
-                        <span class="text-sm font-medium opacity-90 leading-tight font-prompt mt-1">องค์การบริหารส่วนตำบลชำผักแพว</span>
+                        <span class="text-xs sm:text-sm font-medium opacity-90 leading-tight font-prompt mt-1">องค์การบริหารส่วนตำบลชำผักแพว</span>
                     </div>
                 </div>
                 <button onclick="handleAdminToggle()" class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center tap-effect border border-white/20">
@@ -270,7 +270,7 @@
     </div>
 
     <script>
-        const holidays2026 = { "01-01": "วันขึ้นปีใหม่", "03-03": "วันมาฆบูชา", "04-06": "วันจักรี", "04-13": "วันสงกรานต์", "04-14": "วันสงกรานต์", "04-15": "วันสงกรานต์", "05-01": "วันแรงงานแห่งชาติ", "05-04": "วันฉัตรมงคล", "05-11": "วันพืชมงคลฯ", "05-31": "วันวิสาขบูชา", "06-01": "ชดเชยวันวิสาขบูชา", "06-03": "วันเฉลิมฯ พระราชินี", "07-28": "วันเฉลิมฯ ร.10", "07-29": "วันอาสาฬหบูชา", "07-30": "วันเข้าพรรษา", "08-12": "วันแม่แห่งชาติ", "10-13": "วันนวมินทรมหาราช", "10-23": "วันปิยมหาราช", "10-26": "วันออกพรรษา", "12-05": "วันพ่อแห่งชาติ", "12-07": "ชดเชยวันพ่อแห่งชาติ", "12-10": "วันรัฐธรรมนูญ", "12-31": "วันสิ้นปี" };
+        const holidays2026 = { "01-01": "วันขึ้นปีใหม่", "03-03": "วันมาฆบูชา", "04-06": "วันจักรี", "04-13": "วันสงกรานต์", "04-14": "วันสงกรานต์", "04-15": "วันสงกรานต์", "05-01": "วันแรงงานแห่งชาติ", "05-04": "วันฉัตรมonkol", "05-11": "วันพืชมงคลฯ", "05-31": "วันวิสาขบูชา", "06-01": "ชดเชยวันวิสาขบูชา", "06-03": "วันเฉลิมฯ พระราชินี", "07-28": "วันเฉลิมฯ ร.10", "07-29": "วันอาสาฬหบูชา", "07-30": "วันเข้าพรรษา", "08-12": "วันแม่แห่งชาติ", "10-13": "วันนวมินทรมหาราช", "10-23": "วันปิยมหาราช", "10-26": "วันออกพรรษา", "12-05": "วันพ่อแห่งชาติ", "12-07": "ชดเชยวันพ่อแห่งชาติ", "12-10": "วันรัฐธรรมนูญ", "12-31": "วันสิ้นปี" };
 
         window.tasks = []; 
         window.contacts = []; 
@@ -566,6 +566,7 @@
             }
         }
 
+        // Utils & Form Actions
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         function prevMonth() { currentViewDate.setMonth(currentViewDate.getMonth()-1); renderAll(); }
