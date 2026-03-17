@@ -350,26 +350,27 @@
             }
         }
 
-        // ✅ ฟังก์ชันถอดรหัสวันที่แบบปลอดภัย 100% แก้บั๊ก iPhone Safari อ่านวันที่ไม่ออก
-        function getSafeTime(dStr) {
-            if(!dStr) return 0;
-            var p = dStr.split('-');
-            if(p.length === 3) {
-                // บังคับแปลงเป็นตัวเลข ปี, เดือน, วัน (เดือนใน JS เริ่มจาก 0 เลยต้องลบ 1)
-                return new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2])).getTime();
-            }
-            return 0;
+        // ✅ ฟังก์ชันใหม่ 100%: แปลงวันที่เป็น "ตัวเลขล้วน" (ไม่มีทางเพี้ยนใน iPhone)
+        // เช่น "2026-03-30" จะกลายเป็น 20260330 
+        function getDateNum(dStr) {
+            if(!dStr) return 99999999; // ถ้าไม่มีวันที่ ให้ไปอยู่ท้ายสุด
+            return parseInt(dStr.replace(/-/g, ''), 10);
         }
 
         function getDiffDays(startStr, endStr) {
+            if(!startStr) return 0;
             const today = new Date(); 
             today.setHours(0,0,0,0);
             
-            const start = new Date(getSafeTime(startStr));
-            let end = start;
-            if(endStr) end = new Date(getSafeTime(endStr));
+            var p1 = startStr.split('-');
+            const start = new Date(parseInt(p1[0]), parseInt(p1[1])-1, parseInt(p1[2]));
             
-            // ถ้าระยะเวลาปัจจุบัน อยู่ตรงกลางระหว่างวันเริ่ม-วันจบ พอดี ถือว่าเป็น "วันนี้ (0)"
+            let end = start;
+            if(endStr) {
+                var p2 = endStr.split('-');
+                end = new Date(parseInt(p2[0]), parseInt(p2[1])-1, parseInt(p2[2]));
+            }
+            
             if(today.getTime() >= start.getTime() && today.getTime() <= end.getTime()) return 0;
             return Math.ceil((start.getTime() - today.getTime()) / 86400000);
         }
@@ -453,25 +454,24 @@
             let mm = d.getMonth() + 1; if(mm<10) mm='0'+mm;
             let dd = d.getDate(); if(dd<10) dd='0'+dd;
             const todayStr = yyyy + '-' + mm + '-' + dd;
-            const todayTime = getSafeTime(todayStr); // แปลงวันนี้เป็นตัวเลข
+            const todayNum = getDateNum(todayStr); // ค่าตัวเลขของวันนี้
 
             if (window.currentPage === 'dashboard') {
                 const dashContainer = document.getElementById('dashboardTaskList');
                 
                 const todayTasks = window.tasks.filter(function(t){
-                    const sTime = getSafeTime(t.startDate);
-                    const eTime = t.endDate ? getSafeTime(t.endDate) : sTime;
-                    // ตรวจสอบว่าวันนี้อยู่ในช่วงวันเริ่ม-วันจบหรือไม่
-                    return todayTime >= sTime && todayTime <= eTime;
+                    const sNum = getDateNum(t.startDate);
+                    const eNum = t.endDate ? getDateNum(t.endDate) : sNum;
+                    return todayNum >= sNum && todayNum <= eNum;
                 });
                 
                 const upcomingTasksAll = window.tasks.filter(function(t){
-                    return getSafeTime(t.startDate) > todayTime;
+                    return getDateNum(t.startDate) > todayNum;
                 });
                 
-                // ✅ บังคับเรียงวันที่แบบตัวเลขล้วน (แก้บั๊ก 100%)
+                // ✅ เรียงลำดับจากน้อยไปมาก (เอาตัวเลขลบกันตรงๆ ไม่มีทางพลาด)
                 upcomingTasksAll.sort(function(a,b){
-                    return getSafeTime(a.startDate) - getSafeTime(b.startDate);
+                    return getDateNum(a.startDate) - getDateNum(b.startDate);
                 });
                 
                 const upcomingTasks = upcomingTasksAll.slice(0, 10);
@@ -514,15 +514,14 @@
                     let sd = d; if(sd<10) sd='0'+sd;
                     const dateKey = sm + '-' + sd;
                     const fullDate = y + '-' + dateKey;
-                    const fullDateTime = getSafeTime(fullDate);
+                    const fullDateNum = getDateNum(fullDate);
                     
                     let hasTask = false;
                     for(let k=0; k<window.tasks.length; k++){
                         let t = window.tasks[k];
-                        const sTime = getSafeTime(t.startDate);
-                        const eTime = t.endDate ? getSafeTime(t.endDate) : sTime;
-                        // แจ้งเตือนจุดในปฏิทิน ครอบคลุมตั้งแต่วันเริ่มจนถึงวันจบ
-                        if(fullDateTime >= sTime && fullDateTime <= eTime) { hasTask = true; break; }
+                        const sNum = getDateNum(t.startDate);
+                        const eNum = t.endDate ? getDateNum(t.endDate) : sNum;
+                        if(fullDateNum >= sNum && fullDateNum <= eNum) { hasTask = true; break; }
                     }
                     
                     const h = holidays2026[dateKey];
@@ -537,16 +536,16 @@
             if (window.currentPage === 'tasks') {
                 const fullList = document.getElementById('fullTaskList');
                 
-                // ✅ บังคับเรียงวันที่แบบตัวเลขล้วน (แก้บั๊ก Safari 100%)
+                // ✅ จับตัวเลขลบกันเพียวๆ ไม่มีบั๊กแน่นอน
                 const activeTasks = window.tasks.filter(function(t){return t.status === 'กำลังดำเนินการ';}).sort(function(a,b){
-                    return getSafeTime(a.startDate) - getSafeTime(b.startDate);
+                    return getDateNum(a.startDate) - getDateNum(b.startDate);
                 });
                 const pendingTasks = window.tasks.filter(function(t){return t.status === 'รอดำเนินการ';}).sort(function(a,b){
-                    return getSafeTime(a.startDate) - getSafeTime(b.startDate);
+                    return getDateNum(a.startDate) - getDateNum(b.startDate);
                 });
                 const doneTasks = window.tasks.filter(function(t){return t.status === 'เสร็จสิ้น';}).sort(function(a,b){
-                    // งานที่เสร็จแล้ว เอาอันใหม่ไว้บนสุด (มากไปน้อย)
-                    return getSafeTime(b.startDate) - getSafeTime(a.startDate);
+                    // งานที่เสร็จแล้ว เรียงจากใหม่ไปเก่า (มากไปน้อย)
+                    return getDateNum(b.startDate) - getDateNum(a.startDate);
                 }); 
 
                 function buildTaskGroup(title, icon, colorClass, badgeClass, tasksArr, isOpen) {
@@ -558,9 +557,9 @@
                     html += '<div class="p-5 pt-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 border-t border-gray-50 mt-2 pt-5">';
                     if(tasksArr.length > 0) {
                         for(let i=0; i<tasksArr.length; i++) {
-                            const sTime = getSafeTime(tasksArr[i].startDate);
-                            const eTime = tasksArr[i].endDate ? getSafeTime(tasksArr[i].endDate) : sTime;
-                            let isToday = (todayTime >= sTime && todayTime <= eTime);
+                            const sNum = getDateNum(tasksArr[i].startDate);
+                            const eNum = tasksArr[i].endDate ? getDateNum(tasksArr[i].endDate) : sNum;
+                            let isToday = (todayNum >= sNum && todayNum <= eNum);
                             
                             html += taskCardHTML(tasksArr[i], isToday);
                         }
@@ -584,12 +583,12 @@
 
         function showDayTasks(date, h) {
             const container = document.getElementById('selectedDateTasks');
-            const dateTime = getSafeTime(date);
+            const dateNum = getDateNum(date);
             
             const dayTasks = window.tasks.filter(function(t){
-                const sTime = getSafeTime(t.startDate);
-                const eTime = t.endDate ? getSafeTime(t.endDate) : sTime;
-                return dateTime >= sTime && dateTime <= eTime;
+                const sNum = getDateNum(t.startDate);
+                const eNum = t.endDate ? getDateNum(t.endDate) : sNum;
+                return dateNum >= sNum && dateNum <= eNum;
             });
             
             const thaiDate = formatThaiDate(date);
@@ -599,7 +598,7 @@
             let mm = d.getMonth() + 1; if(mm<10) mm='0'+mm;
             let dd = d.getDate(); if(dd<10) dd='0'+dd;
             const todayStr = yyyy + '-' + mm + '-' + dd;
-            const todayTime = getSafeTime(todayStr);
+            const todayNum = getDateNum(todayStr);
             
             let head = '<div class="col-span-full p-4 bg-white rounded-[2rem] border border-gray-100 shadow-sm font-prompt text-center"><p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">วันที่เลือก</p><p class="font-black text-main text-xl">' + thaiDate + '</p>';
             if(h) head += '<div class="mt-3 inline-block bg-red-50 text-red-500 font-bold text-sm px-4 py-2 rounded-xl"><i class="fa-solid fa-flag mr-2"></i>วันหยุดราชการ: ' + h + '</div>';
@@ -608,9 +607,9 @@
             let bodyHTML = '';
             if(dayTasks.length > 0) {
                 for(let i=0; i<dayTasks.length; i++) {
-                    const sTime = getSafeTime(dayTasks[i].startDate);
-                    const eTime = dayTasks[i].endDate ? getSafeTime(dayTasks[i].endDate) : sTime;
-                    let isToday = (todayTime >= sTime && todayTime <= eTime);
+                    const sNum = getDateNum(dayTasks[i].startDate);
+                    const eNum = dayTasks[i].endDate ? getDateNum(dayTasks[i].endDate) : sNum;
+                    let isToday = (todayNum >= sNum && todayNum <= eNum);
                     
                     bodyHTML += taskCardHTML(dayTasks[i], isToday);
                 }
