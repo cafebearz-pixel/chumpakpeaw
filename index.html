@@ -67,18 +67,18 @@
     <div id="app" class="max-w-6xl mx-auto bg-white min-h-screen shadow-2xl flex flex-col relative">
         
         <div class="sticky top-0 z-50 flex flex-col w-full shadow-md">
-            <header class="bg-main px-5 py-4 flex justify-between items-center text-white">
-                <div class="flex items-center gap-3">
-                    <img src="https://drive.google.com/thumbnail?id=1pgip9WQ97-gztB2sYoGyTWRt7tlVtmnY&sz=w200" class="w-12 h-12 object-contain">
-                    <div class="flex flex-col">
-                        <span class="font-black text-xl sm:text-2xl tracking-wide sm:tracking-widest wave-text uppercase leading-none">
+            <header class="bg-main px-4 py-3 md:px-5 md:py-4 flex justify-between items-center text-white overflow-hidden">
+                <div class="flex items-center gap-2 md:gap-3 min-w-0">
+                    <img src="https://drive.google.com/thumbnail?id=1pgip9WQ97-gztB2sYoGyTWRt7tlVtmnY&sz=w200" class="w-10 h-10 md:w-12 md:h-12 object-contain shrink-0">
+                    <div class="flex flex-col min-w-0">
+                        <span class="font-black text-[16px] min-[375px]:text-[18px] sm:text-2xl tracking-tight sm:tracking-widest wave-text uppercase leading-none whitespace-nowrap">
                             <span>C</span><span>H</span><span>U</span><span>M</span><span>P</span><span>A</span><span>K</span><span>P</span><span>A</span><span>E</span><span>W</span>
                         </span>
-                        <span class="text-xs sm:text-sm font-medium opacity-90 leading-tight font-prompt mt-1">องค์การบริหารส่วนตำบลชำผักแพว</span>
+                        <span class="text-[9px] min-[375px]:text-[10px] sm:text-sm font-medium opacity-90 leading-tight font-prompt mt-1 whitespace-nowrap">องค์การบริหารส่วนตำบลชำผักแพว</span>
                     </div>
                 </div>
-                <button onclick="handleAdminToggle()" class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center tap-effect border border-white/20">
-                    <i id="adminIcon" class="fa-solid fa-user-shield text-lg"></i>
+                <button onclick="handleAdminToggle()" class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/10 flex items-center justify-center tap-effect border border-white/20 shrink-0 ml-2">
+                    <i id="adminIcon" class="fa-solid fa-user-shield text-base md:text-lg"></i>
                 </button>
             </header>
 
@@ -349,26 +349,30 @@
             }
         }
 
-        function getDiffDays(dateString) {
+        // ✅ แก้บั๊ก Safari: ป้องกัน Invalid Date โดยการแปลค่าเป็นเครื่องหมาย / ก่อนคำนวณ
+        function getDiffDays(startStr, endStr) {
             const today = new Date(); today.setHours(0,0,0,0);
-            const target = new Date(dateString); target.setHours(0,0,0,0);
-            return Math.ceil((target - today) / 86400000);
+            const start = new Date(startStr.replace(/-/g, '/')); start.setHours(0,0,0,0);
+            let end = start;
+            if(endStr) { end = new Date(endStr.replace(/-/g, '/')); end.setHours(0,0,0,0); }
+            
+            if(today >= start && today <= end) return 0;
+            return Math.ceil((start - today) / 86400000);
         }
 
-        // ✅ ฟังก์ชันแก้ไขการจัดเรียงวันที่แบบไอโฟนไม่รวน
         function formatDateRangeThai(startStr, endStr) {
             if(!startStr) return '';
             const days = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
             const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
             
-            const d1 = new Date(startStr);
+            const d1 = new Date(startStr.replace(/-/g, '/'));
             if(isNaN(d1.getTime())) return startStr;
 
             if(!endStr || startStr === endStr) {
                 return days[d1.getDay()] + " " + d1.getDate() + " " + months[d1.getMonth()] + " " + (d1.getFullYear() + 543);
             }
 
-            const d2 = new Date(endStr);
+            const d2 = new Date(endStr.replace(/-/g, '/'));
             if(isNaN(d2.getTime())) return startStr + ' ถึง ' + endStr;
 
             const y1 = d1.getFullYear() + 543;
@@ -393,13 +397,13 @@
             if(!dateStr) return '';
             const days = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
             const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
-            const d = new Date(dateStr);
+            const d = new Date(dateStr.replace(/-/g, '/'));
             if(isNaN(d.getTime())) return dateStr;
             return days[d.getDay()] + " " + d.getDate() + " " + months[d.getMonth()] + " " + (d.getFullYear() + 543);
         }
 
         function taskCardHTML(t, isTodayTask) {
-            const diff = getDiffDays(t.startDate);
+            const diff = getDiffDays(t.startDate, t.endDate);
             let countdown = '';
             if(diff === 0) countdown = '<div class="absolute -top-3 -right-2 bg-red-600 text-white text-[11px] font-black px-3 py-1.5 rounded-full animate-countdown shadow-lg">วันนี้!</div>';
             else if(diff > 0 && diff <= 10) countdown = '<div class="absolute -top-3 -right-2 bg-orange-500 text-white text-[11px] font-black px-3 py-1.5 rounded-full animate-countdown shadow-lg">อีก ' + diff + ' วันจะถึงงาน</div>';
@@ -444,11 +448,12 @@
                 const upcomingTasksAll = window.tasks.filter(function(t){
                     return t.startDate > todayStr;
                 });
-                // ✅ แก้ไขฟังก์ชัน sort ให้ return -1, 0, 1 อย่างชัดเจนเพื่อแก้บั๊ก Safari
+                
+                // ✅ บังคับเรียงวันที่แบบตัวอักษร ไอโฟนจะได้ไม่งง! (น้อยไปมาก)
                 upcomingTasksAll.sort(function(a,b){
-                    let dA = new Date(a.startDate).getTime();
-                    let dB = new Date(b.startDate).getTime();
-                    return dA - dB;
+                    if(a.startDate < b.startDate) return -1;
+                    if(a.startDate > b.startDate) return 1;
+                    return 0;
                 });
                 const upcomingTasks = upcomingTasksAll.slice(0, 10);
 
@@ -513,10 +518,23 @@
             if (window.currentPage === 'tasks') {
                 const fullList = document.getElementById('fullTaskList');
                 
-                // ✅ แก้ไขฟังก์ชัน sort ให้ return -1, 0, 1 อย่างชัดเจนเพื่อแก้บั๊ก Safari
-                const activeTasks = window.tasks.filter(function(t){return t.status === 'กำลังดำเนินการ';}).sort(function(a,b){return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();});
-                const pendingTasks = window.tasks.filter(function(t){return t.status === 'รอดำเนินการ';}).sort(function(a,b){return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();});
-                const doneTasks = window.tasks.filter(function(t){return t.status === 'เสร็จสิ้น';}).sort(function(a,b){return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();}); // เสร็จสิ้นจัดเรียงจากใหม่ไปเก่า
+                // ✅ แก้ไขเรียงวันที่ให้รองรับ iPhone (ใช้ string < > แทน)
+                const activeTasks = window.tasks.filter(function(t){return t.status === 'กำลังดำเนินการ';}).sort(function(a,b){
+                    if(a.startDate < b.startDate) return -1;
+                    if(a.startDate > b.startDate) return 1;
+                    return 0;
+                });
+                const pendingTasks = window.tasks.filter(function(t){return t.status === 'รอดำเนินการ';}).sort(function(a,b){
+                    if(a.startDate < b.startDate) return -1;
+                    if(a.startDate > b.startDate) return 1;
+                    return 0;
+                });
+                const doneTasks = window.tasks.filter(function(t){return t.status === 'เสร็จสิ้น';}).sort(function(a,b){
+                    // งานที่เสร็จแล้ว เอาอันใหม่ไว้บนสุด
+                    if(a.startDate > b.startDate) return -1;
+                    if(a.startDate < b.startDate) return 1;
+                    return 0;
+                }); 
 
                 function buildTaskGroup(title, icon, colorClass, badgeClass, tasksArr, isOpen) {
                     let html = '<details class="bg-white rounded-[2rem] shadow-sm border border-gray-100 mb-5 group" ' + (isOpen ? 'open' : '') + '>';
