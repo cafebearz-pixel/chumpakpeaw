@@ -349,17 +349,13 @@
             }
         }
 
-        function getDiffDays(startStr, endStr) {
+        function getDiffDays(dateString) {
             const today = new Date(); today.setHours(0,0,0,0);
-            const start = new Date(startStr); start.setHours(0,0,0,0);
-            let end = start;
-            if(endStr) { end = new Date(endStr); end.setHours(0,0,0,0); }
-            
-            if(today >= start && today <= end) return 0; // ถือว่าเป็น "วันนี้" ตลอดช่วงวันเชื่อม
-            return Math.ceil((start - today) / 86400000);
+            const target = new Date(dateString); target.setHours(0,0,0,0);
+            return Math.ceil((target - today) / 86400000);
         }
 
-        // ✅ ฟังก์ชันจัดรูปแบบวันที่แบบช่วง (วันเชื่อม)
+        // ✅ ฟังก์ชันแก้ไขการจัดเรียงวันที่แบบไอโฟนไม่รวน
         function formatDateRangeThai(startStr, endStr) {
             if(!startStr) return '';
             const days = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
@@ -403,7 +399,7 @@
         }
 
         function taskCardHTML(t, isTodayTask) {
-            const diff = getDiffDays(t.startDate, t.endDate);
+            const diff = getDiffDays(t.startDate);
             let countdown = '';
             if(diff === 0) countdown = '<div class="absolute -top-3 -right-2 bg-red-600 text-white text-[11px] font-black px-3 py-1.5 rounded-full animate-countdown shadow-lg">วันนี้!</div>';
             else if(diff > 0 && diff <= 10) countdown = '<div class="absolute -top-3 -right-2 bg-orange-500 text-white text-[11px] font-black px-3 py-1.5 rounded-full animate-countdown shadow-lg">อีก ' + diff + ' วันจะถึงงาน</div>';
@@ -413,7 +409,6 @@
             html += '<div class="flex justify-between items-center mb-4"><span class="bg-blue-50 text-main px-3 py-1.5 rounded-xl text-sm font-bold"><i class="fa-regular fa-clock mr-1"></i>' + (t.startTime||'ไม่ระบุเวลา') + '</span><span class="text-[10px] border px-2 py-1 rounded-lg uppercase text-gray-400 font-bold">' + t.status + '</span></div>';
             html += '<h4 class="font-bold text-xl leading-tight mb-4 text-gray-800">' + t.title + '</h4>';
             html += '<div class="text-sm text-gray-500 space-y-2">';
-            // ✅ เปลี่ยนมาใช้ฟังก์ชันวันเชื่อมตรงนี้
             html += '<p><i class="fa-solid fa-calendar-day mr-2 text-main w-4"></i><span class="font-medium">' + formatDateRangeThai(t.startDate, t.endDate) + '</span></p>';
             html += '<p><i class="fa-solid fa-location-dot mr-2 text-main w-4"></i>' + (t.loc||'-') + '</p>';
             html += '<p><i class="fa-solid fa-shirt mr-2 text-main w-4"></i>การแต่งกาย: ' + (t.dress||'-') + '</p>';
@@ -441,7 +436,6 @@
             if (window.currentPage === 'dashboard') {
                 const dashContainer = document.getElementById('dashboardTaskList');
                 
-                // ✅ แก้ไขให้เช็คงานที่คร่อม "วันนี้" (วันเชื่อม) ให้ขึ้นโชว์ด้วย
                 const todayTasks = window.tasks.filter(function(t){
                     if(!t.endDate || t.endDate === "") return t.startDate === todayStr;
                     return todayStr >= t.startDate && todayStr <= t.endDate;
@@ -450,10 +444,11 @@
                 const upcomingTasksAll = window.tasks.filter(function(t){
                     return t.startDate > todayStr;
                 });
+                // ✅ แก้ไขฟังก์ชัน sort ให้ return -1, 0, 1 อย่างชัดเจนเพื่อแก้บั๊ก Safari
                 upcomingTasksAll.sort(function(a,b){
-                    if(a.startDate < b.startDate) return -1;
-                    if(a.startDate > b.startDate) return 1;
-                    return 0;
+                    let dA = new Date(a.startDate).getTime();
+                    let dB = new Date(b.startDate).getTime();
+                    return dA - dB;
                 });
                 const upcomingTasks = upcomingTasksAll.slice(0, 10);
 
@@ -499,7 +494,6 @@
                     let hasTask = false;
                     for(let k=0; k<window.tasks.length; k++){
                         let t = window.tasks[k];
-                        // ✅ จุดแจ้งเตือนในปฏิทิน ต้องแสดงทุกวันที่คาบเกี่ยวกัน
                         if(!t.endDate || t.endDate === "") {
                             if(t.startDate === fullDate) { hasTask = true; break; }
                         } else {
@@ -519,9 +513,10 @@
             if (window.currentPage === 'tasks') {
                 const fullList = document.getElementById('fullTaskList');
                 
-                const activeTasks = window.tasks.filter(function(t){return t.status === 'กำลังดำเนินการ';}).sort(function(a,b){return a.startDate < b.startDate ? -1 : 1;});
-                const pendingTasks = window.tasks.filter(function(t){return t.status === 'รอดำเนินการ';}).sort(function(a,b){return a.startDate < b.startDate ? -1 : 1;});
-                const doneTasks = window.tasks.filter(function(t){return t.status === 'เสร็จสิ้น';}).sort(function(a,b){return a.startDate > b.startDate ? -1 : 1;}); 
+                // ✅ แก้ไขฟังก์ชัน sort ให้ return -1, 0, 1 อย่างชัดเจนเพื่อแก้บั๊ก Safari
+                const activeTasks = window.tasks.filter(function(t){return t.status === 'กำลังดำเนินการ';}).sort(function(a,b){return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();});
+                const pendingTasks = window.tasks.filter(function(t){return t.status === 'รอดำเนินการ';}).sort(function(a,b){return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();});
+                const doneTasks = window.tasks.filter(function(t){return t.status === 'เสร็จสิ้น';}).sort(function(a,b){return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();}); // เสร็จสิ้นจัดเรียงจากใหม่ไปเก่า
 
                 function buildTaskGroup(title, icon, colorClass, badgeClass, tasksArr, isOpen) {
                     let html = '<details class="bg-white rounded-[2rem] shadow-sm border border-gray-100 mb-5 group" ' + (isOpen ? 'open' : '') + '>';
@@ -532,7 +527,6 @@
                     html += '<div class="p-5 pt-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 border-t border-gray-50 mt-2 pt-5">';
                     if(tasksArr.length > 0) {
                         for(let i=0; i<tasksArr.length; i++) {
-                            // ✅ ประเมินค่าว่างานนี้เป็นของวันนี้หรือไม่ เพื่อให้มันเด้ง
                             let isToday = false;
                             if(!tasksArr[i].endDate || tasksArr[i].endDate === "") isToday = (tasksArr[i].startDate === todayStr);
                             else isToday = (todayStr >= tasksArr[i].startDate && todayStr <= tasksArr[i].endDate);
@@ -560,7 +554,6 @@
         function showDayTasks(date, h) {
             const container = document.getElementById('selectedDateTasks');
             
-            // ✅ ดึงงานเฉพาะวันที่กด (รวมงานวันเชื่อมด้วย)
             const dayTasks = window.tasks.filter(function(t){
                 if(!t.endDate || t.endDate === "") return t.startDate === date;
                 return date >= t.startDate && date <= t.endDate;
