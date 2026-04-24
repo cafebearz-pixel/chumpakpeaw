@@ -60,6 +60,31 @@
             position: relative; overflow: hidden;
         }
         .glass-stat-card .bg-icon { position: absolute; bottom: -20px; right: -15px; font-size: 90px; opacity: 0.08; transform: rotate(-15deg); }
+
+        /* สถานะคิวงานให้ใหญ่และเด่นขึ้น */
+        .status-badge {
+            font-size: 14px !important;
+            font-weight: 900 !important;
+            padding: 8px 14px !important;
+            border-radius: 999px !important;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+            white-space: nowrap;
+        }
+        .status-active {
+            background: #dcfce7;
+            color: #15803d;
+            border: 2px solid #86efac;
+        }
+        .status-pending {
+            background: #fef3c7;
+            color: #b45309;
+            border: 2px solid #fcd34d;
+        }
+        .status-done {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 2px solid #fca5a5;
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -127,11 +152,6 @@
                     </div>
                 </div>
 
-                <div class="relative">
-                    <input type="text" id="dashboardTaskSearch" onkeyup="renderAll()" placeholder="ค้นหาชื่องาน หรือ ภารกิจ..." class="w-full p-4 pl-12 bg-white rounded-2xl shadow-md border-none outline-none focus:ring-2 focus:ring-main font-prompt">
-                    <i class="fa-solid fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-300"></i>
-                </div>
-
                 <div id="dashboardTaskList" class="w-full">
                     <div class="py-12 text-center text-gray-400 font-prompt">
                         <i class="fa-solid fa-spinner animate-spin text-3xl mb-3 text-main"></i>
@@ -157,12 +177,6 @@
 
             <div id="page-tasks" class="hidden space-y-6">
                 <h2 class="font-black text-main text-lg border-l-4 border-blue-500 pl-3 uppercase mb-4">สถานะคิวทั้งหมด</h2>
-                
-                <div class="relative mb-6">
-                    <input type="text" id="taskSearch" onkeyup="renderAll()" placeholder="ค้นหาชื่องาน หรือ ภารกิจ..." class="w-full p-4 pl-12 bg-white rounded-2xl shadow-md border-none outline-none focus:ring-2 focus:ring-main font-prompt">
-                    <i class="fa-solid fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-300"></i>
-                </div>
-
                 <div id="fullTaskList" class="w-full"></div>
             </div>
 
@@ -273,9 +287,10 @@
         <div class="bg-white w-full max-w-xs rounded-[2.5rem] p-8 text-center border-t-8 border-emerald-500 shadow-2xl">
             <h3 class="mb-6 text-main leading-tight font-black text-xl">อัปเดตสถานะนายก</h3>
             <div class="grid gap-3">
-                <button onclick="updateMayorStatus('อยู่อบต./ห้องทำงาน', 'bg-green-500')" class="p-4 bg-green-50 text-green-700 font-bold rounded-2xl tap-effect hover:bg-green-100 text-lg border border-green-100">🟢 อยู่อบต.</button>
+                <button onclick="updateMayorStatus('อยู่อบต.', 'bg-green-500')" class="p-4 bg-green-50 text-green-700 font-bold rounded-2xl tap-effect hover:bg-green-100 text-lg border border-green-100">🟢 อยู่อบต.</button>
                 <button onclick="updateMayorStatus('ลงพื้นที่/ติดภารกิจ', 'bg-amber-500')" class="p-4 bg-amber-50 text-amber-700 font-bold rounded-2xl tap-effect hover:bg-amber-100 text-lg border border-amber-100">🟡 ลงพื้นที่</button>
                 <button onclick="updateMayorStatus('ไม่อยู่อบต.', 'bg-red-500')" class="p-4 bg-red-50 text-red-700 font-bold rounded-2xl tap-effect hover:bg-red-100 text-lg border border-red-100">🔴 ไม่อยู่อบต.</button>
+                <button onclick="resetMayorStatusAuto()" class="p-4 bg-blue-50 text-blue-700 font-bold rounded-2xl tap-effect hover:bg-blue-100 text-lg border border-blue-100">🔄 ใช้สถานะอัตโนมัติ</button>
             </div>
             <button onclick="closeModal('statusModal')" class="mt-6 text-gray-400 tap-effect uppercase text-sm font-bold bg-gray-50 px-6 py-3 rounded-xl w-full">ปิดหน้าต่าง</button>
         </div>
@@ -284,128 +299,165 @@
     <script>
         const holidays2026 = { "01-01": "วันขึ้นปีใหม่", "03-03": "วันมาฆบูชา", "04-06": "วันจักรี", "04-13": "วันสงกรานต์", "04-14": "วันสงกรานต์", "04-15": "วันสงกรานต์", "05-01": "วันแรงงานแห่งชาติ", "05-04": "วันฉัตรมงคล", "05-11": "วันพืชมงคลฯ", "05-31": "วันวิสาขบูชา", "06-01": "ชดเชยวันวิสาขบูชา", "06-03": "วันเฉลิมฯ พระราชินี", "07-28": "วันเฉลิมฯ ร.10", "07-29": "วันอาสาฬหบูชา", "07-30": "วันเข้าพรรษา", "08-12": "วันแม่แห่งชาติ", "10-13": "วันนวมินทรมหาราช", "10-23": "วันปิยมหาราช", "10-26": "วันออกพรรษา", "12-05": "วันพ่อแห่งชาติ", "12-07": "ชดเชยวันพ่อแห่งชาติ", "12-10": "วันรัฐธรรมนูญ", "12-31": "วันสิ้นปี" };
 
-        window.tasks = []; window.contacts = []; window.mayorStatus = { text: 'อยู่อบต./ห้องทำงาน', color: 'bg-green-500' };
-        window.isAdmin = false; window.currentPage = 'dashboard';
+        window.tasks = []; 
+        window.contacts = []; 
+        window.mayorStatus = { text: 'อยู่อบต.', color: 'bg-green-500' };
+        window.mayorStatusManual = false;
+        window.isAdmin = false; 
+        window.currentPage = 'dashboard';
         let currentViewDate = new Date();
 
         const firebaseConfig = {
-            apiKey: "AIzaSyAg_kQRN64eIdhRDtIdsR24JSUiwHdT7tM", authDomain: "flutter-ai-playground-ca0f3.firebaseapp.com",
-            projectId: "flutter-ai-playground-ca0f3", storageBucket: "flutter-ai-playground-ca0f3.firebasestorage.app",
-            messagingSenderId: "679308094535", appId: "1:679308094535:web:81bd85c714926a10909562",
+            apiKey: "AIzaSyAg_kQRN64eIdhRDtIdsR24JSUiwHdT7tM",
+            authDomain: "flutter-ai-playground-ca0f3.firebaseapp.com",
+            projectId: "flutter-ai-playground-ca0f3",
+            storageBucket: "flutter-ai-playground-ca0f3.firebasestorage.app",
+            messagingSenderId: "679308094535",
+            appId: "1:679308094535:web:81bd85c714926a10909562",
             databaseURL: "https://flutter-ai-playground-ca0f3-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
-        firebase.initializeApp(firebaseConfig); const db = firebase.database();
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        window.saveToCloud = function(tasks, contacts, mStatus) {
-            db.ref('data/').set({ tasks: tasks, contacts: contacts, mayorStatus: mStatus || window.mayorStatus });
+        // สถานะนายกอัตโนมัติ: จันทร์-ศุกร์ เวลา 08.30-16.30 = อยู่อบต. นอกเวลาหรือเสาร์-อาทิตย์ = ไม่อยู่อบต.
+        function getAutoMayorStatus() {
+            const now = new Date();
+            const day = now.getDay(); // 0 = อาทิตย์, 1 = จันทร์, ..., 6 = เสาร์
+            const minutes = now.getHours() * 60 + now.getMinutes();
+            const start = 8 * 60 + 30;
+            const end = 16 * 60 + 30;
+
+            if(day >= 1 && day <= 5 && minutes >= start && minutes <= end) {
+                return { text: 'อยู่อบต.', color: 'bg-green-500' };
+            }
+            return { text: 'ไม่อยู่อบต.', color: 'bg-red-500' };
+        }
+
+        window.saveToCloud = function(tasks, contacts, mStatus, manualStatus) {
+            const status = mStatus || window.mayorStatus;
+            db.ref('data/').set({ 
+                tasks: tasks, 
+                contacts: contacts, 
+                mayorStatus: status,
+                mayorStatusManual: manualStatus !== undefined ? manualStatus : window.mayorStatusManual
+            });
         };
 
         db.ref('data/').on('value', function(snapshot) {
             const data = snapshot.val() || {};
-            window.tasks = data.tasks || []; window.contacts = data.contacts || [];
-            window.mayorStatus = data.mayorStatus || {text: 'อยู่อบต./ห้องทำงาน', color: 'bg-green-500'};
+            window.tasks = data.tasks || [];
+            window.contacts = data.contacts || [];
+            window.mayorStatusManual = data.mayorStatusManual || false;
+            window.mayorStatus = data.mayorStatus || getAutoMayorStatus();
+
+            // ถ้าแอดมินไม่ได้ล็อกสถานะเอง ให้ใช้ระบบอัตโนมัติตามเวลาราชการ
+            if(!window.mayorStatusManual) {
+                window.mayorStatus = getAutoMayorStatus();
+            }
             
-            const stText = document.getElementById('statusText'); const stDot = document.getElementById('statusDot');
+            const stText = document.getElementById('statusText');
+            const stDot = document.getElementById('statusDot');
             if(stText) stText.innerText = window.mayorStatus.text;
             if(stDot) stDot.className = "absolute -bottom-1 -right-1 w-5 h-5 md:w-6 md:h-6 rounded-full border-4 border-white " + window.mayorStatus.color + " shadow-sm transition-colors duration-300";
+
             renderAll();
         });
 
-        function handleAdminToggle() { if(window.isAdmin) { window.isAdmin=false; updateAdminUI(); renderAll(); } else { document.getElementById('adminPassword').value=''; openModal('loginModal'); } }
-        function verifyAdminLogin() { if(document.getElementById('adminPassword').value==='ntrd') { window.isAdmin=true; closeModal('loginModal'); updateAdminUI(); renderAll(); } else { alert('รหัสผ่านแอดมินไม่ถูกต้อง!'); } }
+        function handleAdminToggle() {
+            if (window.isAdmin) { window.isAdmin = false; updateAdminUI(); renderAll(); } 
+            else { document.getElementById('adminPassword').value = ''; openModal('loginModal'); }
+        }
+
+        function verifyAdminLogin() {
+            if(document.getElementById('adminPassword').value === 'ntrd') {
+                window.isAdmin = true; closeModal('loginModal'); updateAdminUI(); renderAll();
+            } else { alert('รหัสผ่านแอดมินไม่ถูกต้อง!'); }
+        }
 
         function changePage(p) {
-            window.currentPage = p; const pages = ['dashboard','calendar','tasks','contacts'];
+            window.currentPage = p;
+            const pages = ['dashboard','calendar','tasks','contacts'];
             for(let i=0; i<pages.length; i++) {
                 document.getElementById('page-'+pages[i]).classList.add('hidden');
                 document.getElementById('nav-'+pages[i]).className = 'flex-1 py-4 text-gray-400 font-bold text-sm min-w-[100px] tap-effect font-prompt';
             }
             document.getElementById('page-'+p).classList.remove('hidden');
             document.getElementById('nav-'+p).className = 'flex-1 py-4 text-main border-b-4 border-main font-bold text-sm min-w-[100px] tap-effect font-prompt';
-            
-            // ✅ ล้างค่าค้นหาเมื่อสลับหน้า
-            if(document.getElementById('taskSearch')) document.getElementById('taskSearch').value = '';
-            if(document.getElementById('dashboardTaskSearch')) document.getElementById('dashboardTaskSearch').value = '';
-            
             updateAdminUI(); window.scrollTo(0,0); renderAll();
         }
 
         function updateAdminUI() {
-            if(document.getElementById('fabAdd')) document.getElementById('fabAdd').classList.toggle('hidden', !(window.isAdmin && window.currentPage === 'dashboard'));
-            if(document.getElementById('admin-add-contact')) document.getElementById('admin-add-contact').classList.toggle('hidden', !(window.isAdmin && window.currentPage === 'contacts'));
-            if(document.getElementById('admin-status-btn')) document.getElementById('admin-status-btn').classList.toggle('hidden', !(window.isAdmin && window.currentPage === 'dashboard'));
-            if(document.getElementById('adminIcon')) document.getElementById('adminIcon').className = window.isAdmin ? 'fa-solid fa-user-check text-green-400 text-lg' : 'fa-solid fa-user-shield text-lg text-white';
+            if(document.getElementById('fabAdd')) {
+                if(window.isAdmin && window.currentPage === 'dashboard') { document.getElementById('fabAdd').classList.remove('hidden'); } else { document.getElementById('fabAdd').classList.add('hidden'); }
+            }
+            if(document.getElementById('admin-add-contact')) {
+                if(window.isAdmin && window.currentPage === 'contacts') { document.getElementById('admin-add-contact').classList.remove('hidden'); } else { document.getElementById('admin-add-contact').classList.add('hidden'); }
+            }
+            if(document.getElementById('admin-status-btn')) {
+                if(window.isAdmin && window.currentPage === 'dashboard') { document.getElementById('admin-status-btn').classList.remove('hidden'); } else { document.getElementById('admin-status-btn').classList.add('hidden'); }
+            }
+            const icon = document.getElementById('adminIcon');
+            if(icon) {
+                icon.className = window.isAdmin ? 'fa-solid fa-user-check text-green-400 text-lg' : 'fa-solid fa-user-shield text-lg text-white';
+            }
         }
 
         function getDateNum(dStr) {
-            if(!dStr || dStr.trim() === "") return 99999999;
-            var p = dStr.split('-');
-            if(p.length !== 3) return 99999999;
-            var y = parseInt(p[0], 10);
-            if(y > 2500) y -= 543;
-            var m = p[1].length === 1 ? '0' + p[1] : p[1];
-            var d = p[2].length === 1 ? '0' + p[2] : p[2];
-            return parseInt("" + y + m + d, 10);
-        }
-
-        function getTodayNum() {
-            var d = new Date();
-            var y = d.getFullYear();
-            if(y > 2500) y -= 543;
-            var m = d.getMonth() + 1; m = m < 10 ? '0'+m : m;
-            var day = d.getDate(); day = day < 10 ? '0'+day : day;
-            return parseInt("" + y + m + day, 10);
-        }
-
-        function parseSafeDate(dStr) {
-            var p = dStr.split('-');
-            var y = parseInt(p[0], 10);
-            if(y > 2500) y -= 543;
-            return new Date(y, parseInt(p[1], 10) - 1, parseInt(p[2], 10), 12, 0, 0);
+            if(!dStr) return 99999999;
+            return parseInt(dStr.replace(/-/g, ''), 10);
         }
 
         function getDiffDays(startStr, endStr) {
             if(!startStr) return 0;
-            var todayNum = getTodayNum();
-            var sNum = getDateNum(startStr);
-            var eNum = (endStr && endStr.trim() !== "") ? getDateNum(endStr) : sNum;
+            const today = new Date(); 
+            today.setHours(0,0,0,0);
             
-            if (todayNum >= sNum && todayNum <= eNum) return 0;
+            var p1 = startStr.split('-');
+            const start = new Date(parseInt(p1[0]), parseInt(p1[1])-1, parseInt(p1[2]));
             
-            var dNow = new Date();
-            var yNow = dNow.getFullYear() > 2500 ? dNow.getFullYear() - 543 : dNow.getFullYear();
-            var dToday = new Date(yNow, dNow.getMonth(), dNow.getDate(), 12, 0, 0);
-            var dStart = parseSafeDate(startStr);
-            return Math.ceil((dStart.getTime() - dToday.getTime()) / 86400000);
+            let end = start;
+            if(endStr) {
+                var p2 = endStr.split('-');
+                end = new Date(parseInt(p2[0]), parseInt(p2[1])-1, parseInt(p2[2]));
+            }
+            
+            if(today.getTime() >= start.getTime() && today.getTime() <= end.getTime()) return 0;
+            return Math.ceil((start.getTime() - today.getTime()) / 86400000);
         }
 
         function formatDateRangeThai(startStr, endStr) {
-            if(!startStr) return '-';
+            if(!startStr) return '';
             const days = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
             const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
             
             var p1 = startStr.split('-');
             if(p1.length !== 3) return startStr;
-            var y1_int = parseInt(p1[0], 10);
-            if(y1_int > 2500) y1_int -= 543;
-            const d1 = new Date(y1_int, parseInt(p1[1], 10) - 1, parseInt(p1[2], 10));
+            const d1 = new Date(parseInt(p1[0]), parseInt(p1[1]) - 1, parseInt(p1[2]));
 
-            if(!endStr || startStr.trim() === endStr.trim()) return days[d1.getDay()] + " " + d1.getDate() + " " + months[d1.getMonth()] + " " + (d1.getFullYear() + 543);
-            
+            if(!endStr || startStr === endStr) {
+                return days[d1.getDay()] + " " + d1.getDate() + " " + months[d1.getMonth()] + " " + (d1.getFullYear() + 543);
+            }
+
             var p2 = endStr.split('-');
             if(p2.length !== 3) return startStr + ' ถึง ' + endStr;
-            var y2_int = parseInt(p2[0], 10);
-            if(y2_int > 2500) y2_int -= 543;
-            const d2 = new Date(y2_int, parseInt(p2[1], 10) - 1, parseInt(p2[2], 10));
+            const d2 = new Date(parseInt(p2[0]), parseInt(p2[1]) - 1, parseInt(p2[2]));
 
-            const y1 = d1.getFullYear() + 543; const y2 = d2.getFullYear() + 543;
-            const m1 = months[d1.getMonth()]; const m2 = months[d2.getMonth()];
-            const day1 = d1.getDate(); const day2 = d2.getDate();
+            const y1 = d1.getFullYear() + 543;
+            const y2 = d2.getFullYear() + 543;
+            const m1 = months[d1.getMonth()];
+            const m2 = months[d2.getMonth()];
+            const day1 = d1.getDate();
+            const day2 = d2.getDate();
 
             if (y1 === y2) {
-                if (m1 === m2) return day1 + "-" + day2 + " " + m1 + " " + y1;
-                else return day1 + " " + m1 + " - " + day2 + " " + m2 + " " + y1;
-            } else return day1 + " " + m1 + " " + y1 + " - " + day2 + " " + m2 + " " + y2;
+                if (m1 === m2) {
+                    return day1 + "-" + day2 + " " + m1 + " " + y1;
+                } else {
+                    return day1 + " " + m1 + " - " + day2 + " " + m2 + " " + y1;
+                }
+            } else {
+                return day1 + " " + m1 + " " + y1 + " - " + day2 + " " + m2 + " " + y2;
+            }
         }
 
         function formatThaiDate(dateStr) {
@@ -414,9 +466,7 @@
             const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
             var p = dateStr.split('-');
             if(p.length !== 3) return dateStr;
-            var y_int = parseInt(p[0], 10);
-            if(y_int > 2500) y_int -= 543;
-            const d = new Date(y_int, parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+            const d = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
             return days[d.getDay()] + " " + d.getDate() + " " + months[d.getMonth()] + " " + (d.getFullYear() + 543);
         }
 
@@ -426,9 +476,13 @@
             if(diff === 0) countdown = '<div class="absolute -top-3 -right-2 bg-red-600 text-white text-[11px] font-black px-3 py-1.5 rounded-full animate-countdown shadow-lg">วันนี้!</div>';
             else if(diff > 0 && diff <= 10) countdown = '<div class="absolute -top-3 -right-2 bg-orange-500 text-white text-[11px] font-black px-3 py-1.5 rounded-full animate-countdown shadow-lg">อีก ' + diff + ' วันจะถึงงาน</div>';
             
+            let statusClass = 'status-pending';
+            if(t.status === 'กำลังดำเนินการ') statusClass = 'status-active';
+            else if(t.status === 'เสร็จสิ้น') statusClass = 'status-done';
+
             let html = '<div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 relative tap-effect ' + (isTodayTask?'animate-today-card':'') + ' font-prompt hover:shadow-md transition-all">';
             html += countdown;
-            html += '<div class="flex justify-between items-center mb-4"><span class="bg-blue-50 text-main px-3 py-1.5 rounded-xl text-sm font-bold"><i class="fa-regular fa-clock mr-1"></i>' + (t.startTime||'ไม่ระบุเวลา') + '</span><span class="text-[10px] border px-2 py-1 rounded-lg uppercase text-gray-400 font-bold">' + t.status + '</span></div>';
+            html += '<div class="flex justify-between items-center gap-3 mb-4"><span class="bg-blue-50 text-main px-3 py-1.5 rounded-xl text-sm font-bold"><i class="fa-regular fa-clock mr-1"></i>' + (t.startTime||'ไม่ระบุเวลา') + '</span><span class="status-badge ' + statusClass + '">' + t.status + '</span></div>';
             html += '<h4 class="font-bold text-xl leading-tight mb-4 text-gray-800">' + t.title + '</h4>';
             html += '<div class="text-sm text-gray-500 space-y-2">';
             html += '<p><i class="fa-solid fa-calendar-day mr-2 text-main w-4"></i><span class="font-medium">' + formatDateRangeThai(t.startDate, t.endDate) + '</span></p>';
@@ -449,28 +503,30 @@
             document.getElementById('stat-active').innerText = window.tasks.filter(function(t){return t.status==='กำลังดำเนินการ';}).length;
             document.getElementById('stat-done').innerText = window.tasks.filter(function(t){return t.status==='เสร็จสิ้น';}).length;
 
-            const todayNum = getTodayNum();
+            const d = new Date();
+            const yyyy = d.getFullYear();
+            let mm = d.getMonth() + 1; if(mm<10) mm='0'+mm;
+            let dd = d.getDate(); if(dd<10) dd='0'+dd;
+            const todayStr = yyyy + '-' + mm + '-' + dd;
+            const todayNum = getDateNum(todayStr);
 
             if (window.currentPage === 'dashboard') {
                 const dashContainer = document.getElementById('dashboardTaskList');
                 
-                // ✅ อ่านค่าจากช่องค้นหาหน้าแดชบอร์ด
-                const searchElDash = document.getElementById('dashboardTaskSearch');
-                const queryDash = searchElDash ? searchElDash.value.toLowerCase() : '';
-                
                 const todayTasks = window.tasks.filter(function(t){
                     const sNum = getDateNum(t.startDate);
-                    const eNum = (t.endDate && t.endDate.trim() !== '') ? getDateNum(t.endDate) : sNum;
-                    return todayNum >= sNum && todayNum <= eNum && t.title.toLowerCase().indexOf(queryDash) > -1;
+                    const eNum = t.endDate ? getDateNum(t.endDate) : sNum;
+                    return todayNum >= sNum && todayNum <= eNum;
                 });
                 
                 const upcomingTasksAll = window.tasks.filter(function(t){
-                    return getDateNum(t.startDate) > todayNum && t.title.toLowerCase().indexOf(queryDash) > -1;
+                    return getDateNum(t.startDate) > todayNum;
                 });
                 
                 upcomingTasksAll.sort(function(a,b){
                     return getDateNum(a.startDate) - getDateNum(b.startDate);
                 });
+                
                 const upcomingTasks = upcomingTasksAll.slice(0, 10);
 
                 let html = '';
@@ -500,30 +556,29 @@
                 const y = currentViewDate.getFullYear();
                 const m = currentViewDate.getMonth();
                 const names = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
-                let displayY = y < 2500 ? y + 543 : y;
-                document.getElementById('currentMonthYear').innerText = names[m] + " " + displayY;
+                document.getElementById('currentMonthYear').innerText = names[m] + " " + (y+543);
                 
                 const first = new Date(y,m,1).getDay();
                 const total = new Date(y,m+1,0).getDate();
                 
                 for(let i=0; i<first; i++) grid.innerHTML += '<div></div>';
                 for(let d=1; d<=total; d++) {
-                    let sm = m + 1; sm = sm < 10 ? '0'+sm : sm;
-                    let sd = d; sd = sd < 10 ? '0'+sd : sd;
+                    let sm = m + 1; if(sm<10) sm='0'+sm;
+                    let sd = d; if(sd<10) sd='0'+sd;
                     const dateKey = sm + '-' + sd;
-                    const fullDateStr = y + '-' + dateKey;
-                    const fullDateNum = getDateNum(fullDateStr);
+                    const fullDate = y + '-' + dateKey;
+                    const fullDateNum = getDateNum(fullDate);
                     
                     let hasTask = false;
                     for(let k=0; k<window.tasks.length; k++){
                         let t = window.tasks[k];
-                        let sNum = getDateNum(t.startDate);
-                        let eNum = (t.endDate && t.endDate.trim()!=="") ? getDateNum(t.endDate) : sNum;
+                        const sNum = getDateNum(t.startDate);
+                        const eNum = t.endDate ? getDateNum(t.endDate) : sNum;
                         if(fullDateNum >= sNum && fullDateNum <= eNum) { hasTask = true; break; }
                     }
                     
                     const h = holidays2026[dateKey];
-                    let btnHTML = '<button onclick="showDayTasks(\'' + fullDateStr + '\',\'' + (h||'') + '\')" class="h-12 flex flex-col items-center justify-center rounded-2xl hover:bg-blue-50 relative tap-effect border border-transparent hover:border-blue-100 transition-all">';
+                    let btnHTML = '<button onclick="showDayTasks(\'' + fullDate + '\',\'' + (h||'') + '\')" class="h-12 flex flex-col items-center justify-center rounded-2xl hover:bg-blue-50 relative tap-effect border border-transparent hover:border-blue-100 transition-all">';
                     btnHTML += '<span class="' + (h?'text-red-500 font-bold':'text-gray-700 font-medium') + ' text-sm">' + d + '</span>';
                     if(hasTask) btnHTML += '<div class="w-1.5 h-1.5 bg-main rounded-full mt-1"></div>';
                     btnHTML += '</button>';
@@ -533,24 +588,14 @@
 
             if (window.currentPage === 'tasks') {
                 const fullList = document.getElementById('fullTaskList');
-                const searchEl = document.getElementById('taskSearch');
-                const query = searchEl ? searchEl.value.toLowerCase() : '';
                 
-                const activeTasks = window.tasks.filter(function(t){
-                    return t.status === 'กำลังดำเนินการ' && t.title.toLowerCase().indexOf(query) > -1;
-                }).sort(function(a,b){
+                const activeTasks = window.tasks.filter(function(t){return t.status === 'กำลังดำเนินการ';}).sort(function(a,b){
                     return getDateNum(a.startDate) - getDateNum(b.startDate);
                 });
-                
-                const pendingTasks = window.tasks.filter(function(t){
-                    return t.status === 'รอดำเนินการ' && t.title.toLowerCase().indexOf(query) > -1;
-                }).sort(function(a,b){
+                const pendingTasks = window.tasks.filter(function(t){return t.status === 'รอดำเนินการ';}).sort(function(a,b){
                     return getDateNum(a.startDate) - getDateNum(b.startDate);
                 });
-                
-                const doneTasks = window.tasks.filter(function(t){
-                    return t.status === 'เสร็จสิ้น' && t.title.toLowerCase().indexOf(query) > -1;
-                }).sort(function(a,b){
+                const doneTasks = window.tasks.filter(function(t){return t.status === 'เสร็จสิ้น';}).sort(function(a,b){
                     return getDateNum(b.startDate) - getDateNum(a.startDate);
                 }); 
 
@@ -564,7 +609,7 @@
                     if(tasksArr.length > 0) {
                         for(let i=0; i<tasksArr.length; i++) {
                             const sNum = getDateNum(tasksArr[i].startDate);
-                            const eNum = (tasksArr[i].endDate && tasksArr[i].endDate.trim() !== "") ? getDateNum(tasksArr[i].endDate) : sNum;
+                            const eNum = tasksArr[i].endDate ? getDateNum(tasksArr[i].endDate) : sNum;
                             let isToday = (todayNum >= sNum && todayNum <= eNum);
                             html += taskCardHTML(tasksArr[i], isToday);
                         }
@@ -576,10 +621,9 @@
                 }
 
                 let html = '';
-                let isSearching = query !== '';
                 html += buildTaskGroup('กำลังดำเนินการ', 'fa-solid fa-spinner', 'text-emerald-500', 'bg-emerald-50 text-emerald-600', activeTasks, true);
                 html += buildTaskGroup('รอดำเนินการ', 'fa-solid fa-clock-rotate-left', 'text-amber-500', 'bg-amber-50 text-amber-600', pendingTasks, true);
-                html += buildTaskGroup('เสร็จสิ้น', 'fa-solid fa-check-double', 'text-red-500', 'bg-red-50 text-red-600', doneTasks, isSearching ? true : false);
+                html += buildTaskGroup('เสร็จสิ้น', 'fa-solid fa-check-double', 'text-red-500', 'bg-red-50 text-red-600', doneTasks, false);
 
                 fullList.innerHTML = html;
             }
@@ -587,18 +631,24 @@
             if (window.currentPage === 'contacts') renderContacts();
         }
 
-        function showDayTasks(dateStr, h) {
+        function showDayTasks(date, h) {
             const container = document.getElementById('selectedDateTasks');
-            const targetNum = getDateNum(dateStr);
+            const dateNum = getDateNum(date);
             
             const dayTasks = window.tasks.filter(function(t){
                 const sNum = getDateNum(t.startDate);
-                const eNum = (t.endDate && t.endDate.trim() !== "") ? getDateNum(t.endDate) : sNum;
-                return targetNum >= sNum && targetNum <= eNum;
+                const eNum = t.endDate ? getDateNum(t.endDate) : sNum;
+                return dateNum >= sNum && dateNum <= eNum;
             });
             
-            const thaiDate = formatThaiDate(dateStr);
-            const todayNum = getTodayNum();
+            const thaiDate = formatThaiDate(date);
+            
+            const d = new Date();
+            const yyyy = d.getFullYear();
+            let mm = d.getMonth() + 1; if(mm<10) mm='0'+mm;
+            let dd = d.getDate(); if(dd<10) dd='0'+dd;
+            const todayStr = yyyy + '-' + mm + '-' + dd;
+            const todayNum = getDateNum(todayStr);
             
             let head = '<div class="col-span-full p-4 bg-white rounded-[2rem] border border-gray-100 shadow-sm font-prompt text-center"><p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">วันที่เลือก</p><p class="font-black text-main text-xl">' + thaiDate + '</p>';
             if(h) head += '<div class="mt-3 inline-block bg-red-50 text-red-500 font-bold text-sm px-4 py-2 rounded-xl"><i class="fa-solid fa-flag mr-2"></i>วันหยุดราชการ: ' + h + '</div>';
@@ -608,7 +658,7 @@
             if(dayTasks.length > 0) {
                 for(let i=0; i<dayTasks.length; i++) {
                     const sNum = getDateNum(dayTasks[i].startDate);
-                    const eNum = (dayTasks[i].endDate && dayTasks[i].endDate.trim() !== "") ? getDateNum(dayTasks[i].endDate) : sNum;
+                    const eNum = dayTasks[i].endDate ? getDateNum(dayTasks[i].endDate) : sNum;
                     let isToday = (todayNum >= sNum && todayNum <= eNum);
                     bodyHTML += taskCardHTML(dayTasks[i], isToday);
                 }
@@ -706,9 +756,8 @@
             for(let i=0; i<window.tasks.length; i++){ if(window.tasks[i].id === id) { idx = i; break; } }
             if(idx > -1) window.tasks[idx] = data; else window.tasks.push(data); 
             
-            window.saveToCloud(window.tasks, window.contacts, window.mayorStatus); 
+            window.saveToCloud(window.tasks, window.contacts, window.mayorStatus, window.mayorStatusManual); 
 
-            // ส่งข้อมูลไปเก็บที่ Google Sheets (Backup)
             const scriptURL = 'https://script.google.com/macros/s/AKfycbx2WLgayblJSdhnA_Ad0Bjeng0tjn4aw7UzngKCctWOHJJYDCruvw1hpsSr4t-bNe8ogQ/exec';
             
             fetch(scriptURL, {
@@ -733,7 +782,7 @@
                 let newTasks = [];
                 for(let i=0; i<window.tasks.length; i++){ if(window.tasks[i].id !== id) newTasks.push(window.tasks[i]); }
                 window.tasks = newTasks;
-                window.saveToCloud(window.tasks, window.contacts, window.mayorStatus); 
+                window.saveToCloud(window.tasks, window.contacts, window.mayorStatus, window.mayorStatusManual); 
                 closeModal('taskModal'); 
             } 
         }
@@ -764,7 +813,7 @@
             for(let i=0; i<window.contacts.length; i++){ if(window.contacts[i].id === id) { idx = i; break; } }
             if(idx > -1) window.contacts[idx] = data; else window.contacts.push(data); 
             
-            window.saveToCloud(window.tasks, window.contacts, window.mayorStatus); 
+            window.saveToCloud(window.tasks, window.contacts, window.mayorStatus, window.mayorStatusManual); 
             closeModal('contactModal'); 
         };
         
@@ -773,15 +822,41 @@
                 let newContacts = [];
                 for(let i=0; i<window.contacts.length; i++){ if(window.contacts[i].id !== id) newContacts.push(window.contacts[i]); }
                 window.contacts = newContacts;
-                window.saveToCloud(window.tasks, window.contacts, window.mayorStatus); 
+                window.saveToCloud(window.tasks, window.contacts, window.mayorStatus, window.mayorStatusManual); 
             } 
         }
 
+        // แอดมินเปลี่ยนสถานะเอง ระบบจะจำไว้และไม่ทับด้วยเวลาอัตโนมัติ
         function updateMayorStatus(txt, cls) {
             window.mayorStatus = { text: txt, color: cls };
-            window.saveToCloud(window.tasks, window.contacts, window.mayorStatus);
+            window.mayorStatusManual = true;
+            window.saveToCloud(window.tasks, window.contacts, window.mayorStatus, true);
             closeModal('statusModal');
         }
+
+        // ให้แอดมินกดกลับมาใช้ระบบอัตโนมัติได้
+        function resetMayorStatusAuto() {
+            window.mayorStatusManual = false;
+            window.mayorStatus = getAutoMayorStatus();
+            window.saveToCloud(window.tasks, window.contacts, window.mayorStatus, false);
+            closeModal('statusModal');
+        }
+
+        // ตรวจสถานะอัตโนมัติทุก 1 นาที เฉพาะกรณีที่แอดมินไม่ได้ตั้งเอง
+        setInterval(function() {
+            if(!window.mayorStatusManual) {
+                const autoStatus = getAutoMayorStatus();
+                if(window.mayorStatus.text !== autoStatus.text || window.mayorStatus.color !== autoStatus.color) {
+                    window.mayorStatus = autoStatus;
+                    window.saveToCloud(window.tasks, window.contacts, window.mayorStatus, false);
+                }
+
+                const stText = document.getElementById('statusText');
+                const stDot = document.getElementById('statusDot');
+                if(stText) stText.innerText = window.mayorStatus.text;
+                if(stDot) stDot.className = "absolute -bottom-1 -right-1 w-5 h-5 md:w-6 md:h-6 rounded-full border-4 border-white " + window.mayorStatus.color + " shadow-sm transition-colors duration-300";
+            }
+        }, 60000);
     </script>
 </body>
 </html>
