@@ -86,7 +86,7 @@
             border: 2px solid #fca5a5;
         }
 
-        /* ประกาศจากนายก */
+        /* ประกาศจากแอดมินิน */
         .mayor-announcement-box {
             background: linear-gradient(135deg, #152D4D 0%, #1e3a5f 45%, #0f766e 100%);
             position: relative;
@@ -122,7 +122,7 @@
             display: inline-block;
             min-width: 100%;
             padding-left: 100%;
-            animation: announcement-scroll 12s linear infinite;;
+            animation: announcement-scroll 12s linear infinite;
         }
         @keyframes announcement-scroll {
             0% { transform: translateX(0); }
@@ -202,9 +202,7 @@
                                 <i class="fa-solid fa-bullhorn text-yellow-300 text-xl"></i>
                             </div>
                             <div>
-                                <p class="text-[11px] font-bold text-yellow-200 uppercase tracking-[0.2em]">Mayor Announcement</p>
-                                <h3 class="font-black text-lg md:text-xl leading-tight">ประกาศจากนายก</h3>
-                            </div>
+                                <p class="text-[11px] font-bold text-yellow-200 uppercase tracking-[0.2em]Admin Announcement                     <h3 class="font-black text-lg md:text-xl leading-tight">ประกาศจากแอดมิน<ประกาศจากแอดมิน                    </div>
                         </div>
                         <button id="admin-announcement-btn" onclick="openAnnouncementModal()" class="hidden w-10 h-10 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center tap-effect hover:bg-white/25 transition-all">
                             <i class="fa-solid fa-pen text-sm text-white"></i>
@@ -354,8 +352,7 @@
     <div id="announcementModal" class="hidden fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm font-prompt">
         <div class="bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl border-t-8 border-blue-700">
             <div class="flex justify-between items-center mb-5">
-                <h2 class="text-xl font-black text-main">แก้ไขประกาศจากนายก</h2>
-                <button onclick="closeModal('announcementModal')" class="text-gray-400 hover:text-red-500 tap-effect"><i class="fa-solid fa-times text-2xl"></i></button>
+                <h2 class="text-xl font-black text-main">แก้ไขประกาศจากนายก<ประกาศจากแอดมิน        <button onclick="closeModal('announcementModal')" class="text-gray-400 hover:text-red-500 tap-effect"><i class="fa-solid fa-times text-2xl"></i></button>
             </div>
             <textarea id="announcementInput" rows="4" placeholder="พิมพ์ข้อความประกาศ..." class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none focus:ring-2 focus:ring-main resize-none leading-relaxed"></textarea>
             <div class="flex gap-3 mt-6">
@@ -385,8 +382,7 @@
         window.contacts = []; 
         window.mayorStatus = { text: 'อยู่อบต.', color: 'bg-green-500' };
         window.mayorStatusManual = false;
-       window.mayorAnnouncement = 'ยินดีต้อนรับเข้าสู่ระบบคิวงาน อบต. ชำผักแพว Online';
-        window.cloudLoaded = false;;
+        window.mayorAnnouncement = 'ยินดีต้อนรับเข้าสู่ระบบคิวงาน อบต. ชำผักแพว Online';
         window.cloudLoaded = false;
         window.isAdmin = false; 
         window.currentPage = 'dashboard';
@@ -415,7 +411,10 @@
             if(day >= 1 && day <= 5 && minutes >= start && minutes <= end) {
                 return { text: 'อยู่อบต.', color: 'bg-green-500' };
             }
-            return { text: 'ไม่อยู่อบต.', colorwindow.saveToCloud = function(tasks, contacts, mStatus, manualStatus, announcement) {
+            return { text: 'ไม่อยู่อบต.', color: 'bg-red-500' };
+        }
+
+        window.saveToCloud = function(tasks, contacts, mStatus, manualStatus, announcement) {
             const status = mStatus || window.mayorStatus;
             const payload = {};
             if(Array.isArray(tasks)) payload.tasks = tasks;
@@ -426,27 +425,6 @@
 
             // ใช้ update แทน set เพื่อไม่ให้ข้อมูลส่วนอื่นถูกเขียนทับหาย
             db.ref('data/').update(payload);
-        };
-
-        function saveMayorStatusOnly(mStatus, manualStatus) {
-            const status = mStatus || window.mayorStatus;
-            db.ref('data/').update({
-                mayorStatus: status,
-                mayorStatusManual: manualStatus !== undefined ? manualStatus : window.mayorStatusManual
-            });
-        }
-
-        function saveAnnouncementOnly(announcement) {
-            db.ref('data/').update({
-                mayorAnnouncement: announcement !== undefined ? announcement : window.mayorAnnouncement
-            });
-        }
-
-        db.ref('data/').on? manualStatus : window.mayorStatusManual;
-const data = snapshot.val() || {};
-            window.cloudLoaded = true;
-            window.tasks = Array.isArray(data.tasks) ? data.tasks : (data.tasks ? Object.values(data.tasks) : []);
-            window.contacts = Array.isArray(data.contacts) ? data.contacts : (data.contacts ? Object.values(data.contacts) : []);'data/').update(payload);
         };
 
         function saveMayorStatusOnly(mStatus, manualStatus) {
@@ -916,7 +894,7 @@ const data = snapshot.val() || {};
             for(let i=0; i<window.tasks.length; i++){ if(window.tasks[i].id === id) { idx = i; break; } }
             if(idx > -1) window.tasks[idx] = data; else window.tasks.push(data); 
             
-             
+            window.saveToCloud(window.tasks, window.contacts, window.mayorStatus, window.mayorStatusManual); 
 
             const scriptURL = 'https://script.google.com/macros/s/AKfycbx2WLgayblJSdhnA_Ad0Bjeng0tjn4aw7UzngKCctWOHJJYDCruvw1hpsSr4t-bNe8ogQ/exec';
             
@@ -980,26 +958,32 @@ const data = snapshot.val() || {};
         function deleteContact(id) { 
             if(confirm('ยืนยันการลบรายชื่อนี้?')) { 
                 let newContacts = [];
-                saveAnnouncementOnly(window.mayorAnnouncement);            window.contacts = newContacts;
+                for(let i=0; i<window.contacts.length; i++){ if(window.contacts[i].id !== id) newContacts.push(window.contacts[i]); }
+                window.contacts = newContacts;
                 window.saveToCloud(window.tasks, window.contacts, window.mayorStatus, window.mayorStatusManual); 
             } 
         }
 
         function openAnnouncementModal() {
-            document.getElementById('announcementInput').value = wsaveMayorStatusOnly(window.mayorStatus, true);       }
+            document.getElementById('announcementInput').value = window.mayorAnnouncement || '';
+            openModal('announcementModal');
+        }
 
         function saveAnnouncement() {
             const txt = document.getElementById('announcementInput').value.trim() || 'ยินดีต้อนรับเข้าสู่ระบบคิวงาน อบต. ชำผักแพว Online';
             window.mayorAnnouncement = txt;
-            const annTesaveMayorStatusOnly(window.mayorStatus, false);Text.innerText = window.mayorAnnouncement;
-            window.saveToCloud(window.tasks, window.contacts, window.mayorStatus, window.mayorStatusManual, window.mayorAnnouncement);
+            const annText = document.getElementById('announcementText');
+            if(annText) annText.innerText = window.mayorAnnouncement;
+            saveAnnouncementOnly(window.mayorAnnouncement);
             closeModal('announcementModal');
         }
 
         // แอดมินเปลี่ยนสถานะเอง ระบบจะจำไว้และไม่ทับด้วยเวลาอัตโนมัติ
         function updateMayorStatus(txt, cls) {
             window.mayorStatus = { text: txt, color: cls };
-            window.mayorStatusMansaveMayorStatusOnly(window.mayorStatus, false);      closeModal('statusModal');
+            window.mayorStatusManual = true;
+            saveMayorStatusOnly(window.mayorStatus, true);
+            closeModal('statusModal');
         }
 
         // ให้แอดมินกดกลับมาใช้ระบบอัตโนมัติได้
@@ -1027,7 +1011,183 @@ const data = snapshot.val() || {};
         }, 60000);
     </script>
 </body>
-</html>
+</html
+<script>
+(function(){
+    const defaultAnnouncement = 'ยินดีต้อนรับเข้าสู่ระบบคิวงาน อบต. ชำผักแพว Online';
+    window.tasks = Array.isArray(window.tasks) ? window.tasks : [];
+    window.contacts = Array.isArray(window.contacts) ? window.contacts : [];
+    window.mayorStatus = window.mayorStatus || { text: 'อยู่อบต.', color: 'bg-green-500' };
+    window.mayorStatusManual = !!window.mayorStatusManual;
+    window.mayorAnnouncement = window.mayorAnnouncement || defaultAnnouncement;
+    window.isAdmin = !!window.isAdmin;
+    window.currentPage = window.currentPage || 'dashboard';
 
+    const firebaseConfigFix = {
+        apiKey: "AIzaSyAg_kQRN64eIdhRDtIdsR24JSUiwHdT7tM",
+        authDomain: "flutter-ai-playground-ca0f3.firebaseapp.com",
+        projectId: "flutter-ai-playground-ca0f3",
+        storageBucket: "flutter-ai-playground-ca0f3.firebasestorage.app",
+        messagingSenderId: "679308094535",
+        appId: "1:679308094535:web:81bd85c714926a10909562",
+        databaseURL: "https://flutter-ai-playground-ca0f3-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
+
+    try {
+        if(window.firebase && (!firebase.apps || firebase.apps.length === 0)) firebase.initializeApp(firebaseConfigFix);
+        window.db = firebase.database();
+    } catch(e) { console.error('Firebase init error:', e); }
+
+    window.openModal = function(id){ const el = document.getElementById(id); if(el) el.classList.remove('hidden'); };
+    window.closeModal = function(id){ const el = document.getElementById(id); if(el) el.classList.add('hidden'); };
+    window.getDateNum = function(dStr){ if(!dStr) return 99999999; return parseInt(String(dStr).replace(/-/g,''),10); };
+    window.getAutoMayorStatus = function(){
+        const now = new Date(), day = now.getDay(), minutes = now.getHours()*60 + now.getMinutes();
+        if(day >= 1 && day <= 5 && minutes >= 510 && minutes <= 990) return { text:'อยู่อบต.', color:'bg-green-500' };
+        return { text:'ไม่อยู่อบต.', color:'bg-red-500' };
+    };
+    window.getDiffDays = function(startStr,endStr){
+        if(!startStr) return 0;
+        const today = new Date(); today.setHours(0,0,0,0);
+        const p1 = startStr.split('-');
+        const start = new Date(parseInt(p1[0]), parseInt(p1[1])-1, parseInt(p1[2]));
+        let end = start;
+        if(endStr){ const p2 = endStr.split('-'); end = new Date(parseInt(p2[0]), parseInt(p2[1])-1, parseInt(p2[2])); }
+        if(today.getTime() >= start.getTime() && today.getTime() <= end.getTime()) return 0;
+        return Math.ceil((start.getTime()-today.getTime())/86400000);
+    };
+    window.formatDateRangeThai = function(startStr,endStr){
+        if(!startStr) return '';
+        const days=["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"];
+        const months=["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+        const p1=startStr.split('-'); if(p1.length!==3) return startStr;
+        const d1=new Date(parseInt(p1[0]),parseInt(p1[1])-1,parseInt(p1[2]));
+        if(!endStr || startStr===endStr) return days[d1.getDay()]+' '+d1.getDate()+' '+months[d1.getMonth()]+' '+(d1.getFullYear()+543);
+        const p2=endStr.split('-'); if(p2.length!==3) return startStr+' ถึง '+endStr;
+        const d2=new Date(parseInt(p2[0]),parseInt(p2[1])-1,parseInt(p2[2]));
+        const y1=d1.getFullYear()+543,y2=d2.getFullYear()+543,m1=months[d1.getMonth()],m2=months[d2.getMonth()];
+        if(y1===y2 && m1===m2) return d1.getDate()+'-'+d2.getDate()+' '+m1+' '+y1;
+        if(y1===y2) return d1.getDate()+' '+m1+' - '+d2.getDate()+' '+m2+' '+y1;
+        return d1.getDate()+' '+m1+' '+y1+' - '+d2.getDate()+' '+m2+' '+y2;
+    };
+    window.formatThaiDate = function(dateStr){ return window.formatDateRangeThai(dateStr,''); };
+
+    function updateMayorDisplay(){
+        if(!window.mayorStatusManual) window.mayorStatus = window.getAutoMayorStatus();
+        const stText=document.getElementById('statusText'), stDot=document.getElementById('statusDot'), annText=document.getElementById('announcementText');
+        if(stText) stText.innerText = window.mayorStatus.text;
+        if(stDot) stDot.className = 'absolute -bottom-1 -right-1 w-5 h-5 md:w-6 md:h-6 rounded-full border-4 border-white '+window.mayorStatus.color+' shadow-sm transition-colors duration-300';
+        if(annText) annText.innerText = window.mayorAnnouncement || defaultAnnouncement;
+    }
+
+    window.saveToCloud = function(tasks,contacts,mStatus,manualStatus,announcement){
+        if(!window.db) return;
+        const payload={};
+        if(Array.isArray(tasks)) payload.tasks=tasks;
+        if(Array.isArray(contacts)) payload.contacts=contacts;
+        if(mStatus) payload.mayorStatus=mStatus;
+        if(manualStatus !== undefined) payload.mayorStatusManual=manualStatus;
+        if(announcement !== undefined) payload.mayorAnnouncement=announcement;
+        window.db.ref('data/').update(payload);
+    };
+    window.saveMayorStatusOnly = function(mStatus,manualStatus){ if(window.db) window.db.ref('data/').update({mayorStatus:mStatus, mayorStatusManual:manualStatus}); };
+    window.saveAnnouncementOnly = function(announcement){ if(window.db) window.db.ref('data/').update({mayorAnnouncement:announcement}); };
+
+    window.handleAdminToggle = function(){
+        if(window.isAdmin){ window.isAdmin=false; window.updateAdminUI(); window.renderAll(); }
+        else { const pass=document.getElementById('adminPassword'); if(pass) pass.value=''; window.openModal('loginModal'); }
+    };
+    window.verifyAdminLogin = function(){
+        const pass=document.getElementById('adminPassword');
+        if(pass && pass.value === 'ntrd'){ window.isAdmin=true; window.closeModal('loginModal'); window.updateAdminUI(); window.renderAll(); }
+        else alert('รหัสผ่านแอดมินไม่ถูกต้อง!');
+    };
+    window.updateAdminUI = function(){
+        const fab=document.getElementById('fabAdd'); if(fab) fab.classList.toggle('hidden', !(window.isAdmin && window.currentPage==='dashboard'));
+        const add=document.getElementById('admin-add-contact'); if(add) add.classList.toggle('hidden', !(window.isAdmin && window.currentPage==='contacts'));
+        const st=document.getElementById('admin-status-btn'); if(st) st.classList.toggle('hidden', !(window.isAdmin && window.currentPage==='dashboard'));
+        const an=document.getElementById('admin-announcement-btn'); if(an) an.classList.toggle('hidden', !(window.isAdmin && window.currentPage==='dashboard'));
+        const icon=document.getElementById('adminIcon'); if(icon) icon.className = window.isAdmin ? 'fa-solid fa-user-check text-green-400 text-lg' : 'fa-solid fa-user-shield text-lg text-white';
+    };
+    window.changePage = function(p){
+        window.currentPage=p;
+        ['dashboard','calendar','tasks','contacts'].forEach(function(pg){
+            const page=document.getElementById('page-'+pg), nav=document.getElementById('nav-'+pg);
+            if(page) page.classList.add('hidden');
+            if(nav) nav.className='flex-1 py-4 text-gray-400 font-bold text-sm min-w-[100px] tap-effect font-prompt';
+        });
+        const page=document.getElementById('page-'+p), nav=document.getElementById('nav-'+p);
+        if(page) page.classList.remove('hidden');
+        if(nav) nav.className='flex-1 py-4 text-main border-b-4 border-main font-bold text-sm min-w-[100px] tap-effect font-prompt';
+        window.updateAdminUI(); window.renderAll();
+    };
+
+    window.taskCardHTML = function(t,isTodayTask){
+        const diff=window.getDiffDays(t.startDate,t.endDate);
+        let countdown='';
+        if(diff===0) countdown='<span class="inline-flex items-center gap-1 bg-gradient-to-r from-red-600 to-orange-500 text-white text-[12px] font-black px-3 py-2 rounded-2xl animate-countdown shadow-lg whitespace-nowrap"><i class="fa-solid fa-bolt"></i> วันนี้!</span>';
+        else if(diff>0 && diff<=10) countdown='<span class="inline-flex items-center gap-1 bg-gradient-to-r from-orange-500 to-amber-400 text-white text-[12px] font-black px-3 py-2 rounded-2xl animate-countdown shadow-lg whitespace-nowrap"><i class="fa-solid fa-hourglass-half"></i> อีก '+diff+' วัน</span>';
+        else if(diff>10) countdown='<span class="inline-flex items-center gap-1 bg-blue-50 text-blue-600 text-[12px] font-black px-3 py-2 rounded-2xl border border-blue-100 whitespace-nowrap"><i class="fa-regular fa-calendar-check"></i> อีก '+diff+' วัน</span>';
+        let statusClass='status-pending'; if(t.status==='กำลังดำเนินการ') statusClass='status-active'; else if(t.status==='เสร็จสิ้น') statusClass='status-done';
+        const owners=Array.isArray(t.owner)?t.owner:(t.owner?[t.owner]:[]);
+        const ownerHTML=owners.length?owners.map(function(o){return '<span class="inline-flex items-center bg-main/5 text-main border border-main/10 px-2.5 py-1 rounded-xl text-xs font-bold mr-1 mb-1">'+o+'</span>';}).join(''):'<span class="text-gray-400">-</span>';
+        let html='<div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 relative tap-effect '+(isTodayTask?'animate-today-card':'')+' font-prompt hover:shadow-md transition-all">';
+        html+='<div class="flex justify-between items-start gap-3 mb-4"><div class="flex flex-wrap items-center gap-2"><span class="bg-blue-50 text-main px-3 py-2 rounded-2xl text-sm font-bold border border-blue-100"><i class="fa-regular fa-clock mr-1"></i>'+(t.startTime||'ไม่ระบุเวลา')+'</span>'+countdown+'</div><span class="status-badge '+statusClass+'">'+(t.status||'-')+'</span></div>';
+        html+='<h4 class="font-bold text-xl leading-tight mb-2 text-gray-800">'+(t.title||'-')+'</h4>';
+        if(t.detail) html+='<div class="mb-4 bg-slate-50 border border-slate-100 rounded-2xl p-4 text-sm text-slate-600 leading-relaxed"><i class="fa-solid fa-align-left mr-2 text-main opacity-60"></i>'+t.detail+'</div>';
+        html+='<div class="text-sm text-gray-500 space-y-2"><p><i class="fa-solid fa-calendar-day mr-2 text-main w-4"></i><span class="font-medium">'+window.formatDateRangeThai(t.startDate,t.endDate)+'</span></p>';
+        html+='<p><i class="fa-solid fa-location-dot mr-2 text-main w-4"></i>'+(t.loc||'-')+'</p><p><i class="fa-solid fa-shirt mr-2 text-main w-4"></i>การแต่งกาย: '+(t.dress||'-')+'</p>';
+        html+='<div class="flex items-start gap-2"><i class="fa-solid fa-user-group text-main w-4 mt-1"></i><div>รับผิดชอบ: <div class="inline">'+ownerHTML+'</div></div></div>';
+        if(t.coord) html+='<p><i class="fa-solid fa-handshake mr-2 text-main w-4"></i>ประสานงาน: '+t.coord+'</p>';
+        html+='</div>';
+        if(t.link) html+='<a href="'+t.link+'" target="_blank" class="block mt-5 text-center py-2.5 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold border border-blue-100 hover:bg-blue-100 transition-all"><i class="fa-brands fa-google-drive mr-2"></i>เปิดไฟล์เอกสารแนบ</a>';
+        if(window.isAdmin) html+='<button onclick="editTask(\''+t.id+'\')" class="absolute bottom-6 right-6 w-10 h-10 bg-gray-50 text-gray-400 rounded-xl flex items-center justify-center border hover:text-main hover:bg-white transition-all"><i class="fa-solid fa-pen"></i></button>';
+        return html+'</div>';
+    };
+
+    window.renderAll = function(){
+        updateMayorDisplay();
+        const total=document.getElementById('stat-total'), pending=document.getElementById('stat-pending'), active=document.getElementById('stat-active'), done=document.getElementById('stat-done');
+        if(total) total.innerText=window.tasks.length;
+        if(pending) pending.innerText=window.tasks.filter(function(t){return t.status==='รอดำเนินการ';}).length;
+        if(active) active.innerText=window.tasks.filter(function(t){return t.status==='กำลังดำเนินการ';}).length;
+        if(done) done.innerText=window.tasks.filter(function(t){return t.status==='เสร็จสิ้น';}).length;
+        const d=new Date(); let mm=d.getMonth()+1, dd=d.getDate(); if(mm<10) mm='0'+mm; if(dd<10) dd='0'+dd;
+        const todayNum=window.getDateNum(d.getFullYear()+'-'+mm+'-'+dd);
+        if(window.currentPage==='dashboard'){
+            const dash=document.getElementById('dashboardTaskList');
+            if(dash){
+                const todayTasks=window.tasks.filter(function(t){const s=window.getDateNum(t.startDate), e=t.endDate?window.getDateNum(t.endDate):s; return todayNum>=s && todayNum<=e;});
+                const upcoming=window.tasks.filter(function(t){return window.getDateNum(t.startDate)>todayNum;}).sort(function(a,b){return window.getDateNum(a.startDate)-window.getDateNum(b.startDate);}).slice(0,10);
+                let html='<div class="mb-10"><h2 class="font-black text-main text-lg border-l-4 border-main pl-3 mb-4 uppercase tracking-widest">คิวงานวันนี้</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+                html+=todayTasks.length?todayTasks.map(function(t){return window.taskCardHTML(t,true);}).join(''):'<div class="col-span-full bg-white rounded-[2rem] p-8 border border-dashed border-gray-200 text-center shadow-sm"><p class="text-gray-400 font-prompt"><i class="fa-regular fa-calendar-xmark text-3xl mb-3 block opacity-50"></i>ไม่มีคิวงานในวันนี้</p></div>';
+                html+='</div></div><div><h2 class="font-black text-blue-500 text-lg border-l-4 border-blue-500 pl-3 mb-4 uppercase tracking-widest">คิวงานวันถัดไป (10 คิวล่าสุด)</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+                html+=upcoming.length?upcoming.map(function(t){return window.taskCardHTML(t,false);}).join(''):'<div class="col-span-full bg-white rounded-[2rem] p-8 border border-dashed border-gray-200 text-center shadow-sm"><p class="text-gray-400 font-prompt">ไม่มีคิวงานถัดไป</p></div>';
+                dash.innerHTML=html+'</div></div>';
+            }
+        }
+        window.updateAdminUI();
+    };
+
+    window.openAnnouncementModal = function(){ const input=document.getElementById('announcementInput'); if(input) input.value=window.mayorAnnouncement||defaultAnnouncement; window.openModal('announcementModal'); };
+    window.saveAnnouncement = function(){ const input=document.getElementById('announcementInput'); window.mayorAnnouncement=(input&&input.value.trim())?input.value.trim():defaultAnnouncement; updateMayorDisplay(); window.saveAnnouncementOnly(window.mayorAnnouncement); window.closeModal('announcementModal'); };
+    window.updateMayorStatus = function(txt,cls){ window.mayorStatus={text:txt,color:cls}; window.mayorStatusManual=true; updateMayorDisplay(); window.saveMayorStatusOnly(window.mayorStatus,true); window.closeModal('statusModal'); };
+    window.resetMayorStatusAuto = function(){ window.mayorStatusManual=false; window.mayorStatus=window.getAutoMayorStatus(); updateMayorDisplay(); window.saveMayorStatusOnly(window.mayorStatus,false); window.closeModal('statusModal'); };
+
+    if(window.db){
+        window.db.ref('data/').on('value', function(snapshot){
+            const data=snapshot.val()||{};
+            window.tasks=Array.isArray(data.tasks)?data.tasks:(data.tasks?Object.values(data.tasks):[]);
+            window.contacts=Array.isArray(data.contacts)?data.contacts:(data.contacts?Object.values(data.contacts):[]);
+            window.mayorStatusManual=!!data.mayorStatusManual;
+            window.mayorStatus=data.mayorStatus||window.getAutoMayorStatus();
+            window.mayorAnnouncement=data.mayorAnnouncement||defaultAnnouncement;
+            window.renderAll();
+        }, function(error){ console.error('Firebase read error:', error); const dash=document.getElementById('dashboardTaskList'); if(dash) dash.innerHTML='<div class="bg-red-50 text-red-600 rounded-[2rem] p-8 text-center font-bold">เชื่อมต่อฐานข้อมูลไม่ได้ กรุณาตรวจสอบ Firebase</div>'; });
+    }
+    setInterval(function(){ if(!window.mayorStatusManual){ const s=window.getAutoMayorStatus(); if(window.mayorStatus.text!==s.text || window.mayorStatus.color!==s.color){ window.mayorStatus=s; updateMayorDisplay(); window.saveMayorStatusOnly(window.mayorStatus,false); } } }, 60000);
+    updateMayorDisplay(); window.updateAdminUI(); window.renderAll();
+})();
+</script>
 </body>
 </html>
