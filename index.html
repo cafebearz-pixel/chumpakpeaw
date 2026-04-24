@@ -85,6 +85,49 @@
             color: #b91c1c;
             border: 2px solid #fca5a5;
         }
+
+        /* ประกาศจากนายก */
+        .mayor-announcement-box {
+            background: linear-gradient(135deg, #152D4D 0%, #1e3a5f 45%, #0f766e 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .mayor-announcement-box::before {
+            content: "";
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            right: -60px;
+            top: -70px;
+            background: rgba(255,255,255,0.12);
+            border-radius: 999px;
+        }
+        .mayor-announcement-box::after {
+            content: "";
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            left: -45px;
+            bottom: -55px;
+            background: rgba(255,215,0,0.16);
+            border-radius: 999px;
+        }
+        .announcement-marquee-wrap {
+            overflow: hidden;
+            white-space: nowrap;
+            mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+        }
+        .announcement-marquee-text {
+            display: inline-block;
+            min-width: 100%;
+            padding-left: 100%;
+            animation: announcement-scroll 8s linear infinite;
+        }
+        @keyframes announcement-scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -152,6 +195,26 @@
                     </div>
                 </div>
 
+                <div class="mayor-announcement-box rounded-[2rem] p-5 md:p-6 shadow-xl text-white border border-white/10 font-prompt">
+                    <div class="relative z-10 flex items-center justify-between gap-3 mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center shadow-inner border border-white/20">
+                                <i class="fa-solid fa-bullhorn text-yellow-300 text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-[11px] font-bold text-yellow-200 uppercase tracking-[0.2em]">Mayor Announcement</p>
+                                <h3 class="font-black text-lg md:text-xl leading-tight">ประกาศจากนายก</h3>
+                            </div>
+                        </div>
+                        <button id="admin-announcement-btn" onclick="openAnnouncementModal()" class="hidden w-10 h-10 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center tap-effect hover:bg-white/25 transition-all">
+                            <i class="fa-solid fa-pen text-sm text-white"></i>
+                        </button>
+                    </div>
+                    <div class="relative z-10 bg-white/12 rounded-2xl px-4 py-3 border border-white/15 announcement-marquee-wrap shadow-inner">
+                        <div id="announcementText" class="announcement-marquee-text text-base md:text-lg font-bold text-white">ยินดีต้อนรับเข้าสู่ระบบคิวงาน อบต. ชำผักแพว Online</div>
+                    </div>
+                </div>
+
                 <div id="dashboardTaskList" class="w-full">
                     <div class="py-12 text-center text-gray-400 font-prompt">
                         <i class="fa-solid fa-spinner animate-spin text-3xl mb-3 text-main"></i>
@@ -208,6 +271,7 @@
             <form id="taskForm" class="space-y-4">
                 <input type="hidden" id="taskEditId">
                 <input type="text" id="t-title" placeholder="ชื่องาน/ภารกิจ" required class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none font-bold text-main">
+                <textarea id="t-detail" rows="3" placeholder="รายละเอียดของคิวงาน เช่น วัตถุประสงค์ หมายเหตุ รายละเอียดเพิ่มเติม" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none text-sm leading-relaxed resize-none"></textarea>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-1"><label class="text-[10px] font-bold text-gray-400 pl-2">วันที่เริ่ม</label><input type="date" id="t-startDate" required class="w-full p-3 bg-gray-50 rounded-xl border border-gray-100 text-sm"></div>
@@ -223,23 +287,27 @@
                 <input type="text" id="t-loc" placeholder="สถานที่" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100">
                 <input type="text" id="t-dress" placeholder="การแต่งกาย" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100">
                 <input type="text" id="t-coord" placeholder="ผู้ประสานงาน" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                <select id="t-owner" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                    <option>นายก อบต.</option>
-                    <option>รองนายก อบต.</option>
-                    <option>เลขานุการนายก</option>
-                    <option>ปลัด อบต.</option>
-                    <option>รองปลัด อบต.</option>
-                    <option>สำนักปลัด</option>
-                    <option>กองช่าง</option>
-                    <option>กองคลัง</option>
-                    <option>กองการศึกษาฯ</option>
-                    <option>กองสวัสดิการสังคม</option>
-                    <option>กองสาธารณสุขและสิ่งแวดล้อม</option>
-                    <option>ประธานสภาฯ</option>
-                    <option>รองประธานสภาฯ</option>
-                    <option>สมาชิกสภาฯ</option>
-                    <option>อื่นๆ</option>
-                </select>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-gray-400 pl-2">ผู้รับผิดชอบ เลือกได้หลายคน</label>
+                    <select id="t-owner" multiple class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 min-h-[150px] text-sm">
+                        <option>นายก อบต.</option>
+                        <option>รองนายก อบต.</option>
+                        <option>เลขานุการนายก</option>
+                        <option>ปลัด อบต.</option>
+                        <option>รองปลัด อบต.</option>
+                        <option>สำนักปลัด</option>
+                        <option>กองช่าง</option>
+                        <option>กองคลัง</option>
+                        <option>กองการศึกษาฯ</option>
+                        <option>กองสวัสดิการสังคม</option>
+                        <option>กองสาธารณสุขและสิ่งแวดล้อม</option>
+                        <option>ประธานสภาฯ</option>
+                        <option>รองประธานสภาฯ</option>
+                        <option>สมาชิกสภาฯ</option>
+                        <option>อื่นๆ</option>
+                    </select>
+                    <p class="text-[11px] text-gray-400 pl-2">กด Ctrl ค้างไว้เพื่อเลือกหลายรายการบนคอมพิวเตอร์ หรือแตะเลือกหลายรายการบนมือถือบางรุ่น</p>
+                </div>
                 <input type="url" id="t-link" placeholder="ลิงก์แนบไฟล์ Google Drive (ถ้ามี)" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 text-sm">
                 
                 <div class="pt-4 flex gap-3">
@@ -283,6 +351,20 @@
         </div>
     </div>
 
+    <div id="announcementModal" class="hidden fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm font-prompt">
+        <div class="bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl border-t-8 border-blue-700">
+            <div class="flex justify-between items-center mb-5">
+                <h2 class="text-xl font-black text-main">แก้ไขประกาศจากนายก</h2>
+                <button onclick="closeModal('announcementModal')" class="text-gray-400 hover:text-red-500 tap-effect"><i class="fa-solid fa-times text-2xl"></i></button>
+            </div>
+            <textarea id="announcementInput" rows="4" placeholder="พิมพ์ข้อความประกาศ..." class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none focus:ring-2 focus:ring-main resize-none leading-relaxed"></textarea>
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeModal('announcementModal')" class="flex-1 py-4 bg-gray-100 text-gray-500 rounded-2xl font-bold tap-effect">ยกเลิก</button>
+                <button onclick="saveAnnouncement()" class="flex-1 py-4 bg-main text-white rounded-2xl font-bold shadow-lg tap-effect">บันทึกประกาศ</button>
+            </div>
+        </div>
+    </div>
+
     <div id="statusModal" class="hidden fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm font-prompt">
         <div class="bg-white w-full max-w-xs rounded-[2.5rem] p-8 text-center border-t-8 border-emerald-500 shadow-2xl">
             <h3 class="mb-6 text-main leading-tight font-black text-xl">อัปเดตสถานะนายก</h3>
@@ -303,6 +385,7 @@
         window.contacts = []; 
         window.mayorStatus = { text: 'อยู่อบต.', color: 'bg-green-500' };
         window.mayorStatusManual = false;
+        window.mayorAnnouncement = 'ยินดีต้อนรับเข้าสู่ระบบคิวงาน อบต. ชำผักแพว Online';
         window.isAdmin = false; 
         window.currentPage = 'dashboard';
         let currentViewDate = new Date();
@@ -333,13 +416,14 @@
             return { text: 'ไม่อยู่อบต.', color: 'bg-red-500' };
         }
 
-        window.saveToCloud = function(tasks, contacts, mStatus, manualStatus) {
+        window.saveToCloud = function(tasks, contacts, mStatus, manualStatus, announcement) {
             const status = mStatus || window.mayorStatus;
             db.ref('data/').set({ 
                 tasks: tasks, 
                 contacts: contacts, 
                 mayorStatus: status,
-                mayorStatusManual: manualStatus !== undefined ? manualStatus : window.mayorStatusManual
+                mayorStatusManual: manualStatus !== undefined ? manualStatus : window.mayorStatusManual,
+                mayorAnnouncement: announcement !== undefined ? announcement : window.mayorAnnouncement
             });
         };
 
@@ -349,6 +433,7 @@
             window.contacts = data.contacts || [];
             window.mayorStatusManual = data.mayorStatusManual || false;
             window.mayorStatus = data.mayorStatus || getAutoMayorStatus();
+            window.mayorAnnouncement = data.mayorAnnouncement || 'ยินดีต้อนรับเข้าสู่ระบบคิวงาน อบต. ชำผักแพว Online';
 
             // ถ้าแอดมินไม่ได้ล็อกสถานะเอง ให้ใช้ระบบอัตโนมัติตามเวลาราชการ
             if(!window.mayorStatusManual) {
@@ -359,6 +444,9 @@
             const stDot = document.getElementById('statusDot');
             if(stText) stText.innerText = window.mayorStatus.text;
             if(stDot) stDot.className = "absolute -bottom-1 -right-1 w-5 h-5 md:w-6 md:h-6 rounded-full border-4 border-white " + window.mayorStatus.color + " shadow-sm transition-colors duration-300";
+
+            const annText = document.getElementById('announcementText');
+            if(annText) annText.innerText = window.mayorAnnouncement;
 
             renderAll();
         });
@@ -395,6 +483,9 @@
             }
             if(document.getElementById('admin-status-btn')) {
                 if(window.isAdmin && window.currentPage === 'dashboard') { document.getElementById('admin-status-btn').classList.remove('hidden'); } else { document.getElementById('admin-status-btn').classList.add('hidden'); }
+            }
+            if(document.getElementById('admin-announcement-btn')) {
+                if(window.isAdmin && window.currentPage === 'dashboard') { document.getElementById('admin-announcement-btn').classList.remove('hidden'); } else { document.getElementById('admin-announcement-btn').classList.add('hidden'); }
             }
             const icon = document.getElementById('adminIcon');
             if(icon) {
@@ -473,22 +564,40 @@
         function taskCardHTML(t, isTodayTask) {
             const diff = getDiffDays(t.startDate, t.endDate);
             let countdown = '';
-            if(diff === 0) countdown = '<div class="absolute -top-3 -right-2 bg-red-600 text-white text-[11px] font-black px-3 py-1.5 rounded-full animate-countdown shadow-lg">วันนี้!</div>';
-            else if(diff > 0 && diff <= 10) countdown = '<div class="absolute -top-3 -right-2 bg-orange-500 text-white text-[11px] font-black px-3 py-1.5 rounded-full animate-countdown shadow-lg">อีก ' + diff + ' วันจะถึงงาน</div>';
+            if(diff === 0) {
+                countdown = '<span class="inline-flex items-center gap-1 bg-gradient-to-r from-red-600 to-orange-500 text-white text-[12px] font-black px-3 py-2 rounded-2xl animate-countdown shadow-lg whitespace-nowrap"><i class="fa-solid fa-bolt"></i> วันนี้!</span>';
+            } else if(diff > 0 && diff <= 10) {
+                countdown = '<span class="inline-flex items-center gap-1 bg-gradient-to-r from-orange-500 to-amber-400 text-white text-[12px] font-black px-3 py-2 rounded-2xl animate-countdown shadow-lg whitespace-nowrap"><i class="fa-solid fa-hourglass-half"></i> อีก ' + diff + ' วัน</span>';
+            } else if(diff > 10) {
+                countdown = '<span class="inline-flex items-center gap-1 bg-blue-50 text-blue-600 text-[12px] font-black px-3 py-2 rounded-2xl border border-blue-100 whitespace-nowrap"><i class="fa-regular fa-calendar-check"></i> อีก ' + diff + ' วัน</span>';
+            }
             
             let statusClass = 'status-pending';
             if(t.status === 'กำลังดำเนินการ') statusClass = 'status-active';
             else if(t.status === 'เสร็จสิ้น') statusClass = 'status-done';
 
+            const owners = Array.isArray(t.owner) ? t.owner : (t.owner ? [t.owner] : []);
+            let ownerHTML = '';
+            if(owners.length > 0) {
+                for(let oi=0; oi<owners.length; oi++) {
+                    ownerHTML += '<span class="inline-flex items-center bg-main/5 text-main border border-main/10 px-2.5 py-1 rounded-xl text-xs font-bold mr-1 mb-1">' + owners[oi] + '</span>';
+                }
+            } else {
+                ownerHTML = '<span class="text-gray-400">-</span>';
+            }
+
             let html = '<div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 relative tap-effect ' + (isTodayTask?'animate-today-card':'') + ' font-prompt hover:shadow-md transition-all">';
-            html += countdown;
-            html += '<div class="flex justify-between items-center gap-3 mb-4"><span class="bg-blue-50 text-main px-3 py-1.5 rounded-xl text-sm font-bold"><i class="fa-regular fa-clock mr-1"></i>' + (t.startTime||'ไม่ระบุเวลา') + '</span><span class="status-badge ' + statusClass + '">' + t.status + '</span></div>';
-            html += '<h4 class="font-bold text-xl leading-tight mb-4 text-gray-800">' + t.title + '</h4>';
+            html += '<div class="flex justify-between items-start gap-3 mb-4">';
+            html += '<div class="flex flex-wrap items-center gap-2"><span class="bg-blue-50 text-main px-3 py-2 rounded-2xl text-sm font-bold border border-blue-100"><i class="fa-regular fa-clock mr-1"></i>' + (t.startTime||'ไม่ระบุเวลา') + '</span>' + countdown + '</div>';
+            html += '<span class="status-badge ' + statusClass + '">' + t.status + '</span>';
+            html += '</div>';
+            html += '<h4 class="font-bold text-xl leading-tight mb-2 text-gray-800">' + t.title + '</h4>';
+            if(t.detail) html += '<div class="mb-4 bg-slate-50 border border-slate-100 rounded-2xl p-4 text-sm text-slate-600 leading-relaxed"><i class="fa-solid fa-align-left mr-2 text-main opacity-60"></i>' + t.detail + '</div>';
             html += '<div class="text-sm text-gray-500 space-y-2">';
             html += '<p><i class="fa-solid fa-calendar-day mr-2 text-main w-4"></i><span class="font-medium">' + formatDateRangeThai(t.startDate, t.endDate) + '</span></p>';
             html += '<p><i class="fa-solid fa-location-dot mr-2 text-main w-4"></i>' + (t.loc||'-') + '</p>';
             html += '<p><i class="fa-solid fa-shirt mr-2 text-main w-4"></i>การแต่งกาย: ' + (t.dress||'-') + '</p>';
-            html += '<p><i class="fa-solid fa-user mr-2 text-main w-4"></i>รับผิดชอบ: <span class="text-main font-medium">' + t.owner + '</span></p>';
+            html += '<div class="flex items-start gap-2"><i class="fa-solid fa-user-group text-main w-4 mt-1"></i><div>รับผิดชอบ: <div class="inline">' + ownerHTML + '</div></div></div>';
             if(t.coord) html += '<p><i class="fa-solid fa-handshake mr-2 text-main w-4"></i>ประสานงาน: ' + t.coord + '</p>';
             html += '</div>';
             if(t.link) html += '<a href="' + t.link + '" target="_blank" class="block mt-5 text-center py-2.5 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold border border-blue-100 hover:bg-blue-100 transition-all"><i class="fa-brands fa-google-drive mr-2"></i>เปิดไฟล์เอกสารแนบ</a>';
@@ -729,10 +838,17 @@
             if(!t) return; 
             document.getElementById('taskEditId').value = t.id; 
             
-            const keys = ['title','startDate','startTime','endDate','endTime','status','loc','dress','coord','owner','link'];
+            const keys = ['title','detail','startDate','startTime','endDate','endTime','status','loc','dress','coord','link'];
             for(let i=0; i<keys.length; i++) {
                 const el = document.getElementById('t-' + keys[i]);
                 if(el) el.value = t[keys[i]] || '';
+            }
+            const ownerEl = document.getElementById('t-owner');
+            const owners = Array.isArray(t.owner) ? t.owner : (t.owner ? [t.owner] : []);
+            if(ownerEl) {
+                for(let i=0; i<ownerEl.options.length; i++) {
+                    ownerEl.options[i].selected = owners.indexOf(ownerEl.options[i].value) > -1;
+                }
             }
             document.getElementById('btnDeleteTask').classList.remove('hidden'); 
             openModal('taskModal'); 
@@ -747,9 +863,16 @@
 
             const id = document.getElementById('taskEditId').value || new Date().getTime().toString(); 
             let data = { id: id }; 
-            const keys = ['title','startDate','startTime','endDate','endTime','status','loc','dress','coord','owner','link'];
+            const keys = ['title','detail','startDate','startTime','endDate','endTime','status','loc','dress','coord','link'];
             for(let i=0; i<keys.length; i++) {
                 data[keys[i]] = document.getElementById('t-' + keys[i]).value;
+            }
+            const ownerEl = document.getElementById('t-owner');
+            data.owner = [];
+            if(ownerEl) {
+                for(let i=0; i<ownerEl.selectedOptions.length; i++) {
+                    data.owner.push(ownerEl.selectedOptions[i].value);
+                }
             }
             
             let idx = -1;
@@ -826,7 +949,13 @@
             } 
         }
 
-        // แอดมินเปลี่ยนสถานะเอง ระบบจะจำไว้และไม่ทับด้วยเวลาอัตโนมัติ
+        function openAnnouncementModal() {
+            document.getElementById('announcementInput').value = window.mayorAnnouncement || '';
+            openModal('announcementModal');
+        }
+
+        function saveAnnouncement() {
+            const txt = document.getElementById('announcementInput'
         function updateMayorStatus(txt, cls) {
             window.mayorStatus = { text: txt, color: cls };
             window.mayorStatusManual = true;
@@ -858,5 +987,8 @@
             }
         }, 60000);
     </script>
+</body>
+</html>
+
 </body>
 </html>
