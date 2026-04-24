@@ -122,7 +122,7 @@
             display: inline-block;
             min-width: 100%;
             padding-left: 100%;
-            animation: announcement-scroll 8s linear infinite;
+            animation: announcement-scroll 12s linear infinite;;
         }
         @keyframes announcement-scroll {
             0% { transform: translateX(0); }
@@ -385,7 +385,9 @@
         window.contacts = []; 
         window.mayorStatus = { text: 'อยู่อบต.', color: 'bg-green-500' };
         window.mayorStatusManual = false;
-        window.mayorAnnouncement = 'ยินดีต้อนรับเข้าสู่ระบบคิวงาน อบต. ชำผักแพว Online';
+       window.mayorAnnouncement = 'ยินดีต้อนรับเข้าสู่ระบบคิวงาน อบต. ชำผักแพว Online';
+        window.cloudLoaded = false;;
+        window.cloudLoaded = false;
         window.isAdmin = false; 
         window.currentPage = 'dashboard';
         let currentViewDate = new Date();
@@ -413,24 +415,59 @@
             if(day >= 1 && day <= 5 && minutes >= start && minutes <= end) {
                 return { text: 'อยู่อบต.', color: 'bg-green-500' };
             }
-            return { text: 'ไม่อยู่อบต.', color: 'bg-red-500' };
+            return { text: 'ไม่อยู่อบต.', colorwindow.saveToCloud = function(tasks, contacts, mStatus, manualStatus, announcement) {
+            const status = mStatus || window.mayorStatus;
+            const payload = {};
+            if(Array.isArray(tasks)) payload.tasks = tasks;
+            if(Array.isArray(contacts)) payload.contacts = contacts;
+            payload.mayorStatus = status;
+            payload.mayorStatusManual = manualStatus !== undefined ? manualStatus : window.mayorStatusManual;
+            payload.mayorAnnouncement = announcement !== undefined ? announcement : window.mayorAnnouncement;
+
+            // ใช้ update แทน set เพื่อไม่ให้ข้อมูลส่วนอื่นถูกเขียนทับหาย
+            db.ref('data/').update(payload);
+        };
+
+        function saveMayorStatusOnly(mStatus, manualStatus) {
+            const status = mStatus || window.mayorStatus;
+            db.ref('data/').update({
+                mayorStatus: status,
+                mayorStatusManual: manualStatus !== undefined ? manualStatus : window.mayorStatusManual
+            });
         }
 
-        window.saveToCloud = function(tasks, contacts, mStatus, manualStatus, announcement) {
-            const status = mStatus || window.mayorStatus;
-            db.ref('data/').set({ 
-                tasks: tasks, 
-                contacts: contacts, 
-                mayorStatus: status,
-                mayorStatusManual: manualStatus !== undefined ? manualStatus : window.mayorStatusManual,
+        function saveAnnouncementOnly(announcement) {
+            db.ref('data/').update({
                 mayorAnnouncement: announcement !== undefined ? announcement : window.mayorAnnouncement
             });
+        }
+
+        db.ref('data/').on? manualStatus : window.mayorStatusManual;
+const data = snapshot.val() || {};
+            window.cloudLoaded = true;
+            window.tasks = Array.isArray(data.tasks) ? data.tasks : (data.tasks ? Object.values(data.tasks) : []);
+            window.contacts = Array.isArray(data.contacts) ? data.contacts : (data.contacts ? Object.values(data.contacts) : []);'data/').update(payload);
         };
+
+        function saveMayorStatusOnly(mStatus, manualStatus) {
+            const status = mStatus || window.mayorStatus;
+            db.ref('data/').update({
+                mayorStatus: status,
+                mayorStatusManual: manualStatus !== undefined ? manualStatus : window.mayorStatusManual
+            });
+        }
+
+        function saveAnnouncementOnly(announcement) {
+            db.ref('data/').update({
+                mayorAnnouncement: announcement !== undefined ? announcement : window.mayorAnnouncement
+            });
+        }
 
         db.ref('data/').on('value', function(snapshot) {
             const data = snapshot.val() || {};
-            window.tasks = data.tasks || [];
-            window.contacts = data.contacts || [];
+            window.cloudLoaded = true;
+            window.tasks = Array.isArray(data.tasks) ? data.tasks : (data.tasks ? Object.values(data.tasks) : []);
+            window.contacts = Array.isArray(data.contacts) ? data.contacts : (data.contacts ? Object.values(data.contacts) : []);
             window.mayorStatusManual = data.mayorStatusManual || false;
             window.mayorStatus = data.mayorStatus || getAutoMayorStatus();
             window.mayorAnnouncement = data.mayorAnnouncement || 'ยินดีต้อนรับเข้าสู่ระบบคิวงาน อบต. ชำผักแพว Online';
@@ -879,7 +916,7 @@
             for(let i=0; i<window.tasks.length; i++){ if(window.tasks[i].id === id) { idx = i; break; } }
             if(idx > -1) window.tasks[idx] = data; else window.tasks.push(data); 
             
-            window.saveToCloud(window.tasks, window.contacts, window.mayorStatus, window.mayorStatusManual); 
+             
 
             const scriptURL = 'https://script.google.com/macros/s/AKfycbx2WLgayblJSdhnA_Ad0Bjeng0tjn4aw7UzngKCctWOHJJYDCruvw1hpsSr4t-bNe8ogQ/exec';
             
@@ -943,31 +980,33 @@
         function deleteContact(id) { 
             if(confirm('ยืนยันการลบรายชื่อนี้?')) { 
                 let newContacts = [];
-                for(let i=0; i<window.contacts.length; i++){ if(window.contacts[i].id !== id) newContacts.push(window.contacts[i]); }
-                window.contacts = newContacts;
+                saveAnnouncementOnly(window.mayorAnnouncement);            window.contacts = newContacts;
                 window.saveToCloud(window.tasks, window.contacts, window.mayorStatus, window.mayorStatusManual); 
             } 
         }
 
         function openAnnouncementModal() {
-            document.getElementById('announcementInput').value = window.mayorAnnouncement || '';
-            openModal('announcementModal');
-        }
+            document.getElementById('announcementInput').value = wsaveMayorStatusOnly(window.mayorStatus, true);       }
 
         function saveAnnouncement() {
-            const txt = document.getElementById('announcementInput'
+            const txt = document.getElementById('announcementInput').value.trim() || 'ยินดีต้อนรับเข้าสู่ระบบคิวงาน อบต. ชำผักแพว Online';
+            window.mayorAnnouncement = txt;
+            const annTesaveMayorStatusOnly(window.mayorStatus, false);Text.innerText = window.mayorAnnouncement;
+            window.saveToCloud(window.tasks, window.contacts, window.mayorStatus, window.mayorStatusManual, window.mayorAnnouncement);
+            closeModal('announcementModal');
+        }
+
+        // แอดมินเปลี่ยนสถานะเอง ระบบจะจำไว้และไม่ทับด้วยเวลาอัตโนมัติ
         function updateMayorStatus(txt, cls) {
             window.mayorStatus = { text: txt, color: cls };
-            window.mayorStatusManual = true;
-            window.saveToCloud(window.tasks, window.contacts, window.mayorStatus, true);
-            closeModal('statusModal');
+            window.mayorStatusMansaveMayorStatusOnly(window.mayorStatus, false);      closeModal('statusModal');
         }
 
         // ให้แอดมินกดกลับมาใช้ระบบอัตโนมัติได้
         function resetMayorStatusAuto() {
             window.mayorStatusManual = false;
             window.mayorStatus = getAutoMayorStatus();
-            window.saveToCloud(window.tasks, window.contacts, window.mayorStatus, false);
+            saveMayorStatusOnly(window.mayorStatus, false);
             closeModal('statusModal');
         }
 
@@ -977,7 +1016,7 @@
                 const autoStatus = getAutoMayorStatus();
                 if(window.mayorStatus.text !== autoStatus.text || window.mayorStatus.color !== autoStatus.color) {
                     window.mayorStatus = autoStatus;
-                    window.saveToCloud(window.tasks, window.contacts, window.mayorStatus, false);
+                    saveMayorStatusOnly(window.mayorStatus, false);
                 }
 
                 const stText = document.getElementById('statusText');
