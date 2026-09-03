@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบคิวงาน อบต. ชำผักแพว Online</title>
+    <title>ระบบคิวงานอบต.</title>
 
     <meta name="apple-mobile-web-app-title" content="CPP Q">
     <meta name="application-name" content="CPP Q">
@@ -12,11 +12,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
@@ -25,371 +26,481 @@
     </script>
 
     <style>
-        html { font-size: 18px !important; }
-        body { font-family: 'Prompt', sans-serif; background-color: #f8fafc; color: #1e293b; overflow-x: hidden; }
-        .bg-main { background-color: #152D4D; }
-        .text-main { color: #152D4D; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .tap-effect:active { transform: scale(0.97); opacity: 0.9; }
-        
-        /* คลื่นสีทอง */
-        .wave-text span { display: inline-block; color: #FFD700; text-shadow: 0 2px 4px rgba(0,0,0,0.3); animation: wave 2s ease-in-out infinite; }
-        @keyframes wave { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-        .wave-text span:nth-child(1) { animation-delay: 0.1s; } .wave-text span:nth-child(2) { animation-delay: 0.2s; }
-        .wave-text span:nth-child(3) { animation-delay: 0.3s; } .wave-text span:nth-child(4) { animation-delay: 0.4s; }
-        .wave-text span:nth-child(5) { animation-delay: 0.5s; } .wave-text span:nth-child(6) { animation-delay: 0.6s; }
-        .wave-text span:nth-child(7) { animation-delay: 0.7s; } .wave-text span:nth-child(8) { animation-delay: 0.8s; }
-        .wave-text span:nth-child(9) { animation-delay: 0.9s; } .wave-text span:nth-child(10) { animation-delay: 1.0s; }
-        .wave-text span:nth-child(11) { animation-delay: 1.1s; }
+        :root{
+            --bg:#F5FAFE; --surface:#FFFFFF; --ink:#1E2A38; --muted:#66788D; --border:#E1EBF5;
+            --primary:#2E7BC4; --primary-light:#4E97D9; --primary-dark:#1F5A94; --primary-tint:#E9F3FC;
+            --accent:#E4954F; --accent-light:#EFB37D; --accent-tint:#FDEFE0;
+            --success:#4FA97C; --success-tint:#E9F7F0;
+            --warning:#E0B23F; --warning-tint:#FCF3DA;
+            --danger:#DB7A63; --danger-tint:#FBEDE8;
+        }
+        *{ -webkit-tap-highlight-color: transparent; }
+        html{ font-size:17px; }
+        body{ font-family:'Prompt',sans-serif; background:var(--bg); color:var(--ink); }
+        .font-num{ font-family:'Fraunces',serif; font-variant-numeric:tabular-nums; }
+        .no-scrollbar::-webkit-scrollbar{ display:none; }
+        .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
+        ::-webkit-scrollbar{ width:6px; height:6px; }
+        ::-webkit-scrollbar-thumb{ background:#C6D7E8; border-radius:10px; }
+        .tap-effect:active{ transform:scale(0.97); opacity:0.92; }
 
-        /* Countdown กระพริบ */
-        @keyframes pulse-orange { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(0.95); } }
-        .animate-countdown { animation: pulse-orange 1.5s infinite; }
+        /* ---------- header / nav ---------- */
+        .app-header{ background:linear-gradient(135deg,var(--primary-dark),var(--primary) 70%); }
+        .app-nav{ background:var(--surface); border-bottom:1px solid var(--border); }
+        .nav-btn{ color:var(--muted); border-bottom:3px solid transparent; transition:color .2s ease,border-color .2s ease,background .2s ease; }
+        .nav-btn.is-active{ color:var(--primary-dark); border-color:var(--primary); background:var(--primary-tint); }
 
-        /* การ์ดเด้งขึ้นลงสำหรับงานวันนี้ */
-        @keyframes bounce-subtle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        .animate-today-card { 
-            animation: bounce-subtle 2.5s infinite; 
-            border: 2px solid #ef4444 !important; 
-            box-shadow: 0 15px 30px rgba(239, 68, 68, 0.15) !important; 
+        /* ---------- cards ---------- */
+        .card{ background:var(--surface); border:1px solid var(--border); border-radius:1.75rem; }
+        .stat-card{
+            background:var(--surface); border:1px solid var(--border); border-radius:1.5rem;
+            position:relative; overflow:hidden; cursor:pointer;
+            transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
         }
+        .stat-card::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--bar-color,var(--primary)); }
+        .stat-card:hover{ transform:translateY(-2px); box-shadow:0 12px 26px -14px rgba(31,90,148,0.22); }
+        .stat-card.is-active{ border-color:var(--bar-color,var(--primary)); box-shadow:0 0 0 2px var(--bar-color,var(--primary)) inset, 0 12px 26px -14px rgba(31,90,148,0.25); }
 
-        .glass-stat-card {
-            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 8px 32px rgba(0,0,0,0.05);
-            position: relative; overflow: hidden;
+        /* ---------- presence dot ---------- */
+        @keyframes presencePulse{
+            0%{ box-shadow:0 0 0 0 var(--pulse-color,rgba(79,169,124,.55)); }
+            70%{ box-shadow:0 0 0 10px rgba(0,0,0,0); }
+            100%{ box-shadow:0 0 0 0 rgba(0,0,0,0); }
         }
-        .glass-stat-card .bg-icon { position: absolute; bottom: -20px; right: -15px; font-size: 90px; opacity: 0.08; transform: rotate(-15deg); }
+        .presence-dot{ animation:presencePulse 2.2s ease-out infinite; }
 
-        /* สถานะคิวงานให้ใหญ่และเด่นขึ้น */
-        .status-badge {
-            font-size: 14px !important;
-            font-weight: 900 !important;
-            padding: 8px 14px !important;
-            border-radius: 999px !important;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-            white-space: nowrap;
-        }
-        .status-active {
-            background: #dcfce7;
-            color: #15803d;
-            border: 2px solid #86efac;
-        }
-        .status-pending {
-            background: #fef3c7;
-            color: #b45309;
-            border: 2px solid #fcd34d;
-        }
-        .status-done {
-            background: #fee2e2;
-            color: #b91c1c;
-            border: 2px solid #fca5a5;
-        }
+        /* ---------- status badges ---------- */
+        .status-badge{ font-size:.72rem; font-weight:700; padding:6px 12px; border-radius:999px; white-space:nowrap; border:1px solid transparent; }
+        .status-pending{ background:var(--warning-tint); color:#8A6A1A; border-color:#F0DFA6; }
+        .status-active{ background:var(--primary-tint); color:var(--primary-dark); border-color:#BFDBF5; }
+        .status-done{ background:var(--success-tint); color:#2E6B4B; border-color:#B9E2CC; }
 
-        /* ประกาศจากแอดมิน */
-        .mayor-announcement-box {
-            background: linear-gradient(135deg, #152D4D 0%, #1e3a5f 45%, #0f766e 100%);
-            position: relative;
-            overflow: hidden;
-        }
-        .mayor-announcement-box::before {
-            content: "";
-            position: absolute;
-            width: 180px;
-            height: 180px;
-            right: -60px;
-            top: -70px;
-            background: rgba(255,255,255,0.12);
-            border-radius: 999px;
-        }
-        .mayor-announcement-box::after {
-            content: "";
-            position: absolute;
-            width: 120px;
-            height: 120px;
-            left: -45px;
-            bottom: -55px;
-            background: rgba(255,215,0,0.16);
-            border-radius: 999px;
-        }
-        .announcement-marquee-wrap {
-            overflow: hidden;
-            white-space: nowrap;
-            mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-            -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-        }
-        .announcement-marquee-text {
-            display: inline-block;
-            min-width: 100%;
-            padding-left: 100%;
-            animation: announcement-scroll 12s linear infinite;
-        }
-        @keyframes announcement-scroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-100%); }
-        }
+        .cd-badge{ font-size:.72rem; font-weight:700; padding:6px 12px; border-radius:999px; white-space:nowrap; color:#fff; display:inline-flex; align-items:center; gap:5px; }
+
+        /* ---------- today card ---------- */
+        @keyframes bounceSubtle{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-7px); } }
+        .today-card{ animation:bounceSubtle 2.6s ease-in-out infinite; border-color:var(--danger) !important; box-shadow:0 14px 28px -14px rgba(219,122,99,.35) !important; }
+
+        /* ---------- detail table ---------- */
+        .detail-table{ width:100%; border-collapse:collapse; }
+        .detail-table tr:not(:last-child) td{ border-bottom:1px solid var(--border); }
+        .detail-table td{ padding:8px 4px; vertical-align:top; font-size:.9rem; }
+        .detail-table td.dt-label{ white-space:nowrap; width:1%; color:var(--muted); font-size:.78rem; padding-right:12px; }
+        .detail-table td.dt-value{ color:var(--ink); font-weight:500; word-break:break-word; }
+
+        /* ---------- announcement ---------- */
+        .announce-card{ background:linear-gradient(135deg,var(--primary-dark),#2a6aa8 55%,#1c4a78); position:relative; overflow:hidden; }
+        .announce-card::before{ content:''; position:absolute; width:170px; height:170px; right:-55px; top:-65px; background:rgba(255,255,255,.08); border-radius:999px; }
+        .announce-marquee-wrap{ overflow:hidden; white-space:nowrap; mask-image:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent); -webkit-mask-image:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent); }
+        .announce-marquee-text{ display:inline-block; min-width:100%; padding-left:100%; animation:announceScroll 16s linear infinite; }
+        @keyframes announceScroll{ 0%{ transform:translateX(0); } 100%{ transform:translateX(-100%); } }
+
+        /* ---------- calendar ---------- */
+        .cal-day{ aspect-ratio:1/1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; border-radius:12px; border:1px solid transparent; cursor:pointer; transition:background .15s ease,border-color .15s ease; }
+        .cal-day:hover{ background:var(--primary-tint); }
+        .cal-day-num{ font-size:.82rem; font-weight:500; }
+        .cal-dots{ display:flex; gap:3px; height:6px; }
+        .cal-dot{ width:5px; height:5px; border-radius:50%; }
+        .cal-today{ border-color:var(--primary); background:var(--primary-tint); }
+        .cal-selected{ background:var(--primary) !important; }
+        .cal-selected .cal-day-num{ color:#fff; }
+
+        /* ---------- chips ---------- */
+        .chip{ border:1px solid var(--border); background:var(--surface); color:var(--muted); font-size:.82rem; padding:8px 14px; border-radius:999px; cursor:pointer; transition:all .15s ease; }
+        .chip.is-selected{ background:var(--primary); border-color:var(--primary); color:#fff; font-weight:600; }
+
+        /* ---------- segmented control ---------- */
+        .seg{ display:flex; gap:4px; background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:4px; }
+        .seg-btn{ flex:1; text-align:center; padding:10px 6px; border-radius:10px; font-size:.85rem; font-weight:600; color:var(--muted); cursor:pointer; transition:all .15s ease; }
+        .seg-btn.is-active{ background:var(--surface); color:var(--primary-dark); box-shadow:0 2px 6px rgba(31,90,148,.15); }
+
+        /* ---------- fields ---------- */
+        .field{ border:1px solid var(--border); border-radius:14px; background:var(--surface); padding:14px 16px; width:100%; font-size:.92rem; transition:border-color .15s ease, box-shadow .15s ease; }
+        .field:focus{ outline:none; border-color:var(--primary-light); box-shadow:0 0 0 4px var(--primary-tint); }
+
+        /* ---------- buttons ---------- */
+        .btn-primary{ background:var(--primary); color:#fff; transition:background .2s ease, transform .15s ease; box-shadow:0 8px 18px -9px rgba(31,90,148,.55); }
+        .btn-primary:hover{ background:var(--primary-light); }
+        .btn-ghost{ background:var(--bg); color:var(--muted); }
+        .btn-danger-soft{ background:var(--danger-tint); color:#A44532; }
+
+        .icon-btn{ border:1px solid var(--border); background:var(--surface); color:var(--muted); transition:all .15s ease; }
+        .icon-btn:hover{ color:var(--primary); border-color:var(--primary-light); }
+
+        .fab{ box-shadow:0 14px 30px -10px rgba(31,90,148,.55); }
+        .modal-enter{ animation:modalIn .2s cubic-bezier(.2,.8,.3,1) forwards; }
+        @keyframes modalIn{ from{ opacity:0; transform:translateY(10px) scale(.98); } to{ opacity:1; transform:translateY(0) scale(1); } }
     </style>
 </head>
-<body class="min-h-screen">
+<body>
 
-    <div id="app" class="max-w-6xl mx-auto bg-white min-h-screen shadow-2xl flex flex-col relative">
-        
-        <div class="sticky top-0 z-50 flex flex-col w-full shadow-md">
-            
-            <header class="bg-main px-4 py-3 md:px-5 md:py-4 flex justify-between items-center text-white overflow-hidden">
-                <div class="flex items-center gap-2 md:gap-3 min-w-0">
-                    <img src="https://drive.google.com/thumbnail?id=1pgip9WQ97-gztB2sYoGyTWRt7tlVtmnY&sz=w200" class="w-10 h-10 md:w-12 md:h-12 object-contain shrink-0">
+    <div id="app" class="max-w-6xl mx-auto bg-[var(--bg)] min-h-screen flex flex-col relative">
+
+        <div class="sticky top-0 z-50 flex flex-col w-full shadow-sm">
+            <header class="app-header px-4 py-3 md:px-6 md:py-4 flex justify-between items-center text-white">
+                <div class="flex items-center gap-3 min-w-0">
+                    <img src="https://drive.google.com/thumbnail?id=1pgip9WQ97-gztB2sYoGyTWRt7tlVtmnY&sz=w200" class="w-10 h-10 md:w-12 md:h-12 object-contain shrink-0 rounded-xl bg-white/10 p-1">
                     <div class="flex flex-col min-w-0">
-                        <span class="font-black text-[18px] min-[375px]:text-[20px] sm:text-2xl tracking-wide sm:tracking-widest wave-text uppercase leading-none whitespace-nowrap">
-                            <span>C</span><span>H</span><span>U</span><span>M</span><span>P</span><span>A</span><span>K</span><span>P</span><span>A</span><span>E</span><span>W</span>
-                        </span>
-                        <span class="text-[10px] min-[375px]:text-[12px] sm:text-sm font-medium opacity-90 leading-tight font-prompt mt-1 whitespace-nowrap">องค์การบริหารส่วนตำบลชำผักแพว</span>
+                        <span class="font-bold text-[15px] min-[375px]:text-base sm:text-lg leading-tight truncate">องค์การบริหารส่วนตำบลชำผักแพว</span>
+                        <span class="text-[11px] sm:text-xs font-medium opacity-75 leading-tight mt-0.5">ระบบคิวงานอบต.</span>
                     </div>
                 </div>
-                <button onclick="handleAdminToggle()" class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/10 flex items-center justify-center tap-effect border border-white/20 shrink-0 ml-2">
-                    <i id="adminIcon" class="fa-solid fa-user-shield text-base md:text-lg"></i>
+                <button onclick="handleAdminToggle()" class="w-10 h-10 md:w-11 md:h-11 rounded-full bg-white/10 flex items-center justify-center tap-effect border border-white/20 shrink-0 ml-2">
+                    <i id="adminIcon" class="fa-solid fa-user-shield text-base"></i>
                 </button>
             </header>
 
-            <nav class="flex bg-white border-b overflow-x-auto no-scrollbar font-prompt">
-                <button onclick="changePage('dashboard')" id="nav-dashboard" class="flex-1 py-4 text-main border-b-4 border-main font-bold text-sm min-w-[100px] tap-effect"><i class="fa-solid fa-chart-line mr-2"></i>แดชบอร์ด</button>
-                <button onclick="changePage('calendar')" id="nav-calendar" class="flex-1 py-4 text-gray-400 font-bold text-sm min-w-[100px] tap-effect"><i class="fa-solid fa-calendar-alt mr-2"></i>ปฏิทิน</button>
-                <button onclick="changePage('tasks')" id="nav-tasks" class="flex-1 py-4 text-gray-400 font-bold text-sm min-w-[100px] tap-effect"><i class="fa-solid fa-list-check mr-2"></i>คิวทั้งหมด</button>
-                <button onclick="changePage('contacts')" id="nav-contacts" class="flex-1 py-4 text-gray-400 font-bold text-sm min-w-[100px] tap-effect"><i class="fa-solid fa-address-book mr-2"></i>เบอร์โทร</button>
+            <nav class="app-nav flex overflow-x-auto no-scrollbar">
+                <button onclick="statusFilter='all'; changePage('dashboard')" id="nav-dashboard" class="nav-btn is-active flex-1 py-3.5 font-semibold text-sm min-w-[92px] tap-effect"><i class="fa-solid fa-house mr-1.5"></i>หน้าหลัก</button>
+                <button onclick="changePage('calendar')" id="nav-calendar" class="nav-btn flex-1 py-3.5 font-semibold text-sm min-w-[92px] tap-effect"><i class="fa-solid fa-calendar-days mr-1.5"></i>ปฏิทิน</button>
+                <button onclick="changePage('forms')" id="nav-forms" class="nav-btn flex-1 py-3.5 font-semibold text-sm min-w-[92px] tap-effect"><i class="fa-solid fa-file-lines mr-1.5"></i>แบบฟอร์ม</button>
+                <button onclick="changePage('contacts')" id="nav-contacts" class="nav-btn flex-1 py-3.5 font-semibold text-sm min-w-[92px] tap-effect"><i class="fa-solid fa-address-book mr-1.5"></i>เบอร์โทร</button>
             </nav>
         </div>
 
-        <main id="mainContent" class="flex-1 p-4 md:p-8 space-y-8 bg-[#f8fafc]">
-            <div id="page-dashboard" class="space-y-8">
-                
-                <div class="bg-white p-5 md:p-6 rounded-[2rem] border border-gray-100 flex items-center justify-between shadow-sm hover:shadow-md transition-all tap-effect relative">
-                    <div class="flex items-center gap-4 md:gap-5">
+        <main id="mainContent" class="flex-1 p-4 md:p-8 space-y-6">
+
+            <!-- ============ DASHBOARD ============ -->
+            <section id="page-dashboard" class="space-y-6">
+                <div class="card p-5 flex items-center justify-between relative">
+                    <div class="flex items-center gap-4">
                         <div class="relative">
-                            <img src="https://drive.google.com/thumbnail?id=1ET2DmRqMeDl1f13eL9EZpxr_FNvtZpwM&sz=w200" class="w-16 h-16 md:w-20 md:h-20 rounded-2xl object-cover shadow-sm border-2 border-white">
-                            <div id="statusDot" class="absolute -bottom-1 -right-1 w-5 h-5 md:w-6 md:h-6 rounded-full border-4 border-white bg-green-500 shadow-sm"></div>
+                            <img src="https://drive.google.com/thumbnail?id=1ET2DmRqMeDl1f13eL9EZpxr_FNvtZpwM&sz=w200" class="w-16 h-16 md:w-[72px] md:h-[72px] rounded-2xl object-cover border-2 border-white shadow-sm">
+                            <div id="statusDot" class="presence-dot absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-[3px] border-white bg-emerald-500"></div>
                         </div>
                         <div>
-                            <h2 class="font-black text-main text-lg md:text-xl leading-tight">นายกณัฐรดา กล้าหาญ</h2>
-                            <p id="statusText" class="text-sm text-gray-500 font-medium font-prompt mt-0.5">กำลังเชื่อมต่อ...</p>
+                            <h2 class="font-bold text-base md:text-lg leading-tight" style="color:var(--primary-dark)">นายกณัฐรดา กล้าหาญ</h2>
+                            <p id="statusText" class="text-sm font-medium mt-0.5" style="color:var(--muted)">กำลังเชื่อมต่อ...</p>
                         </div>
                     </div>
-                    <button id="admin-status-btn" onclick="openModal('statusModal')" class="hidden absolute top-5 right-5 md:relative md:top-0 md:right-0 w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center tap-effect hover:bg-gray-100 transition-all"><i class="fa-solid fa-pen text-sm text-gray-400"></i></button>
+                    <button id="admin-status-btn" onclick="openModal('statusModal')" class="hidden icon-btn w-10 h-10 rounded-xl items-center justify-center tap-effect">
+                        <i class="fa-solid fa-pen text-sm"></i>
+                    </button>
                 </div>
 
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="glass-stat-card p-5 rounded-[2rem] text-indigo-700">
-                        <p class="text-[10px] font-bold opacity-60 uppercase tracking-widest font-prompt">ทั้งหมด</p><h3 id="stat-total" class="text-4xl font-black mt-1">0</h3>
-                        <i class="fa-solid fa-folder-tree bg-icon"></i>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div id="stat-card-all" onclick="setStatusFilter('all')" class="stat-card p-4" style="--bar-color:var(--primary)">
+                        <p class="text-[11px] font-semibold uppercase tracking-wide" style="color:var(--muted)">ทั้งหมด</p>
+                        <h3 id="stat-total" class="font-num text-3xl font-semibold mt-1" style="color:var(--primary-dark)">0</h3>
                     </div>
-                    <div class="glass-stat-card p-5 rounded-[2rem] text-amber-600">
-                        <p class="text-[10px] font-bold opacity-60 uppercase tracking-widest font-prompt">รอดำเนินการ</p><h3 id="stat-pending" class="text-4xl font-black mt-1">0</h3>
-                        <i class="fa-solid fa-clock-rotate-left bg-icon"></i>
+                    <div id="stat-card-pending" onclick="setStatusFilter('รอดำเนินการ')" class="stat-card p-4" style="--bar-color:var(--warning)">
+                        <p class="text-[11px] font-semibold uppercase tracking-wide" style="color:var(--muted)">รอดำเนินการ</p>
+                        <h3 id="stat-pending" class="font-num text-3xl font-semibold mt-1" style="color:#8A6A1A">0</h3>
                     </div>
-                    <div class="glass-stat-card p-5 rounded-[2rem] text-emerald-600">
-                        <p class="text-[10px] font-bold opacity-60 uppercase tracking-widest font-prompt">กำลังทำ</p><h3 id="stat-active" class="text-4xl font-black mt-1">0</h3>
-                        <i class="fa-solid fa-spinner bg-icon animate-spin-slow"></i>
+                    <div id="stat-card-active" onclick="setStatusFilter('กำลังดำเนินการ')" class="stat-card p-4" style="--bar-color:var(--primary)">
+                        <p class="text-[11px] font-semibold uppercase tracking-wide" style="color:var(--muted)">กำลังดำเนินการ</p>
+                        <h3 id="stat-active" class="font-num text-3xl font-semibold mt-1" style="color:var(--primary)">0</h3>
                     </div>
-                    <div class="glass-stat-card p-5 rounded-[2rem] text-red-600">
-                        <p class="text-[10px] font-bold opacity-60 uppercase tracking-widest font-prompt">เสร็จสิ้น</p><h3 id="stat-done" class="text-4xl font-black mt-1">0</h3>
-                        <i class="fa-solid fa-check-double bg-icon"></i>
+                    <div id="stat-card-done" onclick="setStatusFilter('เสร็จสิ้น')" class="stat-card p-4" style="--bar-color:var(--success)">
+                        <p class="text-[11px] font-semibold uppercase tracking-wide" style="color:var(--muted)">เสร็จสิ้น</p>
+                        <h3 id="stat-done" class="font-num text-3xl font-semibold mt-1" style="color:var(--success)">0</h3>
                     </div>
                 </div>
 
-                <div class="mayor-announcement-box rounded-[2rem] p-5 md:p-6 shadow-xl text-white border border-white/10 font-prompt">
+                <!-- กล่องประกาศจากแอดมิน -->
+                <div class="announce-card rounded-[1.75rem] p-5 md:p-6 text-white">
                     <div class="relative z-10 flex items-center justify-between gap-3 mb-3">
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center shadow-inner border border-white/20">
-                                <i class="fa-solid fa-bullhorn text-yellow-300 text-xl"></i>
+                            <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                                <i class="fa-solid fa-bullhorn text-amber-300"></i>
                             </div>
-                            <div>
-                                <h3 class="font-black text-xl md:text-2xl leading-tight text-yellow-100">ประกาศจากแอดมิน</h3>
-                            </div>
+                            <h3 class="font-bold text-base md:text-lg">ประกาศจากแอดมิน</h3>
                         </div>
-                        <button id="admin-announcement-btn" onclick="openAnnouncementModal()" class="hidden w-10 h-10 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center tap-effect hover:bg-white/25 transition-all">
-                            <i class="fa-solid fa-pen text-sm text-white"></i>
+                        <button id="admin-announcement-btn" onclick="openAnnouncementModal()" class="hidden w-9 h-9 rounded-xl bg-white/15 border border-white/20 items-center justify-center tap-effect">
+                            <i class="fa-solid fa-pen text-xs"></i>
                         </button>
                     </div>
-                    <div class="relative z-10 bg-white/12 rounded-2xl px-4 py-3 border border-white/15 announcement-marquee-wrap shadow-inner">
-                        <div id="announcementText" class="announcement-marquee-text text-base md:text-lg font-bold text-white">ยินดีต้อนรับเข้าสู่ระบบคิวงาน อบต. ชำผักแพว Online</div>
+                    <div class="relative z-10 bg-white/10 rounded-xl px-4 py-3 border border-white/15 announce-marquee-wrap">
+                        <div id="announcementText" class="announce-marquee-text text-sm md:text-base font-medium">ยินดีต้อนรับเข้าสู่ระบบคิวงาน อบต. ชำผักแพว Online</div>
                     </div>
                 </div>
 
-                <div id="dashboardTaskList" class="w-full">
-                    <div class="py-12 text-center text-gray-400 font-prompt">
-                        <i class="fa-solid fa-spinner animate-spin text-3xl mb-3 text-main"></i>
+                <!-- ช่องทางการติดต่อ อบต. (SVG Icons) ใต้ประกาศ -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <a href="https://www.facebook.com/xbt.cha.phak.ph.w/" target="_blank" class="card p-3.5 flex items-center gap-3 tap-effect hover:shadow-md transition-shadow">
+                        <div class="w-10 h-10 rounded-xl bg-[#1877F2]/10 text-[#1877F2] flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-xs text-[var(--muted)]">Facebook</p>
+                            <p class="text-xs sm:text-sm font-bold truncate" style="color:var(--primary-dark)">อบต.ชำผักแพว</p>
+                        </div>
+                    </a>
+
+                    <a href="https://lin.ee/zXdZrlY" target="_blank" class="card p-3.5 flex items-center gap-3 tap-effect hover:shadow-md transition-shadow">
+                        <div class="w-10 h-10 rounded-xl bg-[#06C755]/10 text-[#06C755] flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.035 9.608.391.084.922.258 1.057.592.122.303.079.778.039 1.085l-.171 1.027c-.053.303-.242 1.186 1.039.645 1.281-.54 6.911-4.069 9.43-6.965 1.761-1.996 2.671-3.992 2.671-5.992z"/></svg>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-xs text-[var(--muted)]">LINE Official</p>
+                            <p class="text-xs sm:text-sm font-bold truncate" style="color:var(--primary-dark)">ติดต่อผ่านไลน์</p>
+                        </div>
+                    </a>
+
+                    <a href="tel:036714081" class="card p-3.5 flex items-center gap-3 tap-effect hover:shadow-md transition-shadow">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M20 15.5c-1.2 0-2.4-.2-3.6-.6-.3-.1-.7 0-1 .2l-2.2 2.2c-2.8-1.4-5.1-3.8-6.6-6.6l2.2-2.2c.3-.3.4-.7.2-1-.4-1.1-.6-2.3-.6-3.5 0-.6-.4-1-1-1H4c-.6 0-1 .4-1 1 0 9.4 7.6 17 17 17 .6 0 1-.4 1-1v-3.5c0-.6-.4-1-1-1zM19 12h2c0-4.97-4.03-9-9-9v2c3.87 0 7 3.13 7 7zm-4 0h2c0-2.76-2.24-5-5-5v2c1.66 0 3 1.34 3 3z"/></svg>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-xs text-[var(--muted)]">เบอร์โทรศัพท์</p>
+                            <p class="text-xs sm:text-sm font-bold truncate" style="color:var(--primary-dark)">036-714081</p>
+                        </div>
+                    </a>
+
+                    <a href="https://www.chumpakpaew.go.th/index.php" target="_blank" class="card p-3.5 flex items-center gap-3 tap-effect hover:shadow-md transition-shadow">
+                        <div class="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-600 flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-xs text-[var(--muted)]">เว็บไซต์ อบต.</p>
+                            <p class="text-xs sm:text-sm font-bold truncate" style="color:var(--primary-dark)">chumpakpaew.go.th</p>
+                        </div>
+                    </a>
+                </div>
+
+                <div id="dashboardTaskList">
+                    <div class="py-14 text-center" style="color:var(--muted)">
+                        <i class="fa-solid fa-spinner animate-spin text-2xl mb-3" style="color:var(--primary)"></i>
                         <p>กำลังเชื่อมต่อฐานข้อมูล...</p>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div id="page-calendar" class="hidden space-y-6">
-                <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100 max-w-3xl mx-auto">
-                    <div class="flex justify-between items-center mb-6">
-                        <button onclick="prevMonth()" class="w-10 h-10 rounded-full bg-gray-50 border tap-effect"><i class="fa-solid fa-chevron-left text-gray-500"></i></button>
-                        <h3 id="currentMonthYear" class="font-black text-main text-lg uppercase"></h3>
-                        <button onclick="nextMonth()" class="w-10 h-10 rounded-full bg-gray-50 border tap-effect"><i class="fa-solid fa-chevron-right text-gray-500"></i></button>
+            <!-- ============ CALENDAR ============ -->
+            <section id="page-calendar" class="hidden space-y-5">
+                <div class="card p-5 md:p-6 max-w-3xl mx-auto">
+                    <div class="flex justify-between items-center mb-5">
+                        <button onclick="prevMonth()" class="icon-btn w-9 h-9 rounded-full flex items-center justify-center tap-effect"><i class="fa-solid fa-chevron-left text-sm"></i></button>
+                        <h3 id="currentMonthYear" class="font-bold text-base md:text-lg" style="color:var(--primary-dark)"></h3>
+                        <button onclick="nextMonth()" class="icon-btn w-9 h-9 rounded-full flex items-center justify-center tap-effect"><i class="fa-solid fa-chevron-right text-sm"></i></button>
                     </div>
-                    <div class="grid grid-cols-7 gap-1 text-center font-bold text-xs text-gray-400 mb-4 uppercase border-b pb-4">
-                        <div class="text-red-400">อา</div><div>จ</div><div>อ</div><div>พ</div><div>พฤ</div><div>ศ</div><div class="text-blue-400">ส</div>
+                    <div class="grid grid-cols-7 gap-1 text-center font-semibold text-[11px] mb-2" style="color:var(--muted)">
+                        <div class="text-[var(--danger)]">อา</div><div>จ</div><div>อ</div><div>พ</div><div>พฤ</div><div>ศ</div><div style="color:var(--primary)">ส</div>
                     </div>
-                    <div id="daysGrid" class="grid grid-cols-7 gap-2"></div>
+                    <div id="daysGrid" class="grid grid-cols-7 gap-1"></div>
+                    <div class="flex items-center gap-5 text-xs mt-4 pt-4" style="color:var(--muted); border-top:1px solid var(--border)">
+                        <span class="flex items-center gap-1.5"><span class="cal-dot" style="background:var(--primary)"></span>มีคิวงาน</span>
+                        <span class="flex items-center gap-1.5"><span class="cal-dot" style="background:var(--danger)"></span>วันหยุดราชการ</span>
+                    </div>
                 </div>
-                <div id="selectedDateTasks" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-            </div>
+                <div id="selectedDateTasks" class="max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </section>
 
-            <div id="page-tasks" class="hidden space-y-6">
-                <h2 class="font-black text-main text-lg border-l-4 border-blue-500 pl-3 uppercase mb-4">สถานะคิวทั้งหมด</h2>
-                <div id="fullTaskList" class="w-full"></div>
-            </div>
-
-            <div id="page-contacts" class="hidden space-y-6">
-                <div class="max-w-3xl mx-auto space-y-6">
-                    <div class="relative">
-                        <input type="text" id="contactSearch" onkeyup="renderContacts(this.value)" placeholder="ค้นหารายชื่อ ชื่อเล่น หรือ ตำแหน่ง..." class="w-full p-4 pl-12 bg-white rounded-2xl shadow-md border-none outline-none focus:ring-2 focus:ring-main font-prompt">
-                        <i class="fa-solid fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-300"></i>
-                    </div>
-                    <button id="admin-add-contact" onclick="openContactModal()" class="hidden w-full py-4 bg-indigo-50 text-indigo-700 rounded-2xl font-black border-2 border-dashed border-indigo-200 tap-effect">
-                        <i class="fa-solid fa-user-plus mr-2"></i> เพิ่มรายชื่อใหม่
+            <!-- ============ FORMS (แบบฟอร์ม) ============ -->
+            <section id="page-forms" class="hidden space-y-5">
+                <div class="flex items-center justify-between gap-3 flex-wrap">
+                    <h2 class="font-bold text-base md:text-lg" style="color:var(--primary-dark)">แบบฟอร์มดาวน์โหลด</h2>
+                    <button id="admin-add-form" onclick="openFormModal()" class="hidden py-2.5 px-4 rounded-2xl font-semibold text-sm items-center justify-center gap-2 tap-effect" style="background:var(--primary-tint); color:var(--primary-dark); border:1.5px dashed #BFDBF5">
+                        <i class="fa-solid fa-plus"></i> เพิ่มแบบฟอร์ม
                     </button>
-                    <div id="contactGroups" class="space-y-8"></div>
                 </div>
-            </div>
+                <div id="formsList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </section>
+
+            <!-- ============ CONTACTS ============ -->
+            <section id="page-contacts" class="hidden space-y-5">
+                <div class="max-w-3xl mx-auto space-y-5">
+                    <div class="relative">
+                        <input type="text" id="contactSearch" oninput="renderContactsPage(this.value)" placeholder="ค้นหารายชื่อ ชื่อเล่น หรือตำแหน่ง..." class="field pl-11">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-sm" style="color:var(--muted)"></i>
+                    </div>
+                    <button id="admin-add-contact" onclick="openContactModal()" class="hidden w-full py-3.5 rounded-2xl font-semibold text-sm items-center justify-center gap-2" style="background:var(--primary-tint); color:var(--primary-dark); border:1.5px dashed #BFDBF5">
+                        <i class="fa-solid fa-user-plus"></i> เพิ่มรายชื่อใหม่
+                    </button>
+                    <div id="contactGroups" class="space-y-6"></div>
+                </div>
+            </section>
         </main>
 
-        <button id="fabAdd" onclick="openTaskModal()" class="hidden fixed bottom-8 right-6 md:bottom-10 md:right-10 w-16 h-16 bg-main text-white rounded-3xl shadow-2xl flex items-center justify-center text-3xl z-[60] border-4 border-white transform tap-effect">
+        <button id="fabAdd" onclick="openTaskModal()" class="hidden fab fixed bottom-7 right-5 md:bottom-9 md:right-9 w-15 h-15 btn-primary rounded-2xl items-center justify-center text-2xl z-[60] border-4 border-white tap-effect" style="width:58px;height:58px;">
             <i class="fa-solid fa-plus"></i>
         </button>
     </div>
 
-    <div id="taskModal" class="hidden fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm font-prompt">
-        <div class="bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
-            <div class="flex justify-between items-center mb-6">
-                <h2 id="taskModalTitle" class="text-2xl font-black text-main">บันทึกคิวงาน</h2>
-                <button onclick="closeModal('taskModal')" class="text-gray-400 hover:text-red-500 tap-effect"><i class="fa-solid fa-times text-2xl"></i></button>
+    <!-- ============ MODAL: TASK ============ -->
+    <div id="taskModal" class="hidden fixed inset-0 z-[100] bg-[#0F2A44]/50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-lg rounded-[1.75rem] shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar modal-enter">
+            <div class="px-6 py-5 flex justify-between items-center sticky top-0 z-10" style="background:var(--primary-tint); border-bottom:1px solid var(--border)">
+                <h2 id="taskModalTitle" class="text-lg font-bold" style="color:var(--primary-dark)">บันทึกคิวงาน</h2>
+                <button onclick="closeModal('taskModal')" class="icon-btn w-9 h-9 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <form id="taskForm" class="space-y-4">
+            <form id="taskForm" class="p-6 space-y-4">
                 <input type="hidden" id="taskEditId">
-                <input type="text" id="t-title" placeholder="ชื่องาน/ภารกิจ" required class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none font-bold text-main">
-                <textarea id="t-detail" rows="3" placeholder="รายละเอียดของคิวงาน เช่น วัตถุประสงค์ หมายเหตุ รายละเอียดเพิ่มเติม" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none text-sm leading-relaxed resize-none"></textarea>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-1"><label class="text-[10px] font-bold text-gray-400 pl-2">วันที่เริ่ม</label><input type="date" id="t-startDate" required class="w-full p-3 bg-gray-50 rounded-xl border border-gray-100 text-sm"></div>
-                    <div class="space-y-1"><label class="text-[10px] font-bold text-gray-400 pl-2">เวลาเริ่ม</label><input type="time" id="t-startTime" class="w-full p-3 bg-gray-50 rounded-xl border border-gray-100 text-sm"></div>
+                <input type="text" id="t-title" placeholder="ชื่องาน/ภารกิจ" required class="field font-semibold">
+                <textarea id="t-detail" rows="3" placeholder="รายละเอียดของคิวงาน เช่น วัตถุประสงค์ หมายเหตุ" class="field resize-none leading-relaxed text-sm"></textarea>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="text-[11px] font-semibold pl-1" style="color:var(--muted)">วันที่เริ่ม</label><input type="date" id="t-startDate" required class="field mt-1 text-sm"></div>
+                    <div><label class="text-[11px] font-semibold pl-1" style="color:var(--muted)">เวลาเริ่ม</label><input type="time" id="t-startTime" class="field mt-1 text-sm"></div>
                 </div>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-1"><label class="text-[10px] font-bold text-gray-400 pl-2">วันที่สิ้นสุด (ถ้ามี)</label><input type="date" id="t-endDate" class="w-full p-3 bg-gray-50 rounded-xl border border-gray-100 text-sm"></div>
-                    <div class="space-y-1"><label class="text-[10px] font-bold text-gray-400 pl-2">เวลาสิ้นสุด (ถ้ามี)</label><input type="time" id="t-endTime" class="w-full p-3 bg-gray-50 rounded-xl border border-gray-100 text-sm"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="text-[11px] font-semibold pl-1" style="color:var(--muted)">วันที่สิ้นสุด (ถ้ามี)</label><input type="date" id="t-endDate" class="field mt-1 text-sm"></div>
+                    <div><label class="text-[11px] font-semibold pl-1" style="color:var(--muted)">เวลาสิ้นสุด (ถ้ามี)</label><input type="time" id="t-endTime" class="field mt-1 text-sm"></div>
                 </div>
-                
-                <select id="t-status" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100"><option>รอดำเนินการ</option><option>กำลังดำเนินการ</option><option>เสร็จสิ้น</option></select>
-                <input type="text" id="t-loc" placeholder="สถานที่" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                <input type="text" id="t-dress" placeholder="การแต่งกาย" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                <input type="text" id="t-coord" placeholder="ผู้ประสานงาน" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-gray-400 pl-2">ผู้รับผิดชอบ เลือกได้หลายคน</label>
-                    <select id="t-owner" multiple class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 min-h-[150px] text-sm">
-                        <option>นายก อบต.</option>
-                        <option>รองนายก อบต.</option>
-                        <option>เลขานุการนายก</option>
-                        <option>ปลัด อบต.</option>
-                        <option>รองปลัด อบต.</option>
-                        <option>สำนักปลัด</option>
-                        <option>กองช่าง</option>
-                        <option>กองคลัง</option>
-                        <option>กองการศึกษาฯ</option>
-                        <option>กองสวัสดิการสังคม</option>
-                        <option>กองสาธารณสุขและสิ่งแวดล้อม</option>
-                        <option>ประธานสภาฯ</option>
-                        <option>รองประธานสภาฯ</option>
-                        <option>สมาชิกสภาฯ</option>
-                        <option>อื่นๆ</option>
-                    </select>
-                    <p class="text-[11px] text-gray-400 pl-2">กด Ctrl ค้างไว้เพื่อเลือกหลายรายการบนคอมพิวเตอร์ หรือแตะเลือกหลายรายการบนมือถือบางรุ่น</p>
+
+                <div>
+                    <label class="text-[11px] font-semibold pl-1" style="color:var(--muted)">สถานะ</label>
+                    <div class="seg mt-1">
+                        <div class="seg-btn" data-status="รอดำเนินการ" onclick="pickStatus('รอดำเนินการ')">รอดำเนินการ</div>
+                        <div class="seg-btn" data-status="กำลังดำเนินการ" onclick="pickStatus('กำลังดำเนินการ')">กำลังดำเนินการ</div>
+                        <div class="seg-btn" data-status="เสร็จสิ้น" onclick="pickStatus('เสร็จสิ้น')">เสร็จสิ้น</div>
+                    </div>
+                    <input type="hidden" id="t-status" value="รอดำเนินการ">
                 </div>
-                <input type="url" id="t-link" placeholder="ลิงก์แนบไฟล์ Google Drive (ถ้ามี)" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 text-sm">
-                
-                <div class="pt-4 flex gap-3">
-                    <button type="button" id="btnDeleteTask" onclick="deleteTask()" class="hidden px-5 bg-red-50 text-red-500 rounded-2xl tap-effect"><i class="fa-solid fa-trash"></i></button>
-                    <button type="button" onclick="closeModal('taskModal')" class="flex-1 py-4 bg-gray-100 text-gray-500 rounded-2xl font-bold tap-effect">ยกเลิก</button>
-                    <button type="submit" id="btnSaveTask" class="flex-1 py-4 bg-main text-white rounded-2xl font-bold shadow-lg tap-effect">บันทึกคิวงาน</button>
+
+                <input type="text" id="t-loc" placeholder="สถานที่" class="field">
+                <input type="text" id="t-dress" placeholder="การแต่งกาย" class="field">
+                <input type="text" id="t-coord" placeholder="ผู้ประสานงาน" class="field">
+
+                <div>
+                    <label class="text-[11px] font-semibold pl-1" style="color:var(--muted)">ผู้รับผิดชอบ (เลือกได้หลายรายการ)</label>
+                    <div id="ownerChips" class="flex flex-wrap gap-2 mt-2"></div>
+                </div>
+
+                <div>
+                    <label class="text-[11px] font-semibold pl-1" style="color:var(--muted)">ไฟล์เอกสารแนบ (PDF หรือ PNG) — จะถูกอัปโหลดขึ้น Google Drive อัตโนมัติ</label>
+                    <input type="file" id="t-fileInput" accept=".pdf,.png,application/pdf,image/png" class="field text-sm mt-1" onchange="handleTaskFileSelect(this)">
+                    <div id="fileCurrentPreview" class="hidden mt-2 items-center justify-between gap-2 p-3 rounded-xl text-sm" style="background:var(--primary-tint); color:var(--primary-dark)">
+                        <span id="fileCurrentName" class="truncate flex-1"></span>
+                        <a id="fileCurrentLink" href="#" target="_blank" class="icon-btn w-8 h-8 rounded-lg flex items-center justify-center shrink-0"><i class="fa-solid fa-eye text-xs"></i></a>
+                        <button type="button" onclick="removeTaskFile()" class="icon-btn w-8 h-8 rounded-lg flex items-center justify-center shrink-0"><i class="fa-solid fa-trash text-xs"></i></button>
+                    </div>
+                    <div id="fileUploadStatus" class="hidden mt-2 text-xs font-semibold" style="color:var(--primary)"><i class="fa-solid fa-spinner animate-spin mr-1"></i>กำลังอัปโหลดไฟล์ขึ้น Google Drive...</div>
+                    <input type="hidden" id="t-fileUrl">
+                    <input type="hidden" id="t-fileName">
+                </div>
+
+                <div class="pt-2 flex gap-3">
+                    <button type="button" id="btnDeleteTask" onclick="deleteTask()" class="hidden px-5 btn-danger-soft rounded-2xl tap-effect"><i class="fa-solid fa-trash"></i></button>
+                    <button type="button" onclick="closeModal('taskModal')" class="flex-1 py-3.5 btn-ghost rounded-2xl font-semibold tap-effect">ยกเลิก</button>
+                    <button type="submit" id="btnSaveTask" class="flex-1 py-3.5 btn-primary rounded-2xl font-semibold tap-effect">บันทึกคิวงาน</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="contactModal" class="hidden fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm font-prompt">
-        <div class="bg-white w-full max-w-sm rounded-[3rem] p-8 shadow-2xl border-t-8 border-indigo-600">
-            <h2 id="contactModalTitle" class="text-xl font-black text-indigo-900 mb-6 uppercase">จัดการรายชื่อ</h2>
-            <form id="contactForm" class="space-y-4">
+    <!-- ============ MODAL: CONTACT ============ -->
+    <div id="contactModal" class="hidden fixed inset-0 z-[100] bg-[#0F2A44]/50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-[1.75rem] shadow-2xl modal-enter">
+            <div class="px-6 py-5 flex justify-between items-center" style="background:var(--primary-tint); border-bottom:1px solid var(--border)">
+                <h2 id="contactModalTitle" class="text-lg font-bold" style="color:var(--primary-dark)">จัดการรายชื่อ</h2>
+                <button onclick="closeModal('contactModal')" class="icon-btn w-9 h-9 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="contactForm" class="p-6 space-y-3.5">
                 <input type="hidden" id="contactEditId">
-                <input type="text" id="c-name" placeholder="ชื่อ-นามสกุล" required class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 font-bold">
-                <input type="text" id="c-nickname" placeholder="ชื่อเล่น" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                <input type="text" id="c-role" placeholder="ตำแหน่ง" required class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                <input type="tel" id="c-tel" placeholder="เบอร์โทรศัพท์" required class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 font-bold">
-                <select id="c-group" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                    <option value="1">1. ผู้บริหาร</option><option value="2">2. ข้าราชการ</option><option value="3">3. พนักงานจ้าง</option><option value="4">4. พนักงานจ้างเหมา</option><option value="5">5. สมาชิก อบต.</option><option value="6">6. กำนัน</option><option value="7">7. ผู้ใหญ่บ้าน</option><option value="8">8. ผู้ช่วยผู้ใหญ่บ้าน</option>
+                <input type="text" id="c-name" placeholder="ชื่อ-นามสกุล" required class="field font-semibold">
+                <input type="text" id="c-nickname" placeholder="ชื่อเล่น" class="field">
+                <input type="text" id="c-role" placeholder="ตำแหน่ง" required class="field">
+                <input type="tel" id="c-tel" placeholder="เบอร์โทรศัพท์" required class="field font-semibold">
+                <input type="url" id="c-photo" placeholder="ลิงก์รูปภาพจาก Google Drive (ถ้ามี)" class="field text-sm">
+                <select id="c-group" class="field">
+                    <option value="1">1. ผู้บริหาร</option><option value="2">2. ข้าราชการ</option><option value="3">3. พนักงานจ้าง</option><option value="4">4. พนักงานจ้างเหมา</option><option value="5">5. สมาชิก อบต.</option><option value="6">6. กำนัน</option><option value="7">7. ผู้ใหญ่บ้าน</option><option value="8">8. ผู้ช่วยผู้ใหญ่บ้าน</option><option value="9">9. เด็กฝึกงาน</option><option value="10">10. หน่วยงานนอก</option><option value="11">11. อื่นๆ</option>
                 </select>
-                <div class="flex gap-3 pt-6">
-                    <button type="button" onclick="closeModal('contactModal')" class="flex-1 py-4 bg-gray-100 text-gray-400 rounded-2xl font-bold tap-effect">ยกเลิก</button>
-                    <button type="submit" class="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-black shadow-lg tap-effect">บันทึก</button>
+                <div class="flex gap-3 pt-3">
+                    <button type="button" onclick="closeModal('contactModal')" class="flex-1 py-3.5 btn-ghost rounded-2xl font-semibold tap-effect">ยกเลิก</button>
+                    <button type="submit" class="flex-1 py-3.5 btn-primary rounded-2xl font-semibold tap-effect">บันทึก</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="loginModal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md font-prompt">
-        <div class="bg-white w-full max-w-sm rounded-[3rem] p-10 shadow-2xl text-center">
-            <div class="w-16 h-16 bg-main rounded-full flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-lock text-white text-2xl"></i></div>
-            <h2 class="text-xl font-black text-main mb-6 uppercase tracking-widest">Admin</h2>
-            <input type="password" id="adminPassword" placeholder="••••" class="w-full p-4 bg-gray-50 rounded-2xl text-center font-black mb-8 outline-none text-2xl tracking-[0.5em] border focus:border-main focus:ring-1">
+    <!-- ============ MODAL: FORM (แบบฟอร์ม) ============ -->
+    <div id="formModal" class="hidden fixed inset-0 z-[100] bg-[#0F2A44]/50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-[1.75rem] shadow-2xl modal-enter">
+            <div class="px-6 py-5 flex justify-between items-center" style="background:var(--primary-tint); border-bottom:1px solid var(--border)">
+                <h2 id="formModalTitle" class="text-lg font-bold" style="color:var(--primary-dark)">เพิ่มแบบฟอร์ม</h2>
+                <button onclick="closeModal('formModal')" class="icon-btn w-9 h-9 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="formForm" class="p-6 space-y-3.5">
+                <input type="hidden" id="f-editId">
+                <input type="text" id="f-name" placeholder="ชื่อแบบฟอร์ม เช่น ใบลาป่วย" required class="field font-semibold">
+                <div>
+                    <label class="text-[11px] font-semibold pl-1" style="color:var(--muted)">ไฟล์แบบฟอร์ม (PDF หรือ PNG)</label>
+                    <input type="file" id="f-fileInput" accept=".pdf,.png,application/pdf,image/png" class="field text-sm mt-1" onchange="handleFormFileSelect(this)">
+                    <div id="formFileCurrentPreview" class="hidden mt-2 items-center justify-between gap-2 p-3 rounded-xl text-sm" style="background:var(--primary-tint); color:var(--primary-dark)">
+                        <span id="formFileCurrentName" class="truncate flex-1"></span>
+                        <a id="formFileCurrentLink" href="#" target="_blank" class="icon-btn w-8 h-8 rounded-lg flex items-center justify-center shrink-0"><i class="fa-solid fa-eye text-xs"></i></a>
+                    </div>
+                    <div id="formFileUploadStatus" class="hidden mt-2 text-xs font-semibold" style="color:var(--primary)"><i class="fa-solid fa-spinner animate-spin mr-1"></i>กำลังอัปโหลดไฟล์ขึ้น Google Drive...</div>
+                    <input type="hidden" id="f-fileUrl">
+                    <input type="hidden" id="f-fileName">
+                </div>
+                <div class="flex gap-3 pt-3">
+                    <button type="button" id="btnDeleteForm" onclick="deleteFormFromModal()" class="hidden px-5 btn-danger-soft rounded-2xl tap-effect"><i class="fa-solid fa-trash"></i></button>
+                    <button type="button" onclick="closeModal('formModal')" class="flex-1 py-3.5 btn-ghost rounded-2xl font-semibold tap-effect">ยกเลิก</button>
+                    <button type="submit" class="flex-1 py-3.5 btn-primary rounded-2xl font-semibold tap-effect">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============ MODAL: LOGIN ============ -->
+    <div id="loginModal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-6 bg-[#0F2A44]/55 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-[1.75rem] p-8 shadow-2xl text-center modal-enter">
+            <div class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style="background:var(--primary)"><i class="fa-solid fa-lock text-white text-xl"></i></div>
+            <h2 class="text-lg font-bold mb-6" style="color:var(--primary-dark)">เข้าสู่ระบบแอดมิน</h2>
+            <input type="password" id="adminPassword" placeholder="••••" class="field text-center font-bold mb-6 text-2xl tracking-[0.5em]">
             <div class="flex gap-3">
-                <button onclick="closeModal('loginModal')" class="flex-1 py-3 rounded-2xl text-gray-400 font-bold bg-gray-100 tap-effect">ยกเลิก</button>
-                <button onclick="verifyAdminLogin()" class="flex-1 py-3 rounded-2xl bg-main text-white font-bold tap-effect">ยืนยัน</button>
+                <button onclick="closeModal('loginModal')" class="flex-1 py-3 rounded-2xl font-semibold btn-ghost tap-effect">ยกเลิก</button>
+                <button onclick="verifyAdminLogin()" class="flex-1 py-3 rounded-2xl btn-primary font-semibold tap-effect">ยืนยัน</button>
             </div>
         </div>
     </div>
 
-    <div id="announcementModal" class="hidden fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm font-prompt">
-        <div class="bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl border-t-8 border-blue-700">
-            <div class="flex justify-between items-center mb-5">
-                <h2 class="text-xl font-black text-main">แก้ไขประกาศจากแอดมิน</h2>
-                <button onclick="closeModal('announcementModal')" class="text-gray-400 hover:text-red-500 tap-effect"><i class="fa-solid fa-times text-2xl"></i></button>
+    <!-- ============ MODAL: ANNOUNCEMENT ============ -->
+    <div id="announcementModal" class="hidden fixed inset-0 z-[100] bg-[#0F2A44]/50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-lg rounded-[1.75rem] p-6 shadow-2xl modal-enter">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold" style="color:var(--primary-dark)">แก้ไขประกาศจากแอดมิน</h2>
+                <button onclick="closeModal('announcementModal')" class="icon-btn w-9 h-9 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <textarea id="announcementInput" rows="4" placeholder="พิมพ์ข้อความประกาศ..." class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 outline-none focus:ring-2 focus:ring-main resize-none leading-relaxed"></textarea>
-            <div class="flex gap-3 mt-6">
-                <button onclick="closeModal('announcementModal')" class="flex-1 py-4 bg-gray-100 text-gray-500 rounded-2xl font-bold tap-effect">ยกเลิก</button>
-                <button onclick="saveAnnouncement()" class="flex-1 py-4 bg-main text-white rounded-2xl font-bold shadow-lg tap-effect">บันทึกประกาศ</button>
+            <textarea id="announcementInput" rows="4" placeholder="พิมพ์ข้อความประกาศ..." class="field resize-none leading-relaxed"></textarea>
+            <div class="flex gap-3 mt-5">
+                <button onclick="closeModal('announcementModal')" class="flex-1 py-3.5 btn-ghost rounded-2xl font-semibold tap-effect">ยกเลิก</button>
+                <button onclick="saveAnnouncement()" class="flex-1 py-3.5 btn-primary rounded-2xl font-semibold tap-effect">บันทึกประกาศ</button>
             </div>
         </div>
     </div>
 
-    <div id="statusModal" class="hidden fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm font-prompt">
-        <div class="bg-white w-full max-w-xs rounded-[2.5rem] p-8 text-center border-t-8 border-emerald-500 shadow-2xl">
-            <h3 class="mb-6 text-main leading-tight font-black text-xl">อัปเดตสถานะนายก</h3>
-            <div class="grid gap-3">
-                <button onclick="updateMayorStatus('อยู่อบต.', 'bg-green-500')" class="p-4 bg-green-50 text-green-700 font-bold rounded-2xl tap-effect hover:bg-green-100 text-lg border border-green-100">🟢 อยู่อบต.</button>
-                <button onclick="updateMayorStatus('ลงพื้นที่/ติดภารกิจ', 'bg-amber-500')" class="p-4 bg-amber-50 text-amber-700 font-bold rounded-2xl tap-effect hover:bg-amber-100 text-lg border border-amber-100">🟡 ลงพื้นที่</button>
-                <button onclick="updateMayorStatus('ไม่อยู่อบต.', 'bg-red-500')" class="p-4 bg-red-50 text-red-700 font-bold rounded-2xl tap-effect hover:bg-red-100 text-lg border border-red-100">🔴 ไม่อยู่อบต.</button>
-                <button onclick="resetMayorStatusAuto()" class="p-4 bg-blue-50 text-blue-700 font-bold rounded-2xl tap-effect hover:bg-blue-100 text-lg border border-blue-100">🔄 ใช้สถานะอัตโนมัติ</button>
+    <!-- ============ MODAL: MAYOR STATUS ============ -->
+    <div id="statusModal" class="hidden fixed inset-0 z-[100] bg-[#0F2A44]/50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-xs rounded-[1.75rem] p-7 text-center shadow-2xl modal-enter">
+            <h3 class="mb-5 font-bold text-base" style="color:var(--primary-dark)">อัปเดตสถานะนายก</h3>
+            <div class="grid gap-2.5">
+                <button onclick="updateMayorStatus('อยู่อบต.','bg-emerald-500')" class="p-3.5 rounded-2xl font-semibold tap-effect text-sm" style="background:var(--success-tint); color:#2E6B4B">🟢 อยู่ อบต.</button>
+                <button onclick="updateMayorStatus('ลงพื้นที่/ติดภารกิจ','bg-amber-500')" class="p-3.5 rounded-2xl font-semibold tap-effect text-sm" style="background:var(--warning-tint); color:#8A6A1A">🟡 ลงพื้นที่</button>
+                <button onclick="updateMayorStatus('ไม่อยู่ อบต.','bg-red-500')" class="p-3.5 rounded-2xl font-semibold tap-effect text-sm" style="background:var(--danger-tint); color:#A44532">🔴 ไม่อยู่ อบต.</button>
+                <button onclick="resetMayorStatusAuto()" class="p-3.5 rounded-2xl font-semibold tap-effect text-sm" style="background:var(--primary-tint); color:var(--primary-dark)">🔄 ใช้สถานะอัตโนมัติ</button>
             </div>
-            <button onclick="closeModal('statusModal')" class="mt-6 text-gray-400 tap-effect uppercase text-sm font-bold bg-gray-50 px-6 py-3 rounded-xl w-full">ปิดหน้าต่าง</button>
+            <button onclick="closeModal('statusModal')" class="mt-5 btn-ghost tap-effect text-sm font-semibold px-6 py-3 rounded-xl w-full">ปิดหน้าต่าง</button>
         </div>
     </div>
 
     <script>
-        const holidays2026 = { "01-01": "วันขึ้นปีใหม่", "03-03": "วันมาฆบูชา", "04-06": "วันจักรี", "04-13": "วันสงกรานต์", "04-14": "วันสงกรานต์", "04-15": "วันสงกรานต์", "05-01": "วันแรงงานแห่งชาติ", "05-04": "วันฉัตรมงคล", "05-11": "วันพืชมงคลฯ", "05-31": "วันวิสาขบูชา", "06-01": "ชดเชยวันวิสาขบูชา", "06-03": "วันเฉลิมฯ พระราชินี", "07-28": "วันเฉลิมฯ ร.10", "07-29": "วันอาสาฬหบูชา", "07-30": "วันเข้าพรรษา", "08-12": "วันแม่แห่งชาติ", "10-13": "วันนวมินทรมหาราช", "10-23": "วันปิยมหาราช", "10-26": "วันออกพรรษา", "12-05": "วันพ่อแห่งชาติ", "12-07": "ชดเชยวันพ่อแห่งชาติ", "12-10": "วันรัฐธรรมนูญ", "12-31": "วันสิ้นปี" };
+        // ---------- static reference data ----------
+        const holidays2026 = { "01-01":"วันขึ้นปีใหม่","03-03":"วันมาฆบูชา","04-06":"วันจักรี","04-13":"วันสงกรานต์","04-14":"วันสงกรานต์","04-15":"วันสงกรานต์","05-01":"วันแรงงานแห่งชาติ","05-04":"วันฉัตรมงคล","05-11":"วันพืชมงคลฯ","05-31":"วันวิสาขบูชา","06-01":"ชดเชยวันวิสาขบูชา","06-03":"วันเฉลิมฯ พระราชินี","07-28":"วันเฉลิมฯ ร.10","07-29":"วันอาสาฬหบูชา","07-30":"วันเข้าพรรษา","08-12":"วันแม่แห่งชาติ","10-13":"วันนวมินทรมหาราช","10-23":"วันปิยมหาราช","10-26":"วันออกพรรษา","12-05":"วันพ่อแห่งชาติ","12-07":"ชดเชยวันพ่อแห่งชาติ","12-10":"วันรัฐธรรมนูญ","12-31":"วันสิ้นปี" };
+        const OWNER_OPTIONS = ['นายก อบต.','รองนายก อบต.','เลขานุการนายก','ปลัด อบต.','รองปลัด อบต.','สำนักปลัด','กองช่าง','กองคลัง','กองการศึกษาฯ','กองสวัสดิการสังคม','กองสาธารณสุขและสิ่งแวดล้อม','ประธานสภาฯ','รองประธานสภาฯ','สมาชิกสภาฯ','อื่นๆ'];
+        const CONTACT_GROUPS = { "1":"ผู้บริหาร","2":"ข้าราชการ","3":"พนักงานจ้าง","4":"พนักงานจ้างเหมา","5":"สมาชิก อบต.","6":"กำนัน","7":"ผู้ใหญ่บ้าน","8":"ผู้ช่วยผู้ใหญ่บ้าน","9":"เด็กฝึกงาน","10":"หน่วยงานนอก","11":"อื่นๆ" };
+        const SHEETS_BACKUP_URL = 'https://script.google.com/macros/s/AKfycbx2WLgayblJSdhnA_Ad0Bjeng0tjn4aw7UzngKCctWOHJJYDCruvw1hpsSr4t-bNe8ogQ/exec';
+        const defaultAnnouncement = 'ยินดีต้อนรับเข้าสู่ระบบคิวงาน อบต. ชำผักแพว Online';
 
-        window.tasks = []; 
-        window.contacts = []; 
-        window.mayorStatus = { text: 'อยู่อบต.', color: 'bg-green-500' };
-        window.mayorStatusManual = false;
-        window.mayorAnnouncement = 'ยินดีต้อนรับเข้าสู่ระบบคิวงาน อบต. ชำผักแพว Online';
-        window.cloudLoaded = false;
-        window.isAdmin = false; 
-        window.currentPage = 'dashboard';
+        // URL Web App เวอร์ชัน 7
+        const DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbyOPdP-42ZBcHWGfnYdT4ylDWuzk8PGPsiZB76pJPGhBFHp1KsnhiQKejZztJginZje4Q/exec';
+
+        // ---------- state ----------
+        let tasks = [];
+        let contacts = [];
+        let formsList = [];
+        let mayorStatus = { text:'อยู่ อบต.', color:'bg-emerald-500' };
+        let mayorStatusManual = false;
+        let mayorAnnouncement = defaultAnnouncement;
+        let isAdmin = false;
+        let currentPage = 'dashboard';
         let currentViewDate = new Date();
+        let statusFilter = 'all';
+        let selectedOwners = [];
 
+        // ---------- firebase (single init) ----------
         const firebaseConfig = {
             apiKey: "AIzaSyAg_kQRN64eIdhRDtIdsR24JSUiwHdT7tM",
             authDomain: "flutter-ai-playground-ca0f3.firebaseapp.com",
@@ -402,800 +513,674 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // สถานะนายกอัตโนมัติ: จันทร์-ศุกร์ เวลา 08.30-16.30 = อยู่อบต. นอกเวลาหรือเสาร์-อาทิตย์ = ไม่อยู่อบต.
+        // ---------- helpers ----------
         function getAutoMayorStatus() {
             const now = new Date();
-            const day = now.getDay(); // 0 = อาทิตย์, 1 = จันทร์, ..., 6 = เสาร์
+            const day = now.getDay();
             const minutes = now.getHours() * 60 + now.getMinutes();
-            const start = 8 * 60 + 30;
-            const end = 16 * 60 + 30;
-
-            if(day >= 1 && day <= 5 && minutes >= start && minutes <= end) {
-                return { text: 'อยู่อบต.', color: 'bg-green-500' };
-            }
-            return { text: 'ไม่อยู่อบต.', color: 'bg-red-500' };
+            if (day >= 1 && day <= 5 && minutes >= 510 && minutes <= 990) return { text:'อยู่ อบต.', color:'bg-emerald-500' };
+            return { text:'ไม่อยู่ อบต.', color:'bg-red-500' };
         }
-
-        window.saveToCloud = function(tasks, contacts, mStatus, manualStatus, announcement) {
-            const status = mStatus || window.mayorStatus;
-            const payload = {};
-            if(Array.isArray(tasks)) payload.tasks = tasks;
-            if(Array.isArray(contacts)) payload.contacts = contacts;
-            payload.mayorStatus = status;
-            payload.mayorStatusManual = manualStatus !== undefined ? manualStatus : window.mayorStatusManual;
-            payload.mayorAnnouncement = announcement !== undefined ? announcement : window.mayorAnnouncement;
-
-            // ใช้ update แทน set เพื่อไม่ให้ข้อมูลส่วนอื่นถูกเขียนทับหาย
-            db.ref('data/').update(payload);
-        };
-
-        function saveMayorStatusOnly(mStatus, manualStatus) {
-            const status = mStatus || window.mayorStatus;
-            db.ref('data/').update({
-                mayorStatus: status,
-                mayorStatusManual: manualStatus !== undefined ? manualStatus : window.mayorStatusManual
-            });
-        }
-
-        function saveAnnouncementOnly(announcement) {
-            db.ref('data/').update({
-                mayorAnnouncement: announcement !== undefined ? announcement : window.mayorAnnouncement
-            });
-        }
-
-        db.ref('data/').on('value', function(snapshot) {
-            const data = snapshot.val() || {};
-            window.cloudLoaded = true;
-            window.tasks = Array.isArray(data.tasks) ? data.tasks : (data.tasks ? Object.values(data.tasks) : []);
-            window.contacts = Array.isArray(data.contacts) ? data.contacts : (data.contacts ? Object.values(data.contacts) : []);
-            window.mayorStatusManual = data.mayorStatusManual || false;
-            window.mayorStatus = data.mayorStatus || getAutoMayorStatus();
-            window.mayorAnnouncement = data.mayorAnnouncement || 'ยินดีต้อนรับเข้าสู่ระบบคิวงาน อบต. ชำผักแพว Online';
-
-            // ถ้าแอดมินไม่ได้ล็อกสถานะเอง ให้ใช้ระบบอัตโนมัติตามเวลาราชการ
-            if(!window.mayorStatusManual) {
-                window.mayorStatus = getAutoMayorStatus();
-            }
-            
-            const stText = document.getElementById('statusText');
-            const stDot = document.getElementById('statusDot');
-            if(stText) stText.innerText = window.mayorStatus.text;
-            if(stDot) stDot.className = "absolute -bottom-1 -right-1 w-5 h-5 md:w-6 md:h-6 rounded-full border-4 border-white " + window.mayorStatus.color + " shadow-sm transition-colors duration-300";
-
-            const annText = document.getElementById('announcementText');
-            if(annText) annText.innerText = window.mayorAnnouncement;
-
-            renderAll();
-        });
-
-        function handleAdminToggle() {
-            if (window.isAdmin) { window.isAdmin = false; updateAdminUI(); renderAll(); } 
-            else { document.getElementById('adminPassword').value = ''; openModal('loginModal'); }
-        }
-
-        function verifyAdminLogin() {
-            if(document.getElementById('adminPassword').value === 'ntrd') {
-                window.isAdmin = true; closeModal('loginModal'); updateAdminUI(); renderAll();
-            } else { alert('รหัสผ่านแอดมินไม่ถูกต้อง!'); }
-        }
-
-        function changePage(p) {
-            window.currentPage = p;
-            const pages = ['dashboard','calendar','tasks','contacts'];
-            for(let i=0; i<pages.length; i++) {
-                document.getElementById('page-'+pages[i]).classList.add('hidden');
-                document.getElementById('nav-'+pages[i]).className = 'flex-1 py-4 text-gray-400 font-bold text-sm min-w-[100px] tap-effect font-prompt';
-            }
-            document.getElementById('page-'+p).classList.remove('hidden');
-            document.getElementById('nav-'+p).className = 'flex-1 py-4 text-main border-b-4 border-main font-bold text-sm min-w-[100px] tap-effect font-prompt';
-            updateAdminUI(); window.scrollTo(0,0); renderAll();
-        }
-
-        function updateAdminUI() {
-            if(document.getElementById('fabAdd')) {
-                if(window.isAdmin && window.currentPage === 'dashboard') { document.getElementById('fabAdd').classList.remove('hidden'); } else { document.getElementById('fabAdd').classList.add('hidden'); }
-            }
-            if(document.getElementById('admin-add-contact')) {
-                if(window.isAdmin && window.currentPage === 'contacts') { document.getElementById('admin-add-contact').classList.remove('hidden'); } else { document.getElementById('admin-add-contact').classList.add('hidden'); }
-            }
-            if(document.getElementById('admin-status-btn')) {
-                if(window.isAdmin && window.currentPage === 'dashboard') { document.getElementById('admin-status-btn').classList.remove('hidden'); } else { document.getElementById('admin-status-btn').classList.add('hidden'); }
-            }
-            if(document.getElementById('admin-announcement-btn')) {
-                if(window.isAdmin && window.currentPage === 'dashboard') { document.getElementById('admin-announcement-btn').classList.remove('hidden'); } else { document.getElementById('admin-announcement-btn').classList.add('hidden'); }
-            }
-            const icon = document.getElementById('adminIcon');
-            if(icon) {
-                icon.className = window.isAdmin ? 'fa-solid fa-user-check text-green-400 text-lg' : 'fa-solid fa-user-shield text-lg text-white';
-            }
-        }
-
-        function getDateNum(dStr) {
-            if(!dStr) return 99999999;
-            return parseInt(dStr.replace(/-/g, ''), 10);
-        }
-
+        function getDateNum(dStr) { if (!dStr) return 99999999; return parseInt(String(dStr).replace(/-/g,''), 10); }
         function getDiffDays(startStr, endStr) {
-            if(!startStr) return 0;
-            const today = new Date(); 
-            today.setHours(0,0,0,0);
-            
-            var p1 = startStr.split('-');
+            if (!startStr) return 0;
+            const today = new Date(); today.setHours(0,0,0,0);
+            const p1 = startStr.split('-');
             const start = new Date(parseInt(p1[0]), parseInt(p1[1])-1, parseInt(p1[2]));
-            
             let end = start;
-            if(endStr) {
-                var p2 = endStr.split('-');
-                end = new Date(parseInt(p2[0]), parseInt(p2[1])-1, parseInt(p2[2]));
-            }
-            
-            if(today.getTime() >= start.getTime() && today.getTime() <= end.getTime()) return 0;
+            if (endStr) { const p2 = endStr.split('-'); end = new Date(parseInt(p2[0]), parseInt(p2[1])-1, parseInt(p2[2])); }
+            if (today.getTime() >= start.getTime() && today.getTime() <= end.getTime()) return 0;
             return Math.ceil((start.getTime() - today.getTime()) / 86400000);
         }
-
         function formatDateRangeThai(startStr, endStr) {
-            if(!startStr) return '';
-            const days = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
-            const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
-            
-            var p1 = startStr.split('-');
-            if(p1.length !== 3) return startStr;
-            const d1 = new Date(parseInt(p1[0]), parseInt(p1[1]) - 1, parseInt(p1[2]));
-
-            if(!endStr || startStr === endStr) {
-                return days[d1.getDay()] + " " + d1.getDate() + " " + months[d1.getMonth()] + " " + (d1.getFullYear() + 543);
-            }
-
-            var p2 = endStr.split('-');
-            if(p2.length !== 3) return startStr + ' ถึง ' + endStr;
-            const d2 = new Date(parseInt(p2[0]), parseInt(p2[1]) - 1, parseInt(p2[2]));
-
-            const y1 = d1.getFullYear() + 543;
-            const y2 = d2.getFullYear() + 543;
-            const m1 = months[d1.getMonth()];
-            const m2 = months[d2.getMonth()];
-            const day1 = d1.getDate();
-            const day2 = d2.getDate();
-
-            if (y1 === y2) {
-                if (m1 === m2) {
-                    return day1 + "-" + day2 + " " + m1 + " " + y1;
-                } else {
-                    return day1 + " " + m1 + " - " + day2 + " " + m2 + " " + y1;
-                }
-            } else {
-                return day1 + " " + m1 + " " + y1 + " - " + day2 + " " + m2 + " " + y2;
-            }
+            if (!startStr) return '';
+            const days = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"];
+            const months = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+            const p1 = startStr.split('-'); if (p1.length !== 3) return startStr;
+            const d1 = new Date(parseInt(p1[0]), parseInt(p1[1])-1, parseInt(p1[2]));
+            if (!endStr || startStr === endStr) return days[d1.getDay()] + " " + d1.getDate() + " " + months[d1.getMonth()] + " " + (d1.getFullYear()+543);
+            const p2 = endStr.split('-'); if (p2.length !== 3) return startStr + ' ถึง ' + endStr;
+            const d2 = new Date(parseInt(p2[0]), parseInt(p2[1])-1, parseInt(p2[2]));
+            const y1 = d1.getFullYear()+543, y2 = d2.getFullYear()+543, m1 = months[d1.getMonth()], m2 = months[d2.getMonth()];
+            if (y1 === y2 && m1 === m2) return d1.getDate() + "-" + d2.getDate() + " " + m1 + " " + y1;
+            if (y1 === y2) return d1.getDate() + " " + m1 + " - " + d2.getDate() + " " + m2 + " " + y1;
+            return d1.getDate() + " " + m1 + " " + y1 + " - " + d2.getDate() + " " + m2 + " " + y2;
+        }
+        function formatThaiDate(dateStr) {
+            if (!dateStr) return '';
+            const days = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"];
+            const months = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+            const p = dateStr.split('-'); if (p.length !== 3) return dateStr;
+            const d = new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2]));
+            return days[d.getDay()] + " " + d.getDate() + " " + months[d.getMonth()] + " " + (d.getFullYear()+543);
+        }
+        function todayNumber() {
+            const d = new Date(); let mm = d.getMonth()+1, dd = d.getDate();
+            if (mm < 10) mm = '0'+mm; if (dd < 10) dd = '0'+dd;
+            return getDateNum(d.getFullYear() + '-' + mm + '-' + dd);
+        }
+        function driveThumbnail(url) {
+            if (!url) return '';
+            const m = url.match(/[-\w]{25,}/);
+            if (m) return 'https://drive.google.com/thumbnail?id=' + m[0] + '&sz=w200';
+            return url;
         }
 
-        function formatThaiDate(dateStr) {
-            if(!dateStr) return '';
-            const days = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
-            const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
-            var p = dateStr.split('-');
-            if(p.length !== 3) return dateStr;
-            const d = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
-            return days[d.getDay()] + " " + d.getDate() + " " + months[d.getMonth()] + " " + (d.getFullYear() + 543);
+        // ---------- Google Drive upload helper ----------
+        function uploadFileToDrive(file) {
+            return new Promise(function(resolve, reject) {
+                if (!DRIVE_UPLOAD_URL || DRIVE_UPLOAD_URL.indexOf('AKfyc') === -1) {
+                    reject(new Error('URL สำหรับอัปโหลดไฟล์ยังไม่ถูกต้อง'));
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function() {
+                    const base64 = reader.result.split(',')[1];
+                    
+                    const formData = new FormData();
+                    formData.append('fileName', file.name);
+                    formData.append('mimeType', file.type || 'application/octet-stream');
+                    formData.append('base64', base64);
+
+                    fetch(DRIVE_UPLOAD_URL, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(function(res) {
+                        return res.json();
+                    })
+                    .then(function(json) {
+                        if (json && (json.status === 'success' || json.url)) {
+                            resolve(json);
+                        } else {
+                            reject(new Error((json && json.message) || 'อัปโหลดไฟล์ไม่สำเร็จ'));
+                        }
+                    })
+                    .catch(function(err) {
+                        reject(new Error('เชื่อมต่อ Google Drive ไม่สำเร็จ (' + err.message + ')'));
+                    });
+                };
+                reader.onerror = function() { reject(new Error('อ่านไฟล์ไม่สำเร็จ')); };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function validateUploadFileType(file) {
+            return file.type === 'application/pdf' || file.type === 'image/png' || file.type.indexOf('image/') > -1;
+        }
+
+        // ---------- card renderers ----------
+        function countdownBadgeHTML(diff) {
+            if (diff === 0) return '<span class="cd-badge" style="background:var(--danger)"><i class="fa-solid fa-bolt"></i> วันนี้!</span>';
+            if (diff > 0 && diff <= 3) return '<span class="cd-badge" style="background:var(--accent)"><i class="fa-solid fa-hourglass-half"></i> อีก ' + diff + ' วัน</span>';
+            if (diff > 3 && diff <= 10) return '<span class="cd-badge" style="background:var(--warning); color:#5c4300"><i class="fa-solid fa-hourglass-half"></i> อีก ' + diff + ' วัน</span>';
+            if (diff > 10) return '<span class="cd-badge" style="background:var(--primary)"><i class="fa-regular fa-calendar-check"></i> อีก ' + diff + ' วัน</span>';
+            return '';
+        }
+        function statusClassOf(status) {
+            if (status === 'กำลังดำเนินการ') return 'status-active';
+            if (status === 'เสร็จสิ้น') return 'status-done';
+            return 'status-pending';
+        }
+
+        // ฟังก์ชันฟอร์แมตเวลาเริ่มต้นและสิ้นสุด
+        function formatTaskTime(startTime, endTime) {
+            if (!startTime && !endTime) return 'ไม่ระบุเวลา';
+            if (startTime && endTime) return startTime + ' - ' + endTime + ' น.';
+            if (startTime) return startTime + ' น.';
+            return 'ถึง ' + endTime + ' น.';
         }
 
         function taskCardHTML(t, isTodayTask) {
             const diff = getDiffDays(t.startDate, t.endDate);
-            let countdown = '';
-            if(diff === 0) {
-                countdown = '<span class="inline-flex items-center gap-1 bg-gradient-to-r from-red-600 to-orange-500 text-white text-[12px] font-black px-3 py-2 rounded-2xl animate-countdown shadow-lg whitespace-nowrap"><i class="fa-solid fa-bolt"></i> วันนี้!</span>';
-            } else if(diff > 0 && diff <= 10) {
-                countdown = '<span class="inline-flex items-center gap-1 bg-gradient-to-r from-orange-500 to-amber-400 text-white text-[12px] font-black px-3 py-2 rounded-2xl animate-countdown shadow-lg whitespace-nowrap"><i class="fa-solid fa-hourglass-half"></i> อีก ' + diff + ' วัน</span>';
-            } else if(diff > 10) {
-                countdown = '<span class="inline-flex items-center gap-1 bg-blue-50 text-blue-600 text-[12px] font-black px-3 py-2 rounded-2xl border border-blue-100 whitespace-nowrap"><i class="fa-regular fa-calendar-check"></i> อีก ' + diff + ' วัน</span>';
-            }
-            
-            let statusClass = 'status-pending';
-            if(t.status === 'กำลังดำเนินการ') statusClass = 'status-active';
-            else if(t.status === 'เสร็จสิ้น') statusClass = 'status-done';
-
+            const countdown = countdownBadgeHTML(diff);
+            const statusClass = statusClassOf(t.status);
+            const timeDisplay = formatTaskTime(t.startTime, t.endTime);
             const owners = Array.isArray(t.owner) ? t.owner : (t.owner ? [t.owner] : []);
-            let ownerHTML = '';
-            if(owners.length > 0) {
-                for(let oi=0; oi<owners.length; oi++) {
-                    ownerHTML += '<span class="inline-flex items-center bg-main/5 text-main border border-main/10 px-2.5 py-1 rounded-xl text-xs font-bold mr-1 mb-1">' + owners[oi] + '</span>';
-                }
-            } else {
-                ownerHTML = '<span class="text-gray-400">-</span>';
-            }
+            const ownerHTML = owners.length
+                ? owners.map(function(o){ return '<span class="inline-block px-2.5 py-1 rounded-lg text-xs font-semibold mr-1 mb-1" style="background:var(--primary-tint); color:var(--primary-dark)">' + o + '</span>'; }).join('')
+                : '<span style="color:var(--muted)">-</span>';
 
-            let html = '<div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 relative tap-effect ' + (isTodayTask?'animate-today-card':'') + ' font-prompt hover:shadow-md transition-all">';
-            html += '<div class="flex justify-between items-start gap-3 mb-4">';
-            html += '<div class="flex flex-wrap items-center gap-2"><span class="bg-blue-50 text-main px-3 py-2 rounded-2xl text-sm font-bold border border-blue-100"><i class="fa-regular fa-clock mr-1"></i>' + (t.startTime||'ไม่ระบุเวลา') + '</span>' + countdown + '</div>';
-            html += '<span class="status-badge ' + statusClass + '">' + t.status + '</span>';
+            let html = '<div class="card p-5 relative tap-effect ' + (isTodayTask ? 'today-card' : '') + '">';
+            html += '<div class="flex justify-between items-start gap-3 mb-3">';
+            html += '<div class="flex flex-wrap items-center gap-2"><span class="px-3 py-1.5 rounded-xl text-xs font-semibold" style="background:var(--primary-tint); color:var(--primary-dark)"><i class="fa-regular fa-clock mr-1"></i>' + timeDisplay + '</span>' + countdown + '</div>';
+            html += '<span class="status-badge ' + statusClass + '">' + (t.status || '-') + '</span>';
             html += '</div>';
-            html += '<h4 class="font-bold text-xl leading-tight mb-2 text-gray-800">' + t.title + '</h4>';
-            if(t.detail) html += '<div class="mb-4 bg-slate-50 border border-slate-100 rounded-2xl p-4 text-sm text-slate-600 leading-relaxed"><i class="fa-solid fa-align-left mr-2 text-main opacity-60"></i>' + t.detail + '</div>';
-            html += '<div class="text-sm text-gray-500 space-y-2">';
-            html += '<p><i class="fa-solid fa-calendar-day mr-2 text-main w-4"></i><span class="font-medium">' + formatDateRangeThai(t.startDate, t.endDate) + '</span></p>';
-            html += '<p><i class="fa-solid fa-location-dot mr-2 text-main w-4"></i>' + (t.loc||'-') + '</p>';
-            html += '<p><i class="fa-solid fa-shirt mr-2 text-main w-4"></i>การแต่งกาย: ' + (t.dress||'-') + '</p>';
-            html += '<div class="flex items-start gap-2"><i class="fa-solid fa-user-group text-main w-4 mt-1"></i><div>รับผิดชอบ: <div class="inline">' + ownerHTML + '</div></div></div>';
-            if(t.coord) html += '<p><i class="fa-solid fa-handshake mr-2 text-main w-4"></i>ประสานงาน: ' + t.coord + '</p>';
-            html += '</div>';
-            if(t.link) html += '<a href="' + t.link + '" target="_blank" class="block mt-5 text-center py-2.5 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold border border-blue-100 hover:bg-blue-100 transition-all"><i class="fa-brands fa-google-drive mr-2"></i>เปิดไฟล์เอกสารแนบ</a>';
-            if(window.isAdmin) html += '<button onclick="editTask(\'' + t.id + '\')" class="absolute bottom-6 right-6 w-10 h-10 bg-gray-50 text-gray-400 rounded-xl flex items-center justify-center border hover:text-main hover:bg-white transition-all"><i class="fa-solid fa-pen"></i></button>';
+            html += '<h4 class="font-bold text-lg leading-snug mb-2">' + (t.title || '-') + '</h4>';
+            if (t.detail) html += '<div class="mb-3 rounded-xl p-3.5 text-sm leading-relaxed" style="background:var(--bg); border:1px solid var(--border); color:var(--muted)"><i class="fa-solid fa-align-left mr-2" style="color:var(--primary)"></i>' + t.detail + '</div>';
+
+            html += '<div class="rounded-xl overflow-x-auto p-1" style="background:var(--bg); border:1px solid var(--border)"><table class="detail-table">';
+            html += '<tr><td class="dt-label">📅 วันที่</td><td class="dt-value">' + formatDateRangeThai(t.startDate, t.endDate) + '</td></tr>';
+            html += '<tr><td class="dt-label">⏰ เวลา</td><td class="dt-value">' + timeDisplay + '</td></tr>';
+            html += '<tr><td class="dt-label">📍 สถานที่</td><td class="dt-value">' + (t.loc || '-') + '</td></tr>';
+            html += '<tr><td class="dt-label">👕 การแต่งกาย</td><td class="dt-value">' + (t.dress || '-') + '</td></tr>';
+            html += '<tr><td class="dt-label">👥 ผู้รับผิดชอบ</td><td class="dt-value">' + ownerHTML + '</td></tr>';
+            if (t.coord) html += '<tr><td class="dt-label">🤝 ประสานงาน</td><td class="dt-value">' + t.coord + '</td></tr>';
+            html += '</table></div>';
+
+            const fileUrl = t.fileUrl || t.link;
+            if (fileUrl) html += '<a href="' + fileUrl + '" target="_blank" class="block mt-3.5 text-center py-2.5 rounded-xl text-xs font-semibold" style="background:var(--primary-tint); color:var(--primary-dark)"><i class="fa-brands fa-google-drive mr-2"></i>เปิดไฟล์เอกสารแนบ' + (t.fileName ? ' (' + t.fileName + ')' : '') + '</a>';
+            if (isAdmin) html += '<button onclick="editTask(\'' + t.id + '\')" class="absolute bottom-5 right-5 icon-btn w-9 h-9 rounded-xl flex items-center justify-center"><i class="fa-solid fa-pen text-sm"></i></button>';
             html += '</div>';
             return html;
         }
 
-        function renderAll() {
-            document.getElementById('stat-total').innerText = window.tasks.length;
-            document.getElementById('stat-pending').innerText = window.tasks.filter(function(t){return t.status==='รอดำเนินการ';}).length;
-            document.getElementById('stat-active').innerText = window.tasks.filter(function(t){return t.status==='กำลังดำเนินการ';}).length;
-            document.getElementById('stat-done').innerText = window.tasks.filter(function(t){return t.status==='เสร็จสิ้น';}).length;
+        function formCardHTML(f) {
+            const hasFile = !!f.fileUrl;
+            const isPng = f.fileName && f.fileName.toLowerCase().endsWith('.png');
+            let html = '<div class="card p-5 flex items-center justify-between gap-3">';
+            html += '<div class="flex items-center gap-3 min-w-0">';
+            html += '<div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style="background:var(--primary-tint); color:var(--primary-dark)"><i class="fa-solid ' + (isPng ? 'fa-file-image' : 'fa-file-pdf') + ' text-lg"></i></div>';
+            html += '<div class="min-w-0"><p class="font-bold truncate">' + f.name + '</p><p class="text-xs truncate" style="color:var(--muted)">' + (hasFile ? (f.fileName || 'ไฟล์แนบ') : 'ยังไม่มีไฟล์แนบ') + '</p></div>';
+            html += '</div>';
+            html += '<div class="flex items-center gap-2 shrink-0">';
+            if (hasFile) html += '<a href="' + f.fileUrl + '" target="_blank" class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:var(--success-tint); color:var(--success)"><i class="fa-solid fa-download"></i></a>';
+            if (isAdmin) {
+                html += '<button onclick="editForm(\'' + f.id + '\')" class="icon-btn w-9 h-9 rounded-xl flex items-center justify-center"><i class="fa-solid fa-pen text-xs"></i></button>';
+                html += '<button onclick="deleteForm(\'' + f.id + '\')" class="icon-btn w-9 h-9 rounded-xl flex items-center justify-center hover:!text-[var(--danger)]"><i class="fa-solid fa-trash text-xs"></i></button>';
+            }
+            html += '</div></div>';
+            return html;
+        }
 
-            const d = new Date();
-            const yyyy = d.getFullYear();
-            let mm = d.getMonth() + 1; if(mm<10) mm='0'+mm;
-            let dd = d.getDate(); if(dd<10) dd='0'+dd;
-            const todayStr = yyyy + '-' + mm + '-' + dd;
-            const todayNum = getDateNum(todayStr);
+        // ---------- page renderers ----------
+        function renderDashboard() {
+            const dash = document.getElementById('dashboardTaskList');
+            const tNum = todayNumber();
 
-            if (window.currentPage === 'dashboard') {
-                const dashContainer = document.getElementById('dashboardTaskList');
-                
-                const todayTasks = window.tasks.filter(function(t){
-                    const sNum = getDateNum(t.startDate);
-                    const eNum = t.endDate ? getDateNum(t.endDate) : sNum;
-                    return todayNum >= sNum && todayNum <= eNum;
-                });
-                
-                const upcomingTasksAll = window.tasks.filter(function(t){
-                    return getDateNum(t.startDate) > todayNum;
-                });
-                
-                upcomingTasksAll.sort(function(a,b){
-                    return getDateNum(a.startDate) - getDateNum(b.startDate);
-                });
-                
-                const upcomingTasks = upcomingTasksAll.slice(0, 10);
-
-                let html = '';
-                html += '<div class="mb-10"><h2 class="font-black text-main text-lg border-l-4 border-main pl-3 mb-4 uppercase tracking-widest">คิวงานวันนี้</h2>';
-                html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
-                if(todayTasks.length > 0) {
-                    for(let i=0; i<todayTasks.length; i++) html += taskCardHTML(todayTasks[i], true); 
-                } else {
-                    html += '<div class="col-span-full bg-white rounded-[2rem] p-8 border border-dashed border-gray-200 text-center shadow-sm"><p class="text-gray-400 font-prompt"><i class="fa-regular fa-calendar-xmark text-3xl mb-3 block opacity-50"></i>ไม่มีคิวงานในวันนี้</p></div>';
-                }
-                html += '</div></div>';
-                
-                html += '<div><h2 class="font-black text-blue-500 text-lg border-l-4 border-blue-500 pl-3 mb-4 uppercase tracking-widest">คิวงานวันถัดไป (10 คิวล่าสุด)</h2>';
-                html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
-                if(upcomingTasks.length > 0) {
-                    for(let i=0; i<upcomingTasks.length; i++) html += taskCardHTML(upcomingTasks[i], false); 
-                } else {
-                    html += '<div class="col-span-full bg-white rounded-[2rem] p-8 border border-dashed border-gray-200 text-center shadow-sm"><p class="text-gray-400 font-prompt">ไม่มีคิวงานถัดไป</p></div>';
-                }
-                html += '</div></div>';
-                dashContainer.innerHTML = html;
+            if (statusFilter !== 'all') {
+                const filtered = tasks.filter(function(t){ return t.status === statusFilter; })
+                    .sort(function(a,b){ return getDateNum(a.startDate) - getDateNum(b.startDate); });
+                let html = '<div class="flex items-center justify-between mb-3.5 gap-3 flex-wrap">';
+                html += '<h2 class="font-bold text-base flex items-center gap-2" style="color:var(--primary-dark)"><span class="w-1.5 h-5 rounded-full inline-block" style="background:var(--primary)"></span>คิวงานสถานะ: ' + statusFilter + '</h2>';
+                html += '<button onclick="setStatusFilter(\'all\')" class="text-xs font-semibold px-3 py-2 rounded-xl tap-effect" style="background:var(--bg); color:var(--muted); border:1px solid var(--border)"><i class="fa-solid fa-xmark mr-1"></i>ล้างตัวกรอง</button>';
+                html += '</div><div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+                html += filtered.length ? filtered.map(function(t){ const s=getDateNum(t.startDate), e=t.endDate?getDateNum(t.endDate):s; return taskCardHTML(t, tNum>=s&&tNum<=e); }).join('') : '<div class="col-span-full card p-8 text-center" style="border-style:dashed"><p style="color:var(--muted)">ไม่มีคิวงานในสถานะนี้</p></div>';
+                html += '</div>';
+                dash.innerHTML = html;
+                return;
             }
 
-            if (window.currentPage === 'calendar') {
-                const grid = document.getElementById('daysGrid'); 
-                grid.innerHTML = '';
-                const y = currentViewDate.getFullYear();
-                const m = currentViewDate.getMonth();
-                const names = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
-                document.getElementById('currentMonthYear').innerText = names[m] + " " + (y+543);
-                
-                const first = new Date(y,m,1).getDay();
-                const total = new Date(y,m+1,0).getDate();
-                
-                for(let i=0; i<first; i++) grid.innerHTML += '<div></div>';
-                for(let d=1; d<=total; d++) {
-                    let sm = m + 1; if(sm<10) sm='0'+sm;
-                    let sd = d; if(sd<10) sd='0'+sd;
-                    const dateKey = sm + '-' + sd;
-                    const fullDate = y + '-' + dateKey;
-                    const fullDateNum = getDateNum(fullDate);
-                    
-                    let hasTask = false;
-                    for(let k=0; k<window.tasks.length; k++){
-                        let t = window.tasks[k];
-                        const sNum = getDateNum(t.startDate);
-                        const eNum = t.endDate ? getDateNum(t.endDate) : sNum;
-                        if(fullDateNum >= sNum && fullDateNum <= eNum) { hasTask = true; break; }
-                    }
-                    
-                    const h = holidays2026[dateKey];
-                    let btnHTML = '<button onclick="showDayTasks(\'' + fullDate + '\',\'' + (h||'') + '\')" class="h-12 flex flex-col items-center justify-center rounded-2xl hover:bg-blue-50 relative tap-effect border border-transparent hover:border-blue-100 transition-all">';
-                    btnHTML += '<span class="' + (h?'text-red-500 font-bold':'text-gray-700 font-medium') + ' text-sm">' + d + '</span>';
-                    if(hasTask) btnHTML += '<div class="w-1.5 h-1.5 bg-main rounded-full mt-1"></div>';
-                    btnHTML += '</button>';
-                    grid.innerHTML += btnHTML;
+            const todayTasks = tasks.filter(function(t){ const s=getDateNum(t.startDate); const e=t.endDate?getDateNum(t.endDate):s; return tNum>=s && tNum<=e; });
+            const upcoming = tasks.filter(function(t){ return getDateNum(t.startDate) > tNum; })
+                .sort(function(a,b){ return getDateNum(a.startDate) - getDateNum(b.startDate); }).slice(0, 10);
+
+            let html = '<div class="mb-8"><h2 class="font-bold text-base mb-3.5 flex items-center gap-2" style="color:var(--primary-dark)"><span class="w-1.5 h-5 rounded-full inline-block" style="background:var(--danger)"></span>คิวงานวันนี้</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+            html += todayTasks.length ? todayTasks.map(function(t){ return taskCardHTML(t,true); }).join('') : '<div class="col-span-full card p-8 text-center" style="border-style:dashed"><p style="color:var(--muted)"><i class="fa-regular fa-calendar-xmark text-2xl mb-2 block opacity-50"></i>ไม่มีคิวงานในวันนี้</p></div>';
+            html += '</div></div>';
+
+            html += '<div><h2 class="font-bold text-base mb-3.5 flex items-center gap-2" style="color:var(--primary-dark)"><span class="w-1.5 h-5 rounded-full inline-block" style="background:var(--primary)"></span>คิวงานถัดไป (10 คิวใกล้ที่สุด)</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+            html += upcoming.length ? upcoming.map(function(t){ return taskCardHTML(t,false); }).join('') : '<div class="col-span-full card p-8 text-center" style="border-style:dashed"><p style="color:var(--muted)">ไม่มีคิวงานถัดไป</p></div>';
+            html += '</div></div>';
+            dash.innerHTML = html;
+        }
+
+        function renderCalendarPage() {
+            const grid = document.getElementById('daysGrid'); grid.innerHTML = '';
+            const y = currentViewDate.getFullYear(), m = currentViewDate.getMonth();
+            const names = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+            document.getElementById('currentMonthYear').innerText = names[m] + " " + (y+543);
+
+            const first = new Date(y,m,1).getDay();
+            const total = new Date(y,m+1,0).getDate();
+            const tNum = todayNumber();
+
+            let html = '';
+            for (let i=0; i<first; i++) html += '<div></div>';
+            for (let d=1; d<=total; d++) {
+                let sm = m+1, sd = d;
+                if (sm<10) sm = '0'+sm; if (sd<10) sd = '0'+sd;
+                const dateKey = sm + '-' + sd;
+                const fullDate = y + '-' + dateKey;
+                const fullDateNum = getDateNum(fullDate);
+
+                let hasTask = false;
+                for (let k=0; k<tasks.length; k++) {
+                    const s = getDateNum(tasks[k].startDate), e = tasks[k].endDate ? getDateNum(tasks[k].endDate) : s;
+                    if (fullDateNum >= s && fullDateNum <= e) { hasTask = true; break; }
                 }
+                const h = holidays2026[dateKey];
+                const isToday = fullDateNum === tNum;
+                html += '<button onclick="showDayTasks(\'' + fullDate + '\',\'' + (h||'') + '\')" class="cal-day ' + (isToday?'cal-today':'') + '">';
+                html += '<span class="cal-day-num" style="' + (h ? 'color:var(--danger); font-weight:700;' : 'color:var(--ink);') + '">' + d + '</span>';
+                html += '<span class="cal-dots">';
+                if (hasTask) html += '<span class="cal-dot" style="background:var(--primary)"></span>';
+                if (h) html += '<span class="cal-dot" style="background:var(--danger)"></span>';
+                html += '</span></button>';
             }
-
-            if (window.currentPage === 'tasks') {
-                const fullList = document.getElementById('fullTaskList');
-                
-                const activeTasks = window.tasks.filter(function(t){return t.status === 'กำลังดำเนินการ';}).sort(function(a,b){
-                    return getDateNum(a.startDate) - getDateNum(b.startDate);
-                });
-                const pendingTasks = window.tasks.filter(function(t){return t.status === 'รอดำเนินการ';}).sort(function(a,b){
-                    return getDateNum(a.startDate) - getDateNum(b.startDate);
-                });
-                const doneTasks = window.tasks.filter(function(t){return t.status === 'เสร็จสิ้น';}).sort(function(a,b){
-                    return getDateNum(b.startDate) - getDateNum(a.startDate);
-                }); 
-
-                function buildTaskGroup(title, icon, colorClass, badgeClass, tasksArr, isOpen) {
-                    let html = '<details class="bg-white rounded-[2rem] shadow-sm border border-gray-100 mb-5 group" ' + (isOpen ? 'open' : '') + '>';
-                    html += '<summary class="font-black text-main text-lg p-5 cursor-pointer list-none flex justify-between items-center tap-effect outline-none [&::-webkit-details-marker]:hidden">';
-                    html += '<div class="flex items-center gap-3"><i class="' + icon + ' ' + colorClass + '"></i> ' + title + ' <span class="' + badgeClass + ' text-xs px-3 py-1 rounded-full">' + tasksArr.length + '</span></div>';
-                    html += '<i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180 text-gray-400"></i>';
-                    html += '</summary>';
-                    html += '<div class="p-5 pt-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 border-t border-gray-50 mt-2 pt-5">';
-                    if(tasksArr.length > 0) {
-                        for(let i=0; i<tasksArr.length; i++) {
-                            const sNum = getDateNum(tasksArr[i].startDate);
-                            const eNum = tasksArr[i].endDate ? getDateNum(tasksArr[i].endDate) : sNum;
-                            let isToday = (todayNum >= sNum && todayNum <= eNum);
-                            html += taskCardHTML(tasksArr[i], isToday);
-                        }
-                    } else {
-                        html += '<p class="text-center text-gray-300 py-6 w-full col-span-full font-prompt">ไม่มีคิวงานในสถานะนี้</p>';
-                    }
-                    html += '</div></details>';
-                    return html;
-                }
-
-                let html = '';
-                html += buildTaskGroup('กำลังดำเนินการ', 'fa-solid fa-spinner', 'text-emerald-500', 'bg-emerald-50 text-emerald-600', activeTasks, true);
-                html += buildTaskGroup('รอดำเนินการ', 'fa-solid fa-clock-rotate-left', 'text-amber-500', 'bg-amber-50 text-amber-600', pendingTasks, true);
-                html += buildTaskGroup('เสร็จสิ้น', 'fa-solid fa-check-double', 'text-red-500', 'bg-red-50 text-red-600', doneTasks, false);
-
-                fullList.innerHTML = html;
-            }
-            
-            if (window.currentPage === 'contacts') renderContacts();
+            grid.innerHTML = html;
         }
 
         function showDayTasks(date, h) {
             const container = document.getElementById('selectedDateTasks');
             const dateNum = getDateNum(date);
-            
-            const dayTasks = window.tasks.filter(function(t){
-                const sNum = getDateNum(t.startDate);
-                const eNum = t.endDate ? getDateNum(t.endDate) : sNum;
-                return dateNum >= sNum && dateNum <= eNum;
-            });
-            
+            const dayTasks = tasks.filter(function(t){ const s=getDateNum(t.startDate); const e=t.endDate?getDateNum(t.endDate):s; return dateNum>=s && dateNum<=e; });
             const thaiDate = formatThaiDate(date);
-            
-            const d = new Date();
-            const yyyy = d.getFullYear();
-            let mm = d.getMonth() + 1; if(mm<10) mm='0'+mm;
-            let dd = d.getDate(); if(dd<10) dd='0'+dd;
-            const todayStr = yyyy + '-' + mm + '-' + dd;
-            const todayNum = getDateNum(todayStr);
-            
-            let head = '<div class="col-span-full p-4 bg-white rounded-[2rem] border border-gray-100 shadow-sm font-prompt text-center"><p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">วันที่เลือก</p><p class="font-black text-main text-xl">' + thaiDate + '</p>';
-            if(h) head += '<div class="mt-3 inline-block bg-red-50 text-red-500 font-bold text-sm px-4 py-2 rounded-xl"><i class="fa-solid fa-flag mr-2"></i>วันหยุดราชการ: ' + h + '</div>';
+            const tNum = todayNumber();
+
+            let head = '<div class="col-span-full card p-4 text-center"><p class="text-xs font-semibold uppercase tracking-wide mb-1" style="color:var(--muted)">วันที่เลือก</p><p class="font-bold text-lg" style="color:var(--primary-dark)">' + thaiDate + '</p>';
+            if (h) head += '<div class="mt-2.5 inline-block font-semibold text-sm px-4 py-2 rounded-xl" style="background:var(--danger-tint); color:#A44532"><i class="fa-solid fa-flag mr-2"></i>วันหยุดราชการ: ' + h + '</div>';
             head += '</div>';
-            
-            let bodyHTML = '';
-            if(dayTasks.length > 0) {
-                for(let i=0; i<dayTasks.length; i++) {
-                    const sNum = getDateNum(dayTasks[i].startDate);
-                    const eNum = dayTasks[i].endDate ? getDateNum(dayTasks[i].endDate) : sNum;
-                    let isToday = (todayNum >= sNum && todayNum <= eNum);
-                    bodyHTML += taskCardHTML(dayTasks[i], isToday);
-                }
+
+            let body = '';
+            if (dayTasks.length) {
+                body = dayTasks.map(function(t){
+                    const s=getDateNum(t.startDate), e=t.endDate?getDateNum(t.endDate):s;
+                    return taskCardHTML(t, tNum>=s && tNum<=e);
+                }).join('');
             } else {
-                bodyHTML = '<div class="col-span-full bg-white rounded-[2rem] p-8 border border-dashed border-gray-200 text-center"><p class="text-gray-400 font-prompt">ไม่มีคิวงานในวันนี้</p></div>';
+                body = '<div class="col-span-full card p-8 text-center" style="border-style:dashed"><p style="color:var(--muted)">ไม่มีคิวงานในวันนี้</p></div>';
             }
-            container.innerHTML = head + bodyHTML;
+            container.innerHTML = head + body;
         }
 
-        function renderContacts(query) {
-            if(query === undefined) query = '';
-            const container = document.getElementById('contactGroups'); if(!container) return;
-            const groups = { "1":"ผู้บริหาร","2":"ข้าราชการ","3":"พนักงานจ้าง","4":"พนักงานจ้างเหมา","5":"สมาชิก อบต.","6":"กำนัน","7":"ผู้ใหญ่บ้าน","8":"ผู้ช่วยผู้ใหญ่บ้าน" };
+        function renderFormsPage() {
+            const list = document.getElementById('formsList');
+            if (!list) return;
+            list.innerHTML = formsList.length ? formsList.map(formCardHTML).join('') : '<div class="col-span-full card p-8 text-center" style="border-style:dashed"><p style="color:var(--muted)">ยังไม่มีแบบฟอร์ม กดปุ่ม "เพิ่มแบบฟอร์ม" เพื่อเริ่มต้น</p></div>';
+        }
+
+        function renderContactsPage(query) {
+            if (query === undefined) query = '';
+            const container = document.getElementById('contactGroups'); if (!container) return;
             container.innerHTML = '';
-            
-            let gKeys = Object.keys(groups);
-            for(let i=0; i<gKeys.length; i++) {
-                let g = gKeys[i];
-                let list = [];
-                for(let j=0; j<window.contacts.length; j++){
-                    let c = window.contacts[j];
-                    if(c.group === g && (c.name.indexOf(query) > -1 || c.role.indexOf(query) > -1 || (c.nickname && c.nickname.indexOf(query) > -1))) {
-                        list.push(c);
-                    }
-                }
-                
-                if(list.length > 0) {
-                    let html = '<div class="space-y-4 font-prompt"><h4 class="text-xs font-black text-gray-400 uppercase pl-3 border-l-4 border-gray-200 ml-1 mb-2 tracking-widest">' + groups[g] + '</h4>';
-                    for(let k=0; k<list.length; k++){
-                        let m = list[k];
-                        html += '<div class="bg-white p-5 rounded-[2rem] border border-gray-100 flex items-center justify-between shadow-sm tap-effect hover:shadow-md transition-all">';
-                        html += '<div onclick="window.location=\'tel:' + m.tel + '\'" class="flex-1">';
-                        html += '<p class="font-bold text-main text-lg leading-tight mb-1"><i class="fa-solid fa-circle-user mr-3 text-main w-5"></i>' + m.name + '</p>';
-                        html += '<p class="text-[15px] text-main font-medium mb-1 leading-tight"><i class="fa-solid fa-heart mr-3 text-main w-5 opacity-40"></i>' + (m.nickname || '-') + '</p>';
-                        html += '<p class="text-[15px] text-gray-500 font-normal mb-3 leading-tight"><i class="fa-solid fa-briefcase mr-3 text-main w-5 opacity-40"></i>' + m.role + '</p>';
-                        html += '<p class="text-xl font-black text-main tracking-widest leading-tight"><i class="fa-solid fa-mobile-retro mr-3 text-main w-5 opacity-40 text-sm"></i>' + m.tel + '</p>';
+            const gKeys = Object.keys(CONTACT_GROUPS);
+            for (let i=0; i<gKeys.length; i++) {
+                const g = gKeys[i];
+                const list = contacts.filter(function(c){
+                    return c.group === g && ((c.name||'').indexOf(query)>-1 || (c.role||'').indexOf(query)>-1 || (c.nickname && c.nickname.indexOf(query)>-1));
+                });
+                if (!list.length) continue;
+
+                let html = '<div class="space-y-3"><h4 class="text-xs font-bold uppercase tracking-wide pl-3 ml-0.5" style="color:var(--muted); border-left:3px solid var(--border)">' + CONTACT_GROUPS[g] + '</h4>';
+                list.forEach(function(m){
+                    const avatarHTML = m.photo
+                        ? '<img src="' + driveThumbnail(m.photo) + '" class="w-11 h-11 rounded-2xl object-cover shrink-0" style="border:1px solid var(--border)">'
+                        : '<div class="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style="background:var(--primary-tint); color:var(--primary)"><i class="fa-solid fa-user"></i></div>';
+                    html += '<div class="card p-4 flex items-center gap-3">';
+                    html += avatarHTML;
+                    html += '<div class="flex-1 min-w-0 cursor-pointer" onclick="window.location=\'tel:' + m.tel + '\'">';
+                    html += '<p class="font-bold leading-tight mb-1 truncate" style="color:var(--primary-dark)">' + m.name + '</p>';
+                    html += '<p class="text-sm mb-1 truncate" style="color:var(--muted)">' + (m.nickname ? '(' + m.nickname + ') ' : '') + (m.role||'') + '</p>';
+                    html += '<p class="text-lg font-bold tracking-wide" style="color:var(--primary-dark)">' + m.tel + '</p></div>';
+                    html += '<div class="flex flex-col items-center gap-2 flex-shrink-0">';
+                    html += '<a href="tel:' + m.tel + '" class="w-11 h-11 rounded-2xl flex items-center justify-center" style="background:var(--success-tint); color:var(--success)"><i class="fa-solid fa-phone"></i></a>';
+                    if (isAdmin) {
+                        html += '<div class="flex gap-1.5">';
+                        html += '<button onclick="editContact(\'' + m.id + '\')" class="icon-btn w-8 h-8 rounded-lg flex items-center justify-center"><i class="fa-solid fa-pen text-xs"></i></button>';
+                        html += '<button onclick="deleteContact(\'' + m.id + '\')" class="icon-btn w-8 h-8 rounded-lg flex items-center justify-center hover:!text-[var(--danger)]"><i class="fa-solid fa-trash text-xs"></i></button>';
                         html += '</div>';
-                        html += '<div class="flex flex-col items-center gap-3">';
-                        html += '<a href="tel:' + m.tel + '" class="w-14 h-14 bg-green-50 text-green-600 rounded-[1.5rem] flex items-center justify-center shadow-sm hover:bg-green-100"><i class="fa-solid fa-phone text-xl"></i></a>';
-                        if(window.isAdmin) {
-                            html += '<div class="flex gap-2 bg-gray-50 px-3 py-2 rounded-xl border border-gray-100">';
-                            html += '<button onclick="editContact(\'' + m.id + '\')" class="text-gray-400 hover:text-main w-6 h-6 flex items-center justify-center"><i class="fa-solid fa-pen text-sm"></i></button>';
-                            html += '<button onclick="deleteContact(\'' + m.id + '\')" class="text-red-300 hover:text-red-500 w-6 h-6 flex items-center justify-center"><i class="fa-solid fa-trash text-sm"></i></button>';
-                            html += '</div>';
-                        }
-                        html += '</div></div>';
                     }
-                    html += '</div>';
-                    container.innerHTML += html;
-                }
+                    html += '</div></div>';
+                });
+                html += '</div>';
+                container.innerHTML += html;
             }
+            if (!container.innerHTML) container.innerHTML = '<div class="card p-8 text-center" style="border-style:dashed"><p style="color:var(--muted)">ไม่พบรายชื่อที่ค้นหา</p></div>';
         }
 
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function prevMonth() { currentViewDate.setMonth(currentViewDate.getMonth()-1); renderAll(); }
-        function nextMonth() { currentViewDate.setMonth(currentViewDate.getMonth()+1); renderAll(); }
-        
-        function openTaskModal() { 
-            document.getElementById('taskForm').reset(); 
-            document.getElementById('taskEditId').value = ''; 
-            document.getElementById('btnDeleteTask').classList.add('hidden'); 
-            openModal('taskModal'); 
-        }
-        function editTask(id) { 
-            let t = null;
-            for(let i=0; i<window.tasks.length; i++){ if(window.tasks[i].id == id) { t = window.tasks[i]; break; } }
-            if(!t) return; 
-            document.getElementById('taskEditId').value = t.id; 
-            
-            const keys = ['title','detail','startDate','startTime','endDate','endTime','status','loc','dress','coord','link'];
-            for(let i=0; i<keys.length; i++) {
-                const el = document.getElementById('t-' + keys[i]);
-                if(el) el.value = t[keys[i]] || '';
+        // ---------- master render ----------
+        function updatePresenceDisplay() {
+            if (!mayorStatusManual) mayorStatus = getAutoMayorStatus();
+            const stText = document.getElementById('statusText');
+            const stDot = document.getElementById('statusDot');
+            const annText = document.getElementById('announcementText');
+            if (stText) stText.innerText = mayorStatus.text;
+            if (stDot) {
+                stDot.className = 'presence-dot absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-[3px] border-white ' + mayorStatus.color;
+                const pulseColor = mayorStatus.color.indexOf('emerald')>-1 ? 'rgba(79,169,124,.55)' : (mayorStatus.color.indexOf('amber')>-1 ? 'rgba(224,178,63,.55)' : 'rgba(219,122,99,.55)');
+                stDot.style.setProperty('--pulse-color', pulseColor);
             }
-            const ownerEl = document.getElementById('t-owner');
-            const owners = Array.isArray(t.owner) ? t.owner : (t.owner ? [t.owner] : []);
-            if(ownerEl) {
-                for(let i=0; i<ownerEl.options.length; i++) {
-                    ownerEl.options[i].selected = owners.indexOf(ownerEl.options[i].value) > -1;
-                }
-            }
-            document.getElementById('btnDeleteTask').classList.remove('hidden'); 
-            openModal('taskModal'); 
+            if (annText) annText.innerText = mayorAnnouncement || defaultAnnouncement;
         }
-        
-        document.getElementById('taskForm').onsubmit = function(e) { 
-            e.preventDefault(); 
+
+        function updateStatCards() {
+            document.getElementById('stat-total').innerText = tasks.length;
+            document.getElementById('stat-pending').innerText = tasks.filter(function(t){ return t.status==='รอดำเนินการ'; }).length;
+            document.getElementById('stat-active').innerText = tasks.filter(function(t){ return t.status==='กำลังดำเนินการ'; }).length;
+            document.getElementById('stat-done').innerText = tasks.filter(function(t){ return t.status==='เสร็จสิ้น'; }).length;
+
+            ['all','รอดำเนินการ','กำลังดำเนินการ','เสร็จสิ้น'].forEach(function(key){
+                const idMap = { 'all':'stat-card-all', 'รอดำเนินการ':'stat-card-pending', 'กำลังดำเนินการ':'stat-card-active', 'เสร็จสิ้น':'stat-card-done' };
+                const el = document.getElementById(idMap[key]);
+                if (el) el.classList.toggle('is-active', currentPage==='dashboard' && statusFilter===key);
+            });
+        }
+
+        function renderAll() {
+            updatePresenceDisplay();
+            updateStatCards();
+            if (currentPage === 'dashboard') renderDashboard();
+            else if (currentPage === 'calendar') renderCalendarPage();
+            else if (currentPage === 'forms') renderFormsPage();
+            else if (currentPage === 'contacts') renderContactsPage(document.getElementById('contactSearch') ? document.getElementById('contactSearch').value : '');
+            updateAdminUI();
+        }
+
+        // ---------- nav / modal ----------
+        function changePage(p) {
+            currentPage = p;
+            if (p !== 'dashboard') statusFilter = 'all';
+            ['dashboard','calendar','forms','contacts'].forEach(function(pg){
+                document.getElementById('page-'+pg).classList.add('hidden');
+                document.getElementById('nav-'+pg).classList.remove('is-active');
+            });
+            document.getElementById('page-'+p).classList.remove('hidden');
+            document.getElementById('nav-'+p).classList.add('is-active');
+            window.scrollTo({ top:0, behavior:'smooth' });
+            renderAll();
+        }
+        function setStatusFilter(key) {
+            statusFilter = key;
+            changePage('dashboard');
+        }
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+        function prevMonth() { currentViewDate.setMonth(currentViewDate.getMonth()-1); renderCalendarPage(); }
+        function nextMonth() { currentViewDate.setMonth(currentViewDate.getMonth()+1); renderCalendarPage(); }
+
+        // ---------- admin ----------
+        function handleAdminToggle() {
+            if (isAdmin) { isAdmin = false; updateAdminUI(); renderAll(); }
+            else { document.getElementById('adminPassword').value = ''; openModal('loginModal'); }
+        }
+        function verifyAdminLogin() {
+            if (document.getElementById('adminPassword').value === 'ntrd') { isAdmin = true; closeModal('loginModal'); updateAdminUI(); renderAll(); }
+            else alert('รหัสผ่านแอดมินไม่ถูกต้อง!');
+        }
+        function updateAdminUI() {
+            const fab = document.getElementById('fabAdd'); if (fab) { fab.classList.toggle('hidden', !(isAdmin && currentPage==='dashboard')); fab.classList.toggle('flex', isAdmin && currentPage==='dashboard'); }
+            const addC = document.getElementById('admin-add-contact'); if (addC) { addC.classList.toggle('hidden', !(isAdmin && currentPage==='contacts')); addC.classList.toggle('flex', isAdmin && currentPage==='contacts'); }
+            const addF = document.getElementById('admin-add-form'); if (addF) { addF.classList.toggle('hidden', !(isAdmin && currentPage==='forms')); addF.classList.toggle('flex', isAdmin && currentPage==='forms'); }
+            const st = document.getElementById('admin-status-btn'); if (st) { st.classList.toggle('hidden', !isAdmin); st.classList.toggle('flex', isAdmin); }
+            const an = document.getElementById('admin-announcement-btn'); if (an) { an.classList.toggle('hidden', !isAdmin); an.classList.toggle('flex', isAdmin); }
+            const icon = document.getElementById('adminIcon'); if (icon) icon.className = isAdmin ? 'fa-solid fa-user-check text-base' : 'fa-solid fa-user-shield text-base';
+        }
+
+        // ---------- cloud sync ----------
+        function saveToCloud(newTasks, newContacts, mStatus, manualStatus, announcement) {
+            const payload = {};
+            if (Array.isArray(newTasks)) payload.tasks = newTasks;
+            if (Array.isArray(newContacts)) payload.contacts = newContacts;
+            payload.mayorStatus = mStatus || mayorStatus;
+            payload.mayorStatusManual = manualStatus !== undefined ? manualStatus : mayorStatusManual;
+            payload.mayorAnnouncement = announcement !== undefined ? announcement : mayorAnnouncement;
+            db.ref('data/').update(payload);
+        }
+        function saveMayorStatusOnly(mStatus, manualStatus) { db.ref('data/').update({ mayorStatus:mStatus, mayorStatusManual:manualStatus }); }
+        function saveAnnouncementOnly(announcement) { db.ref('data/').update({ mayorAnnouncement:announcement }); }
+
+        // ---------- task form ----------
+        function pickStatus(status) {
+            document.getElementById('t-status').value = status;
+            document.querySelectorAll('.seg-btn').forEach(function(b){ b.classList.toggle('is-active', b.getAttribute('data-status')===status); });
+        }
+        function renderOwnerChips() {
+            const wrap = document.getElementById('ownerChips');
+            wrap.innerHTML = OWNER_OPTIONS.map(function(o){
+                const sel = selectedOwners.indexOf(o) > -1;
+                return '<span class="chip' + (sel?' is-selected':'') + '" onclick="toggleOwnerChip(\'' + o.replace(/'/g,"\\'") + '\')">' + o + '</span>';
+            }).join('');
+        }
+        function toggleOwnerChip(o) {
+            const i = selectedOwners.indexOf(o);
+            if (i > -1) selectedOwners.splice(i,1); else selectedOwners.push(o);
+            renderOwnerChips();
+        }
+        function showFileCurrentPreview(name, url) {
+            document.getElementById('fileCurrentName').innerHTML = '<i class="fa-solid fa-file-lines mr-2"></i>' + name;
+            document.getElementById('fileCurrentLink').href = url;
+            document.getElementById('fileCurrentPreview').classList.remove('hidden');
+            document.getElementById('fileCurrentPreview').classList.add('flex');
+        }
+        function removeTaskFile() {
+            document.getElementById('t-fileUrl').value = '';
+            document.getElementById('t-fileName').value = '';
+            document.getElementById('fileCurrentPreview').classList.add('hidden');
+            document.getElementById('fileCurrentPreview').classList.remove('flex');
+        }
+        async function handleTaskFileSelect(input) {
+            const file = input.files[0];
+            if (!file) return;
+            if (!validateUploadFileType(file)) { alert('รองรับเฉพาะไฟล์ PDF หรือ PNG เท่านั้น'); input.value=''; return; }
+            document.getElementById('fileUploadStatus').classList.remove('hidden');
+            try {
+                const result = await uploadFileToDrive(file);
+                document.getElementById('t-fileUrl').value = result.url;
+                document.getElementById('t-fileName').value = file.name;
+                showFileCurrentPreview(file.name, result.url);
+            } catch (err) {
+                alert('อัปโหลดไฟล์ไม่สำเร็จ: ' + err.message);
+            } finally {
+                document.getElementById('fileUploadStatus').classList.add('hidden');
+                input.value = '';
+            }
+        }
+        function openTaskModal() {
+            document.getElementById('taskForm').reset();
+            document.getElementById('taskEditId').value = '';
+            document.getElementById('btnDeleteTask').classList.add('hidden');
+            document.getElementById('taskModalTitle').innerText = 'บันทึกคิวงาน';
+            selectedOwners = [];
+            renderOwnerChips();
+            pickStatus('รอดำเนินการ');
+            removeTaskFile();
+            openModal('taskModal');
+        }
+        function editTask(id) {
+            const t = tasks.find(function(x){ return x.id == id; });
+            if (!t) return;
+            document.getElementById('taskEditId').value = t.id;
+            document.getElementById('taskModalTitle').innerText = 'แก้ไขคิวงาน';
+            ['title','detail','startDate','startTime','endDate','endTime','loc','dress','coord'].forEach(function(k){
+                const el = document.getElementById('t-' + k); if (el) el.value = t[k] || '';
+            });
+            pickStatus(t.status || 'รอดำเนินการ');
+            selectedOwners = Array.isArray(t.owner) ? t.owner.slice() : (t.owner ? [t.owner] : []);
+            renderOwnerChips();
+            const fileUrl = t.fileUrl || t.link;
+            if (fileUrl) {
+                document.getElementById('t-fileUrl').value = fileUrl;
+                document.getElementById('t-fileName').value = t.fileName || '';
+                showFileCurrentPreview(t.fileName || 'ไฟล์แนบ', fileUrl);
+            } else {
+                removeTaskFile();
+            }
+            document.getElementById('btnDeleteTask').classList.remove('hidden');
+            openModal('taskModal');
+        }
+        document.getElementById('taskForm').addEventListener('submit', function(e) {
+            e.preventDefault();
             const btn = document.getElementById('btnSaveTask');
             const originalText = btn.innerText;
-            btn.innerText = 'กำลังบันทึก...';
-            btn.disabled = true;
+            btn.innerText = 'กำลังบันทึก...'; btn.disabled = true;
 
-            const id = document.getElementById('taskEditId').value || new Date().getTime().toString(); 
-            let data = { id: id }; 
-            const keys = ['title','detail','startDate','startTime','endDate','endTime','status','loc','dress','coord','link'];
-            for(let i=0; i<keys.length; i++) {
-                data[keys[i]] = document.getElementById('t-' + keys[i]).value;
-            }
-            const ownerEl = document.getElementById('t-owner');
-            data.owner = [];
-            if(ownerEl) {
-                for(let i=0; i<ownerEl.selectedOptions.length; i++) {
-                    data.owner.push(ownerEl.selectedOptions[i].value);
-                }
-            }
-            
-            let idx = -1;
-            for(let i=0; i<window.tasks.length; i++){ if(window.tasks[i].id === id) { idx = i; break; } }
-            if(idx > -1) window.tasks[idx] = data; else window.tasks.push(data); 
-            
-            window.saveToCloud(window.tasks, window.contacts, window.mayorStatus, window.mayorStatusManual); 
-
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbx2WLgayblJSdhnA_Ad0Bjeng0tjn4aw7UzngKCctWOHJJYDCruvw1hpsSr4t-bNe8ogQ/exec';
-            
-            fetch(scriptURL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify(data)
-            }).then(function() {
-                btn.innerText = originalText;
-                btn.disabled = false;
-                closeModal('taskModal'); 
-            }).catch(function(error) {
-                console.error('Sheets Backup Error:', error.message);
-                btn.innerText = originalText;
-                btn.disabled = false;
-                closeModal('taskModal'); 
+            const id = document.getElementById('taskEditId').value || Date.now().toString();
+            const data = { id: id, owner: selectedOwners.slice() };
+            ['title','detail','startDate','startTime','endDate','endTime','status','loc','dress','coord','fileUrl','fileName'].forEach(function(k){
+                const el = document.getElementById('t-' + k); if (el) data[k] = el.value;
             });
-        };
 
-        function deleteTask() { 
-            if(confirm('ยืนยันการลบคิวงานนี้ถาวร?')) { 
-                const id = document.getElementById('taskEditId').value;
-                let newTasks = [];
-                for(let i=0; i<window.tasks.length; i++){ if(window.tasks[i].id !== id) newTasks.push(window.tasks[i]); }
-                window.tasks = newTasks;
-                window.saveToCloud(window.tasks, window.contacts, window.mayorStatus, window.mayorStatusManual); 
-                closeModal('taskModal'); 
-            } 
+            const idx = tasks.findIndex(function(x){ return x.id === id; });
+            if (idx > -1) tasks[idx] = data; else tasks.push(data);
+            saveToCloud(tasks, contacts, mayorStatus, mayorStatusManual);
+
+            fetch(SHEETS_BACKUP_URL, { method:'POST', mode:'no-cors', body: JSON.stringify(data) })
+                .catch(function(err){ console.error('Sheets backup error:', err.message); })
+                .finally(function(){ btn.innerText = originalText; btn.disabled = false; closeModal('taskModal'); });
+        });
+        function deleteTask() {
+            if (!confirm('ยืนยันการลบคิวงานนี้ถาวร?')) return;
+            const id = document.getElementById('taskEditId').value;
+            tasks = tasks.filter(function(x){ return x.id !== id; });
+            saveToCloud(tasks, contacts, mayorStatus, mayorStatusManual);
+            closeModal('taskModal');
         }
 
-        function openContactModal() { document.getElementById('contactForm').reset(); document.getElementById('contactEditId').value = ''; openModal('contactModal'); }
-        function editContact(id) { 
-            let c = null;
-            for(let i=0; i<window.contacts.length; i++){ if(window.contacts[i].id == id) { c = window.contacts[i]; break; } }
-            if(!c) return; 
-            document.getElementById('contactEditId').value = c.id; 
-            const keys = ['name','nickname','role','tel','group'];
-            for(let i=0; i<keys.length; i++) {
-                const el = document.getElementById('c-' + keys[i]);
-                if(el) el.value = c[keys[i]] || '';
+        // ---------- contact form ----------
+        function openContactModal() {
+            document.getElementById('contactForm').reset();
+            document.getElementById('contactEditId').value = '';
+            document.getElementById('contactModalTitle').innerText = 'เพิ่มรายชื่อผู้ติดต่อ';
+            openModal('contactModal');
+        }
+        function editContact(id) {
+            const c = contacts.find(function(x){ return x.id == id; });
+            if (!c) return;
+            document.getElementById('contactEditId').value = c.id;
+            document.getElementById('contactModalTitle').innerText = 'แก้ไขรายชื่อผู้ติดต่อ';
+            ['name','nickname','role','tel','group','photo'].forEach(function(k){
+                const el = document.getElementById('c-' + k); if (el) el.value = c[k] || '';
+            });
+            openModal('contactModal');
+        }
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('contactEditId').value || Date.now().toString();
+            const data = { id: id };
+            ['name','nickname','role','tel','group','photo'].forEach(function(k){
+                const el = document.getElementById('c-' + k); if (el) data[k] = el.value;
+            });
+            const idx = contacts.findIndex(function(x){ return x.id === id; });
+            if (idx > -1) contacts[idx] = data; else contacts.push(data);
+            saveToCloud(tasks, contacts, mayorStatus, mayorStatusManual);
+            closeModal('contactModal');
+        });
+        function deleteContact(id) {
+            if (!confirm('ยืนยันการลบรายชื่อนี้?')) return;
+            contacts = contacts.filter(function(x){ return x.id !== id; });
+            saveToCloud(tasks, contacts, mayorStatus, mayorStatusManual);
+        }
+
+        // ---------- form (แบบฟอร์ม) management ----------
+        async function handleFormFileSelect(input) {
+            const file = input.files[0];
+            if (!file) return;
+            if (!validateUploadFileType(file)) { alert('รองรับเฉพาะไฟล์ PDF หรือ PNG เท่านั้น'); input.value=''; return; }
+            document.getElementById('formFileUploadStatus').classList.remove('hidden');
+            try {
+                const result = await uploadFileToDrive(file);
+                document.getElementById('f-fileUrl').value = result.url;
+                document.getElementById('f-fileName').value = file.name;
+                document.getElementById('formFileCurrentName').innerText = file.name;
+                document.getElementById('formFileCurrentLink').href = result.url;
+                document.getElementById('formFileCurrentPreview').classList.remove('hidden');
+                document.getElementById('formFileCurrentPreview').classList.add('flex');
+            } catch (err) {
+                alert('อัปโหลดไฟล์ไม่สำเร็จ: ' + err.message);
+            } finally {
+                document.getElementById('formFileUploadStatus').classList.add('hidden');
+                input.value = '';
             }
-            openModal('contactModal'); 
         }
-        document.getElementById('contactForm').onsubmit = function(e) { 
-            e.preventDefault(); 
-            const id = document.getElementById('contactEditId').value || new Date().getTime().toString(); 
-            let data = { id: id }; 
-            const keys = ['name','nickname','role','tel','group'];
-            for(let i=0; i<keys.length; i++) {
-                data[keys[i]] = document.getElementById('c-' + keys[i]).value;
+        function openFormModal() {
+            document.getElementById('formForm').reset();
+            document.getElementById('f-editId').value = '';
+            document.getElementById('f-fileUrl').value = '';
+            document.getElementById('f-fileName').value = '';
+            document.getElementById('formFileCurrentPreview').classList.add('hidden');
+            document.getElementById('formFileCurrentPreview').classList.remove('flex');
+            document.getElementById('formModalTitle').innerText = 'เพิ่มแบบฟอร์ม';
+            document.getElementById('btnDeleteForm').classList.add('hidden');
+            openModal('formModal');
+        }
+        function editForm(id) {
+            const f = formsList.find(function(x){ return x.id == id; });
+            if (!f) return;
+            document.getElementById('formForm').reset();
+            document.getElementById('f-editId').value = f.id;
+            document.getElementById('f-name').value = f.name || '';
+            document.getElementById('f-fileUrl').value = f.fileUrl || '';
+            document.getElementById('f-fileName').value = f.fileName || '';
+            if (f.fileUrl) {
+                document.getElementById('formFileCurrentName').innerText = f.fileName || 'ไฟล์แนบ';
+                document.getElementById('formFileCurrentLink').href = f.fileUrl;
+                document.getElementById('formFileCurrentPreview').classList.remove('hidden');
+                document.getElementById('formFileCurrentPreview').classList.add('flex');
+            } else {
+                document.getElementById('formFileCurrentPreview').classList.add('hidden');
+                document.getElementById('formFileCurrentPreview').classList.remove('flex');
             }
-            
-            let idx = -1;
-            for(let i=0; i<window.contacts.length; i++){ if(window.contacts[i].id === id) { idx = i; break; } }
-            if(idx > -1) window.contacts[idx] = data; else window.contacts.push(data); 
-            
-            window.saveToCloud(window.tasks, window.contacts, window.mayorStatus, window.mayorStatusManual); 
-            closeModal('contactModal'); 
-        };
-        
-        function deleteContact(id) { 
-            if(confirm('ยืนยันการลบรายชื่อนี้?')) { 
-                let newContacts = [];
-                for(let i=0; i<window.contacts.length; i++){ if(window.contacts[i].id !== id) newContacts.push(window.contacts[i]); }
-                window.contacts = newContacts;
-                window.saveToCloud(window.tasks, window.contacts, window.mayorStatus, window.mayorStatusManual); 
-            } 
+            document.getElementById('formModalTitle').innerText = 'แก้ไขแบบฟอร์ม';
+            document.getElementById('btnDeleteForm').classList.remove('hidden');
+            openModal('formModal');
+        }
+        document.getElementById('formForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('f-editId').value || Date.now().toString();
+            const data = {
+                id: id,
+                name: document.getElementById('f-name').value,
+                fileUrl: document.getElementById('f-fileUrl').value,
+                fileName: document.getElementById('f-fileName').value
+            };
+            const idx = formsList.findIndex(function(x){ return x.id === id; });
+            if (idx > -1) formsList[idx] = data; else formsList.push(data);
+            db.ref('data/').update({ forms: formsList });
+            closeModal('formModal');
+        });
+        function deleteFormFromModal() {
+            const id = document.getElementById('f-editId').value;
+            closeModal('formModal');
+            deleteForm(id);
+        }
+        function deleteForm(id) {
+            if (!confirm('ยืนยันการลบแบบฟอร์มนี้?')) return;
+            formsList = formsList.filter(function(x){ return x.id !== id; });
+            db.ref('data/').update({ forms: formsList });
         }
 
+        // ---------- announcement & status ----------
         function openAnnouncementModal() {
-            document.getElementById('announcementInput').value = window.mayorAnnouncement || '';
+            document.getElementById('announcementInput').value = mayorAnnouncement || defaultAnnouncement;
             openModal('announcementModal');
         }
-
         function saveAnnouncement() {
-            const txt = document.getElementById('announcementInput').value.trim() || 'ยินดีต้อนรับเข้าสู่ระบบคิวงาน อบต. ชำผักแพว Online';
-            window.mayorAnnouncement = txt;
-            const annText = document.getElementById('announcementText');
-            if(annText) annText.innerText = window.mayorAnnouncement;
-            saveAnnouncementOnly(window.mayorAnnouncement);
+            const input = document.getElementById('announcementInput');
+            mayorAnnouncement = (input && input.value.trim()) ? input.value.trim() : defaultAnnouncement;
+            updatePresenceDisplay();
+            saveAnnouncementOnly(mayorAnnouncement);
             closeModal('announcementModal');
         }
-
-        // แอดมินเปลี่ยนสถานะเอง ระบบจะจำไว้และไม่ทับด้วยเวลาอัตโนมัติ
         function updateMayorStatus(txt, cls) {
-            window.mayorStatus = { text: txt, color: cls };
-            window.mayorStatusManual = true;
-            saveMayorStatusOnly(window.mayorStatus, true);
+            mayorStatus = { text:txt, color:cls };
+            mayorStatusManual = true;
+            updatePresenceDisplay();
+            saveMayorStatusOnly(mayorStatus, true);
             closeModal('statusModal');
         }
-
-        // ให้แอดมินกดกลับมาใช้ระบบอัตโนมัติได้
         function resetMayorStatusAuto() {
-            window.mayorStatusManual = false;
-            window.mayorStatus = getAutoMayorStatus();
-            saveMayorStatusOnly(window.mayorStatus, false);
+            mayorStatusManual = false;
+            mayorStatus = getAutoMayorStatus();
+            updatePresenceDisplay();
+            saveMayorStatusOnly(mayorStatus, false);
             closeModal('statusModal');
         }
 
-        // ตรวจสถานะอัตโนมัติทุก 1 นาที เฉพาะกรณีที่แอดมินไม่ได้ตั้งเอง
-        setInterval(function() {
-            if(!window.mayorStatusManual) {
-                const autoStatus = getAutoMayorStatus();
-                if(window.mayorStatus.text !== autoStatus.text || window.mayorStatus.color !== autoStatus.color) {
-                    window.mayorStatus = autoStatus;
-                    saveMayorStatusOnly(window.mayorStatus, false);
-                }
+        // ---------- boot ----------
+        db.ref('data/').on('value', function(snapshot) {
+            const data = snapshot.val() || {};
+            tasks = Array.isArray(data.tasks) ? data.tasks : (data.tasks ? Object.values(data.tasks) : []);
+            contacts = Array.isArray(data.contacts) ? data.contacts : (data.contacts ? Object.values(data.contacts) : []);
+            formsList = Array.isArray(data.forms) ? data.forms : (data.forms ? Object.values(data.forms) : []);
+            mayorStatusManual = !!data.mayorStatusManual;
+            mayorStatus = data.mayorStatus || getAutoMayorStatus();
+            mayorAnnouncement = data.mayorAnnouncement || defaultAnnouncement;
+            renderAll();
+        });
 
-                const stText = document.getElementById('statusText');
-                const stDot = document.getElementById('statusDot');
-                if(stText) stText.innerText = window.mayorStatus.text;
-                if(stDot) stDot.className = "absolute -bottom-1 -right-1 w-5 h-5 md:w-6 md:h-6 rounded-full border-4 border-white " + window.mayorStatus.color + " shadow-sm transition-colors duration-300";
+        setInterval(function() {
+            if (!mayorStatusManual) {
+                const auto = getAutoMayorStatus();
+                if (mayorStatus.text !== auto.text || mayorStatus.color !== auto.color) {
+                    mayorStatus = auto;
+                    saveMayorStatusOnly(mayorStatus, false);
+                }
+                updatePresenceDisplay();
             }
         }, 60000);
+
+        updateAdminUI();
     </script>
-
-<script>
-<script>
-(function(){
-    const defaultAnnouncement = 'ยินดีต้อนรับเข้าสู่ระบบคิวงาน อบต. ชำผักแพว Online';
-    window.tasks = Array.isArray(window.tasks) ? window.tasks : [];
-    window.contacts = Array.isArray(window.contacts) ? window.contacts : [];
-    window.mayorStatus = window.mayorStatus || { text: 'อยู่อบต.', color: 'bg-green-500' };
-    window.mayorStatusManual = !!window.mayorStatusManual;
-    window.mayorAnnouncement = window.mayorAnnouncement || defaultAnnouncement;
-    window.isAdmin = !!window.isAdmin;
-    window.currentPage = window.currentPage || 'dashboard';
-
-    try {
-        if(window.firebase && (!firebase.apps || firebase.apps.length === 0)) {
-            firebase.initializeApp({
-                apiKey: 'AIzaSyAg_kQRN64eIdhRDtIdsR24JSUiwHdT7tM',
-                authDomain: 'flutter-ai-playground-ca0f3.firebaseapp.com',
-                projectId: 'flutter-ai-playground-ca0f3',
-                storageBucket: 'flutter-ai-playground-ca0f3.firebasestorage.app',
-                messagingSenderId: '679308094535',
-                appId: '1:679308094535:web:81bd85c714926a10909562',
-                databaseURL: 'https://flutter-ai-playground-ca0f3-default-rtdb.asia-southeast1.firebasedatabase.app'
-            });
-        }
-        window.db = firebase.database();
-    } catch(e) {
-        console.error('Firebase init error:', e);
-    }
-
-    window.openModal = function(id){ const el = document.getElementById(id); if(el) el.classList.remove('hidden'); };
-    window.closeModal = function(id){ const el = document.getElementById(id); if(el) el.classList.add('hidden'); };
-    window.getDateNum = function(dStr){ if(!dStr) return 99999999; return parseInt(String(dStr).replace(/-/g,''),10); };
-    window.getAutoMayorStatus = function(){
-        const now = new Date();
-        const day = now.getDay();
-        const minutes = now.getHours()*60 + now.getMinutes();
-        if(day >= 1 && day <= 5 && minutes >= 510 && minutes <= 990) return { text:'อยู่อบต.', color:'bg-green-500' };
-        return { text:'ไม่อยู่อบต.', color:'bg-red-500' };
-    };
-    window.getDiffDays = function(startStr,endStr){
-        if(!startStr) return 0;
-        const today = new Date(); today.setHours(0,0,0,0);
-        const p1 = startStr.split('-');
-        const start = new Date(parseInt(p1[0]), parseInt(p1[1])-1, parseInt(p1[2]));
-        let end = start;
-        if(endStr){ const p2 = endStr.split('-'); end = new Date(parseInt(p2[0]), parseInt(p2[1])-1, parseInt(p2[2])); }
-        if(today.getTime() >= start.getTime() && today.getTime() <= end.getTime()) return 0;
-        return Math.ceil((start.getTime()-today.getTime())/86400000);
-    };
-    window.formatDateRangeThai = function(startStr,endStr){
-        if(!startStr) return '';
-        const days=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
-        const months=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-        const p1=startStr.split('-'); if(p1.length!==3) return startStr;
-        const d1=new Date(parseInt(p1[0]),parseInt(p1[1])-1,parseInt(p1[2]));
-        if(!endStr || startStr===endStr) return days[d1.getDay()]+' '+d1.getDate()+' '+months[d1.getMonth()]+' '+(d1.getFullYear()+543);
-        const p2=endStr.split('-'); if(p2.length!==3) return startStr+' ถึง '+endStr;
-        const d2=new Date(parseInt(p2[0]),parseInt(p2[1])-1,parseInt(p2[2]));
-        const y1=d1.getFullYear()+543, y2=d2.getFullYear()+543, m1=months[d1.getMonth()], m2=months[d2.getMonth()];
-        if(y1===y2 && m1===m2) return d1.getDate()+'-'+d2.getDate()+' '+m1+' '+y1;
-        if(y1===y2) return d1.getDate()+' '+m1+' - '+d2.getDate()+' '+m2+' '+y1;
-        return d1.getDate()+' '+m1+' '+y1+' - '+d2.getDate()+' '+m2+' '+y2;
-    };
-
-    function updateMayorDisplay(){
-        if(!window.mayorStatusManual) window.mayorStatus = window.getAutoMayorStatus();
-        const stText=document.getElementById('statusText');
-        const stDot=document.getElementById('statusDot');
-        const annText=document.getElementById('announcementText');
-        if(stText) stText.innerText = window.mayorStatus.text;
-        if(stDot) stDot.className = 'absolute -bottom-1 -right-1 w-5 h-5 md:w-6 md:h-6 rounded-full border-4 border-white '+window.mayorStatus.color+' shadow-sm transition-colors duration-300';
-        if(annText) annText.innerText = window.mayorAnnouncement || defaultAnnouncement;
-    }
-
-    window.saveToCloud = function(tasks,contacts,mStatus,manualStatus,announcement){
-        if(!window.db) return;
-        const payload={};
-        if(Array.isArray(tasks)) payload.tasks=tasks;
-        if(Array.isArray(contacts)) payload.contacts=contacts;
-        if(mStatus) payload.mayorStatus=mStatus;
-        if(manualStatus !== undefined) payload.mayorStatusManual=manualStatus;
-        if(announcement !== undefined) payload.mayorAnnouncement=announcement;
-        window.db.ref('data/').update(payload);
-    };
-    window.saveMayorStatusOnly = function(mStatus,manualStatus){ if(window.db) window.db.ref('data/').update({mayorStatus:mStatus, mayorStatusManual:manualStatus}); };
-    window.saveAnnouncementOnly = function(announcement){ if(window.db) window.db.ref('data/').update({mayorAnnouncement:announcement}); };
-
-    window.handleAdminToggle = function(){
-        if(window.isAdmin){ window.isAdmin=false; window.updateAdminUI(); window.renderAll(); }
-        else { const pass=document.getElementById('adminPassword'); if(pass) pass.value=''; window.openModal('loginModal'); }
-    };
-    window.verifyAdminLogin = function(){
-        const pass=document.getElementById('adminPassword');
-        if(pass && pass.value === 'ntrd'){ window.isAdmin=true; window.closeModal('loginModal'); window.updateAdminUI(); window.renderAll(); }
-        else alert('รหัสผ่านแอดมินไม่ถูกต้อง!');
-    };
-    window.updateAdminUI = function(){
-        const fab=document.getElementById('fabAdd'); if(fab) fab.classList.toggle('hidden', !(window.isAdmin && window.currentPage==='dashboard'));
-        const add=document.getElementById('admin-add-contact'); if(add) add.classList.toggle('hidden', !(window.isAdmin && window.currentPage==='contacts'));
-        const st=document.getElementById('admin-status-btn'); if(st) st.classList.toggle('hidden', !(window.isAdmin && window.currentPage==='dashboard'));
-        const an=document.getElementById('admin-announcement-btn'); if(an) an.classList.toggle('hidden', !(window.isAdmin && window.currentPage==='dashboard'));
-        const icon=document.getElementById('adminIcon'); if(icon) icon.className = window.isAdmin ? 'fa-solid fa-user-check text-green-400 text-lg' : 'fa-solid fa-user-shield text-lg text-white';
-    };
-    window.changePage = function(p){
-        window.currentPage=p;
-        ['dashboard','calendar','tasks','contacts'].forEach(function(pg){
-            const page=document.getElementById('page-'+pg); const nav=document.getElementById('nav-'+pg);
-            if(page) page.classList.add('hidden');
-            if(nav) nav.className='flex-1 py-4 text-gray-400 font-bold text-sm min-w-[100px] tap-effect font-prompt';
-        });
-        const page=document.getElementById('page-'+p); const nav=document.getElementById('nav-'+p);
-        if(page) page.classList.remove('hidden');
-        if(nav) nav.className='flex-1 py-4 text-main border-b-4 border-main font-bold text-sm min-w-[100px] tap-effect font-prompt';
-        window.updateAdminUI(); window.renderAll();
-    };
-
-    window.taskCardHTML = function(t,isTodayTask){
-        const diff=window.getDiffDays(t.startDate,t.endDate);
-        let countdown='';
-        if(diff===0) countdown='<span class="inline-flex items-center gap-1 bg-gradient-to-r from-red-600 to-orange-500 text-white text-[12px] font-black px-3 py-2 rounded-2xl animate-countdown shadow-lg whitespace-nowrap"><i class="fa-solid fa-bolt"></i> วันนี้!</span>';
-        else if(diff>0 && diff<=10) countdown='<span class="inline-flex items-center gap-1 bg-gradient-to-r from-orange-500 to-amber-400 text-white text-[12px] font-black px-3 py-2 rounded-2xl animate-countdown shadow-lg whitespace-nowrap"><i class="fa-solid fa-hourglass-half"></i> อีก '+diff+' วัน</span>';
-        else if(diff>10) countdown='<span class="inline-flex items-center gap-1 bg-blue-50 text-blue-600 text-[12px] font-black px-3 py-2 rounded-2xl border border-blue-100 whitespace-nowrap"><i class="fa-regular fa-calendar-check"></i> อีก '+diff+' วัน</span>';
-        let statusClass='status-pending'; if(t.status==='กำลังดำเนินการ') statusClass='status-active'; else if(t.status==='เสร็จสิ้น') statusClass='status-done';
-        const owners=Array.isArray(t.owner)?t.owner:(t.owner?[t.owner]:[]);
-        const ownerHTML=owners.length?owners.map(function(o){return '<span class="inline-flex items-center bg-main/5 text-main border border-main/10 px-2.5 py-1 rounded-xl text-xs font-bold mr-1 mb-1">'+o+'</span>';}).join(''):'<span class="text-gray-400">-</span>';
-        let html='<div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 relative tap-effect '+(isTodayTask?'animate-today-card':'')+' font-prompt hover:shadow-md transition-all">';
-        html+='<div class="flex justify-between items-start gap-3 mb-4"><div class="flex flex-wrap items-center gap-2"><span class="bg-blue-50 text-main px-3 py-2 rounded-2xl text-sm font-bold border border-blue-100"><i class="fa-regular fa-clock mr-1"></i>'+(t.startTime||'ไม่ระบุเวลา')+'</span>'+countdown+'</div><span class="status-badge '+statusClass+'">'+(t.status||'-')+'</span></div>';
-        html+='<h4 class="font-bold text-xl leading-tight mb-2 text-gray-800">'+(t.title||'-')+'</h4>';
-        if(t.detail) html+='<div class="mb-4 bg-slate-50 border border-slate-100 rounded-2xl p-4 text-sm text-slate-600 leading-relaxed"><i class="fa-solid fa-align-left mr-2 text-main opacity-60"></i>'+t.detail+'</div>';
-        html+='<div class="text-sm text-gray-500 space-y-2"><p><i class="fa-solid fa-calendar-day mr-2 text-main w-4"></i><span class="font-medium">'+window.formatDateRangeThai(t.startDate,t.endDate)+'</span></p>';
-        html+='<p><i class="fa-solid fa-location-dot mr-2 text-main w-4"></i>'+(t.loc||'-')+'</p><p><i class="fa-solid fa-shirt mr-2 text-main w-4"></i>การแต่งกาย: '+(t.dress||'-')+'</p>';
-        html+='<div class="flex items-start gap-2"><i class="fa-solid fa-user-group text-main w-4 mt-1"></i><div>รับผิดชอบ: <div class="inline">'+ownerHTML+'</div></div></div>';
-        if(t.coord) html+='<p><i class="fa-solid fa-handshake mr-2 text-main w-4"></i>ประสานงาน: '+t.coord+'</p>';
-        html+='</div>';
-        if(t.link) html+='<a href="'+t.link+'" target="_blank" class="block mt-5 text-center py-2.5 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold border border-blue-100 hover:bg-blue-100 transition-all"><i class="fa-brands fa-google-drive mr-2"></i>เปิดไฟล์เอกสารแนบ</a>';
-        if(window.isAdmin) html+='<button onclick="editTask(\''+t.id+'\')" class="absolute bottom-6 right-6 w-10 h-10 bg-gray-50 text-gray-400 rounded-xl flex items-center justify-center border hover:text-main hover:bg-white transition-all"><i class="fa-solid fa-pen"></i></button>';
-        return html+'</div>';
-    };
-
-    window.renderAll = function(){
-        updateMayorDisplay();
-        const total=document.getElementById('stat-total'); const pending=document.getElementById('stat-pending'); const active=document.getElementById('stat-active'); const done=document.getElementById('stat-done');
-        if(total) total.innerText=window.tasks.length;
-        if(pending) pending.innerText=window.tasks.filter(function(t){return t.status==='รอดำเนินการ';}).length;
-        if(active) active.innerText=window.tasks.filter(function(t){return t.status==='กำลังดำเนินการ';}).length;
-        if(done) done.innerText=window.tasks.filter(function(t){return t.status==='เสร็จสิ้น';}).length;
-        const d=new Date(); let mm=d.getMonth()+1, dd=d.getDate(); if(mm<10) mm='0'+mm; if(dd<10) dd='0'+dd;
-        const todayNum=window.getDateNum(d.getFullYear()+'-'+mm+'-'+dd);
-        if(window.currentPage==='dashboard'){
-            const dash=document.getElementById('dashboardTaskList');
-            if(dash){
-                const todayTasks=window.tasks.filter(function(t){const s=window.getDateNum(t.startDate); const e=t.endDate?window.getDateNum(t.endDate):s; return todayNum>=s && todayNum<=e;});
-                const upcoming=window.tasks.filter(function(t){return window.getDateNum(t.startDate)>todayNum;}).sort(function(a,b){return window.getDateNum(a.startDate)-window.getDateNum(b.startDate);}).slice(0,10);
-                let html='<div class="mb-10"><h2 class="font-black text-main text-lg border-l-4 border-main pl-3 mb-4 uppercase tracking-widest">คิวงานวันนี้</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
-                html+=todayTasks.length?todayTasks.map(function(t){return window.taskCardHTML(t,true);}).join(''):'<div class="col-span-full bg-white rounded-[2rem] p-8 border border-dashed border-gray-200 text-center shadow-sm"><p class="text-gray-400 font-prompt"><i class="fa-regular fa-calendar-xmark text-3xl mb-3 block opacity-50"></i>ไม่มีคิวงานในวันนี้</p></div>';
-                html+='</div></div><div><h2 class="font-black text-blue-500 text-lg border-l-4 border-blue-500 pl-3 mb-4 uppercase tracking-widest">คิวงานวันถัดไป (10 คิวล่าสุด)</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
-                html+=upcoming.length?upcoming.map(function(t){return window.taskCardHTML(t,false);}).join(''):'<div class="col-span-full bg-white rounded-[2rem] p-8 border border-dashed border-gray-200 text-center shadow-sm"><p class="text-gray-400 font-prompt">ไม่มีคิวงานถัดไป</p></div>';
-                dash.innerHTML=html+'</div></div>';
-            }
-        }
-        window.updateAdminUI();
-    };
-
-    window.openAnnouncementModal = function(){ const input=document.getElementById('announcementInput'); if(input) input.value=window.mayorAnnouncement||defaultAnnouncement; window.openModal('announcementModal'); };
-    window.saveAnnouncement = function(){ const input=document.getElementById('announcementInput'); window.mayorAnnouncement=(input&&input.value.trim())?input.value.trim():defaultAnnouncement; updateMayorDisplay(); window.saveAnnouncementOnly(window.mayorAnnouncement); window.closeModal('announcementModal'); };
-    window.updateMayorStatus = function(txt,cls){ window.mayorStatus={text:txt,color:cls}; window.mayorStatusManual=true; updateMayorDisplay(); window.saveMayorStatusOnly(window.mayorStatus,true); window.closeModal('statusModal'); };
-    window.resetMayorStatusAuto = function(){ window.mayorStatusManual=false; window.mayorStatus=window.getAutoMayorStatus(); updateMayorDisplay(); window.saveMayorStatusOnly(window.mayorStatus,false); window.closeModal('statusModal'); };
-
-    if(window.db){
-        window.db.ref('data/').on('value', function(snapshot){
-            const data=snapshot.val()||{};
-            window.tasks=Array.isArray(data.tasks)?data.tasks:(data.tasks?Object.values(data.tasks):[]);
-            window.contacts=Array.isArray(data.contacts)?data.contacts:(data.contacts?Object.values(data.contacts):[]);
-            window.mayorStatusManual=!!data.mayorStatusManual;
-            window.mayorStatus=data.mayorStatus||window.getAutoMayorStatus();
-            window.mayorAnnouncement=data.mayorAnnouncement||defaultAnnouncement;
-            window.renderAll();
-        });
-    }
-    setInterval(function(){ if(!window.mayorStatusManual){ const s=window.getAutoMayorStatus(); if(window.mayorStatus.text!==s.text || window.mayorStatus.color!==s.color){ window.mayorStatus=s; updateMayorDisplay(); window.saveMayorStatusOnly(window.mayorStatus,false); } } }, 60000);
-    updateMayorDisplay(); window.updateAdminUI(); window.renderAll();
-})();
-</script>
-</script>
 </body>
 </html>
