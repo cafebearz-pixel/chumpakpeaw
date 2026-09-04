@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบคิวงาน อบต. ชำผักแพว Online</title>
-
-    <!-- ป้องกัน Safari / iOS บันทึกแคชหน้าจอโฮมถาวร -->
+    
+    <!-- ป้องกันการค้างแคชบนหน้าจอโฮม iOS / Safari -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 
+    <title>ระบบคิวงาน อบต. ชำผักแพว Online</title>
+
     <meta name="apple-mobile-web-app-title" content="CPP Q">
     <meta name="application-name" content="CPP Q">
-    <link rel="apple-touch-icon" href="https://drive.google.com/thumbnail?id=1KkCDCvXZThPoNsj7a8ST51V1Im91PioL&sz=w500">
-    <link rel="icon" href="https://drive.google.com/thumbnail?id=1KkCDCvXZThPoNsj7a8ST51V1Im91PioL&sz=w500">
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1KkCDCvXZThPoNsj7a8ST51V1Im91PioL">
+    <link rel="icon" href="https://lh3.googleusercontent.com/d/1KkCDCvXZThPoNsj7a8ST51V1Im91PioL">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
@@ -144,7 +145,7 @@
         <div class="sticky top-0 z-50 flex flex-col w-full shadow-sm">
             <header class="app-header px-4 py-3 md:px-6 md:py-4 flex justify-between items-center text-white">
                 <div class="flex items-center gap-3 min-w-0">
-                    <img src="https://drive.google.com/thumbnail?id=1pgip9WQ97-gztB2sYoGyTWRt7tlVtmnY&sz=w200" class="w-10 h-10 md:w-12 md:h-12 object-contain shrink-0 rounded-xl bg-white/10 p-1">
+                    <img src="https://lh3.googleusercontent.com/d/1pgip9WQ97-gztB2sYoGyTWRt7tlVtmnY" class="w-10 h-10 md:w-12 md:h-12 object-contain shrink-0 rounded-xl bg-white/10 p-1">
                     <div class="flex flex-col min-w-0">
                         <span class="font-bold text-[15px] min-[375px]:text-base sm:text-lg leading-tight truncate">องค์การบริหารส่วนตำบลชำผักแพว</span>
                         <span class="text-[11px] sm:text-xs font-medium opacity-75 leading-tight mt-0.5">ระบบคิวงาน อบต. Online</span>
@@ -170,7 +171,7 @@
                 <div class="card p-5 flex items-center justify-between relative">
                     <div class="flex items-center gap-4">
                         <div class="relative">
-                            <img src="https://drive.google.com/thumbnail?id=1ET2DmRqMeDl1f13eL9EZpxr_FNvtZpwM&sz=w200" class="w-16 h-16 md:w-[72px] md:h-[72px] rounded-2xl object-cover border-2 border-white shadow-sm">
+                            <img src="https://lh3.googleusercontent.com/d/1ET2DmRqMeDl1f13eL9EZpxr_FNvtZpwM" class="w-16 h-16 md:w-[72px] md:h-[72px] rounded-2xl object-cover border-2 border-white shadow-sm">
                             <div id="statusDot" class="presence-dot absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-[3px] border-white bg-emerald-500"></div>
                         </div>
                         <div>
@@ -439,10 +440,10 @@
 
     <script>
         // ==========================================
-        // 🔄 ระบบตรวจจับและบังคับอัปเดตหน้าจอโฮม (Cache Buster)
-        // เมื่อมีการแก้โค้ดใหม่ ให้เปลี่ยนเลขเวอร์ชันตรงนี้ เช่น '1.0.2'
+        // 🔄 ระบบบังคับอัปเดตหน้าจอโฮมอัตโนมัติ (Cache Buster)
+        // เมื่อมีการอัปเดตโค้ด ให้ปรับเปลี่ยนเลขเวอร์ชันนี้
         // ==========================================
-        const CURRENT_APP_VERSION = '1.0.1';
+        const CURRENT_APP_VERSION = '1.0.2';
 
         (function autoUpdateCheck() {
             const savedVersion = localStorage.getItem('app_version');
@@ -465,7 +466,7 @@
         const SHEETS_BACKUP_URL = 'https://script.google.com/macros/s/AKfycbx2WLgayblJSdhnA_Ad0Bjeng0tjn4aw7UzngKCctWOHJJYDCruvw1hpsSr4t-bNe8ogQ/exec';
         const defaultAnnouncement = 'ยินดีต้อนรับเข้าสู่ระบบคิวงาน อบต. ชำผักแพว Online';
 
-        // URL Web App เวอร์ชัน 7
+        // URL Web App
         const DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbyOPdP-42ZBcHWGfnYdT4ylDWuzk8PGPsiZB76pJPGhBFHp1KsnhiQKejZztJginZje4Q/exec';
 
         // ---------- state ----------
@@ -481,7 +482,7 @@
         let statusFilter = 'all';
         let selectedOwners = [];
 
-        // ---------- firebase (single init) ----------
+        // ---------- firebase ----------
         const firebaseConfig = {
             apiKey: "AIzaSyAg_kQRN64eIdhRDtIdsR24JSUiwHdT7tM",
             authDomain: "flutter-ai-playground-ca0f3.firebaseapp.com",
@@ -540,10 +541,14 @@
             if (mm < 10) mm = '0'+mm; if (dd < 10) dd = '0'+dd;
             return getDateNum(d.getFullYear() + '-' + mm + '-' + dd);
         }
+        
+        // ฟังก์ชันแปลงลิงก์รูปให้แสดงผลได้ทุกอุปกรณ์ (รวมถึง Safari / iOS)
         function driveThumbnail(url) {
             if (!url) return '';
             const m = url.match(/[-\w]{25,}/);
-            if (m) return 'https://drive.google.com/thumbnail?id=' + m[0] + '&sz=w200';
+            if (m) {
+                return 'https://lh3.googleusercontent.com/d/' + m[0];
+            }
             return url;
         }
 
@@ -766,8 +771,9 @@
                 let html = '<div class="space-y-3"><h4 class="text-xs font-bold uppercase tracking-wide pl-3 ml-0.5" style="color:var(--muted); border-left:3px solid var(--border)">' + CONTACT_GROUPS[g] + '</h4>';
                 list.forEach(function(m){
                     const avatarHTML = m.photo
-                        ? '<img src="' + driveThumbnail(m.photo) + '" class="w-11 h-11 rounded-2xl object-cover shrink-0" style="border:1px solid var(--border)">'
+                        ? '<img src="' + driveThumbnail(m.photo) + '" referrerpolicy="no-referrer" loading="lazy" class="w-11 h-11 rounded-2xl object-cover shrink-0" style="border:1px solid var(--border)" onerror="this.onerror=null;this.src=\'https://lh3.googleusercontent.com/d/' + (m.photo.match(/[-\w]{25,}/) ? m.photo.match(/[-\w]{25,}/)[0] : '') + '\';">'
                         : '<div class="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style="background:var(--primary-tint); color:var(--primary)"><i class="fa-solid fa-user"></i></div>';
+                    
                     html += '<div class="card p-4 flex items-center gap-3">';
                     html += avatarHTML;
                     html += '<div class="flex-1 min-w-0 cursor-pointer" onclick="window.location=\'tel:' + m.tel + '\'">';
