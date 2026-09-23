@@ -428,7 +428,7 @@
         // 🔄 ระบบบังคับอัปเดตหน้าจอโฮมอัตโนมัติ (Cache Buster)
         // เมื่อมีการอัปเดตโค้ด ให้ปรับเปลี่ยนเลขเวอร์ชันนี้
         // ==========================================
-        const CURRENT_APP_VERSION = '1.0.4'; // อัปเดตเวอร์ชัน
+        const CURRENT_APP_VERSION = '1.0.5'; 
  
         (function autoUpdateCheck() {
             const savedVersion = localStorage.getItem('app_version');
@@ -451,8 +451,8 @@
         const SHEETS_BACKUP_URL = 'https://script.google.com/macros/s/AKfycbx2WLgayblJSdhnA_Ad0Bjeng0tjn4aw7UzngKCctWOHJJYDCruvw1hpsSr4t-bNe8ogQ/exec';
         const defaultAnnouncement = 'ยินดีต้อนรับเข้าสู่ระบบคิวงาน อบต. ชำผักแพว Online';
  
-        // 📌 อย่าลืมเปลี่ยน URL ตรงนี้เป็น URL ใหม่ที่ได้จาก Apps Script นะครับ
-        const DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbzzzzzzzzzzzzzzzzzzzzzzzzzz/exec';
+        // 🚨 นำ URL เว็บแอปของคุณที่ลงท้ายด้วย /exec มาวางในเครื่องหมายคำพูดด้านล่างนี้ 🚨
+        const DRIVE_UPLOAD_URL = 'วางลิงก์ที่ลงท้ายด้วย_/exec_ตรงนี้';
  
         // ---------- state ----------
         let tasks = [];
@@ -536,7 +536,7 @@
             return url;
         }
  
-        // 🔴🔴 โซนแก้ไขใหม่ : เปลี่ยนรูปแบบส่งข้อมูลเป็น URLSearchParams
+        // ---------- 🔴 ระบบส่งไฟล์ผ่าน URLSearchParams ----------
         function uploadFileToDrive(file) {
             return new Promise(function(resolve, reject) {
                 if (!DRIVE_UPLOAD_URL || DRIVE_UPLOAD_URL.indexOf('AKfy') === -1) {
@@ -549,7 +549,6 @@
                 reader.onload = function() {
                    const base64 = reader.result.split(',')[1];
                    
-                   // แพ็คข้อมูลแบบฟอร์ม ส่งผ่าน e.parameter ให้ Apps Script อ่านง่ายๆ
                    const payload = new URLSearchParams();
                    payload.append('fileName', file.name);
                    payload.append('mimeType', file.type || 'application/octet-stream');
@@ -557,7 +556,7 @@
  
                    fetch(DRIVE_UPLOAD_URL, {
                        method: 'POST',
-                       body: payload // ไม่ต้องใส่ header Content-Type ให้ใช้ค่า default แบบ Form
+                       body: payload 
                    })
                    .then(function(res) {
                        return res.json();
